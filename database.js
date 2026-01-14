@@ -1,4 +1,3 @@
-// database.js
 const Database = require('better-sqlite3');
 const path = require('path');
 const { app } = require('electron');
