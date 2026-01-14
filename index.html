@@ -2,10 +2,98 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Note-me - Test</title>
+  <title>Writing App - Step 1</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 40px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 { color: #333; }
+    button {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    #documents {
+      margin-top: 20px;
+      padding: 20px;
+      background: #f5f5f5;
+      border-radius: 8px;
+    }
+    .document {
+      padding: 10px;
+      margin: 10px 0;
+      background: white;
+      border-radius: 4px;
+    }
+    input {
+      padding: 8px;
+      font-size: 14px;
+      width: 300px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Step 0: Electron Works</h1>
-  <p>If you see this, the environment is ready.</p>
+  <h1>Step 1: Database Test</h1>
+  
+  <div>
+    <input type="text" id="titleInput" placeholder="Document title" />
+    <button onclick="createDoc()">Create Document</button>
+  </div>
+  
+  <div>
+    <button onclick="loadDocs()">Load All Documents</button>
+  </div>
+  
+  <div id="documents"></div>
+  
+  <script>
+    async function createDoc() {
+      const title = document.getElementById('titleInput').value;
+      if (!title) {
+        alert('Enter a title');
+        return;
+      }
+      
+      const result = await window.api.createDocument(title);
+      
+      if (result.success) {
+        console.log('Created:', result.document);
+        document.getElementById('titleInput').value = '';
+        loadDocs();
+      } else {
+        alert('Error: ' + result.error);
+      }
+    }
+    
+    async function loadDocs() {
+      const result = await window.api.getDocuments();
+      
+      if (result.success) {
+        const container = document.getElementById('documents');
+        
+        if (result.documents.length === 0) {
+          container.innerHTML = '<p>No documents yet. Create one above.</p>';
+        } else {
+          container.innerHTML = '<h3>Documents:</h3>' + 
+            result.documents.map(doc => `
+              <div class="document">
+                <strong>${doc.title}</strong><br>
+                <small>ID: ${doc.id}</small><br>
+                <small>Created: ${new Date(doc.created_at).toLocaleString()}</small>
+              </div>
+            `).join('');
+        }
+      } else {
+        alert('Error loading: ' + result.error);
+      }
+    }
+    
+    // Load on start
+    loadDocs();
+  </script>
 </body>
 </html>
