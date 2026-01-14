@@ -1,0 +1,68 @@
+*.json
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Build outputs
+dist/
+out/
+build/
+.next/
+.nuxt/
+.cache/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Dependency directories
+jspm_packages/
+bower_components/
+
+# Misc
+.DS_Store
+Thumbs.db
+.vscode/*      # Optional: remove if you want to share settings
+.idea/         # Optional: remove if using WebStorm and sharing config
+*.log
+npm-debug.log*
+
+# Editor directories
+*.swp
+*.swo
+
+# Coverage reports
+coverage/
+.nyc_output/
+
+# Testing
+/test-results/
+/playwright-report/
+/reports/
+
+# Local configuration files
+.vercel/
+.netlify/
+
+# macOS
+._*
+
+# Windows
+$RECYCLE.BIN/
+Desktop.ini
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
