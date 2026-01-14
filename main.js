@@ -17,7 +17,7 @@ function createWindow() {
   });
   
   mainWindow.loadFile('index.html');
-  mainWindow.webContents.openDevTools(); // For debugging
+  // mainWindow.webContents.openDevTools(); // For debugging
 }
 
 app.whenReady().then(() => {
