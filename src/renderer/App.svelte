@@ -1,10 +1,10 @@
 <script>
-  import { onMount } from 'svelte';
-  import Sidebar from './components/Sidebar.svelte';
-  import Editor from './components/Editor.svelte';
-  import MutationLog from './components/MutationLog.svelte';
-  import { loadDocuments } from './stores/documents';
-  
+  import { onMount } from "svelte";
+  import Sidebar from "./components/Sidebar.svelte";
+  import Home from "./components/Home.svelte";
+  import Editor from "./components/Editor.svelte";
+  import { loadDocuments, currentView } from "./stores/documents";
+
   onMount(() => {
     loadDocuments();
   });
@@ -12,7 +12,9 @@
 
 <div class="app-container">
   <Sidebar />
-  <Editor />
-  <MutationLog />
+  {#if $currentView === "home"}
+    <Home />
+  {:else}
+    <Editor />
+  {/if}
 </div>
-

@@ -2,6 +2,12 @@ import { writable } from 'svelte/store';
 
 export const documents = writable([]);
 export const currentDocument = writable(null);
+export const currentView = writable('home'); // 'home' or 'editor'
+
+export function setView(view) {
+  currentView.set(view);
+}
+
 
 export async function loadDocuments() {
   const result = await window.api.getDocuments();
