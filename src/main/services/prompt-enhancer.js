@@ -18,9 +18,11 @@ function findPythonExecutable() {
     for (const pythonPath of pythonPaths) {
         if (fs.existsSync(pythonPath)) {
             try {
-                execSync(`"${pythonPath}" --version`, { stdio: 'ignore' });
+                execSync(`${pythonPath} --version`, { stdio: 'ignore', shell: true });
+                console.log('[PROMPT_ENHANCER] Found python at:', pythonPath);
                 return pythonPath;
-            } catch {
+            } catch (e) {
+                console.log('[PROMPT_ENHANCER] Path check failed:', pythonPath, e.message);
                 continue;
             }
         }
@@ -28,13 +30,16 @@ function findPythonExecutable() {
 
     // Fall back to just 'python3' or 'python' and hope it's in PATH
     try {
-        execSync('python3 --version', { stdio: 'ignore' });
+        execSync('which python3', { stdio: 'ignore', shell: true });
+        console.log('[PROMPT_ENHANCER] Found python3 in PATH');
         return 'python3';
     } catch {
         try {
-            execSync('python --version', { stdio: 'ignore' });
+            execSync('which python', { stdio: 'ignore', shell: true });
+            console.log('[PROMPT_ENHANCER] Found python in PATH');
             return 'python';
         } catch {
+            console.error('[PROMPT_ENHANCER] Python not found anywhere');
             return null;
         }
     }
