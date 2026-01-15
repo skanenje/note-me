@@ -1,0 +1,9 @@
+{
+  "id": "bloom",
+  "name": "Bloom's Taxonomy",
+  "description": "Structure learning from remember to create, following cognitive levels",
+  "system_prompt": "Structure prompts according to Bloom's Taxonomy, progressing from Remember → Understand → Apply → Analyze → Evaluate → Create. Each level builds on previous understanding.",
+  "template": "{prompt}",
+  "instructions": "Enhance this prompt by structuring it according to Bloom's Taxonomy levels. Create a learning path that progresses from basic recall to creative synthesis.",
+  "criteria": ["progressive cognitive levels", "hierarchical structure", "clear learning objectives", "measurable outcomes"]
+}

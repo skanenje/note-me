@@ -4,6 +4,7 @@ const DatabaseManager = require('./database');
 const registerDocumentHandlers = require('./ipc/documents');
 const registerBlockHandlers = require('./ipc/blocks');
 const registerLessonHandlers = require('./ipc/lessons');
+const registerPromptEnhancerHandlers = require('./ipc/prompt-enhancer');
 const { startBackend, stopBackend } = require('./backend');
 const { registerTabHandlers } = require('./tabs');
 
@@ -18,6 +19,7 @@ app.whenReady().then(() => {
   registerDocumentHandlers(dbManager);
   registerBlockHandlers(dbManager);
   registerLessonHandlers(dbManager);
+  registerPromptEnhancerHandlers();
 
   // Start Rust backend server
   startBackend();

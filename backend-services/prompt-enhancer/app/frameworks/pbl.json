@@ -1,0 +1,9 @@
+{
+  "id": "pblarning",
+  "name": "Problem-Based Learning",
+  "description": "Center learning around authentic, complex problems",
+  "system_prompt": "Use problem-based learning (PBL) principles. Frame the learning around a realistic, complex problem that requires multiple perspectives and deep understanding to solve.",
+  "template": "{prompt}",
+  "instructions": "Transform this into a problem-based learning scenario. Include the context of a real-world problem, what needs to be solved, constraints, and resources available.",
+  "criteria": ["real-world relevance", "complex problem", "multi-perspective", "authentic context"]
+}

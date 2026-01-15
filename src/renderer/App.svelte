@@ -6,9 +6,10 @@
   import Sidebar from "./components/Sidebar.svelte";
   import Editor from "./components/Editor.svelte";
   import AIToolsView from "./components/AIToolsView.svelte";
+  import PromptEnhancer from "./components/PromptEnhancer.svelte";
   import { loadDocuments } from "./stores/documents";
 
-  let currentView = "lessons"; // 'lessons', 'documents'
+  let currentView = "lessons"; // 'lessons', 'documents', 'aitools', 'prompt-enhancer'
   let selectedLessonId = null;
 
   onMount(() => {
@@ -54,6 +55,8 @@
       </div>
     {:else if currentView === "aitools"}
       <AIToolsView />
+    {:else if currentView === "prompt-enhancer"}
+      <PromptEnhancer />
     {/if}
   </main>
 </div>

@@ -8,9 +8,9 @@
   "main": "src/main/index.js",
   "scripts": {
     "dev": "npm run build-backend && concurrently \"vite\" \"wait-on http://localhost:5173 && NODE_ENV=development electron .\"",
+    "start": "npm run build-backend && npm run build && NODE_ENV=production electron .",
     "build": "vite build",
     "build-backend": "cd backend && cargo build --release",
-    "start": "electron .",
     "package": "electron-builder"
   },
   "devDependencies": {
@@ -27,6 +27,7 @@
   "dependencies": {
     "better-sqlite3": "^12.6.0",
     "uuid": "^13.0.0",
-    "wait-on": "^9.0.3"
+    "wait-on": "^9.0.3",
+    "node-fetch": "^2.7.0"
   }
 }

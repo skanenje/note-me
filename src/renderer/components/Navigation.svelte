@@ -44,5 +44,16 @@
       <span class="text-xl">🤖</span>
       <span>AI Tools</span>
     </button>
+
+    <button
+      class="flex items-center gap-3 w-full px-4 py-3 rounded-lg transition-all {currentView ===
+      'prompt-enhancer'
+        ? 'bg-white text-primary font-bold'
+        : 'bg-white/10 hover:bg-white/20'}"
+      on:click={() => onNavigate("prompt-enhancer")}
+    >
+      <span class="text-xl">🚀</span>
+      <span>Prompt Enhancer</span>
+    </button>
   </div>
 </nav>

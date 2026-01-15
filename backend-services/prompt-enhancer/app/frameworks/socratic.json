@@ -1,0 +1,9 @@
+{
+  "id": "socratic",
+  "name": "Socratic Method",
+  "description": "Guides through questions to develop understanding",
+  "system_prompt": "Use the Socratic method: ask guiding questions that help the learner discover answers themselves, encouraging critical thinking and deeper understanding.",
+  "template": "{prompt}",
+  "instructions": "Rephrase this prompt as a series of guiding questions that help someone discover the answer through reasoning. Each question should build on previous understanding.",
+  "criteria": ["thought-provoking", "progressive difficulty", "self-discovery", "critical thinking"]
+}
