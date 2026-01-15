@@ -174,8 +174,7 @@ Interactive code execution for learning (JavaScript only, no external AI calls).
 ### From note-me:
 - ✅ Note-taking functionality
 - ✅ Learning management system
-- ❌ Removed external AI API calls (OpenAI/Ollama)
-- ✅ Kept local code execution for learning
+
 
 ## 📈 Roadmap
 

@@ -10,7 +10,6 @@ That's it! This will:
   ✅ Build Rust backend (compiles to port 3001)
   ✅ Build Svelte frontend (bundles with Vite)
   ✅ Launch Electron app
-  ✅ Auto-start Python Prompt Enhancer (port 8001)
 
 All services start automatically - no separate terminals needed!
 
@@ -19,9 +18,7 @@ All services start automatically - no separate terminals needed!
 FIRST TIME SETUP:
 
   1. npm install
-  2. cd backend-services/prompt-enhancer && pip install -r requirements.txt
-  3. cd ../..
-  4. npm start
+  2. npm start
 
 ────────────────────────────────────────────────────────────────
 
@@ -38,7 +35,6 @@ This keeps Vite running with live CSS/JS updates while you work.
 SERVICE PORTS:
 
   Rust Backend     → port 3001
-  Python Enhancer  → port 8001
   Electron Window  → Desktop app window
 
 ────────────────────────────────────────────────────────────────
@@ -48,10 +44,8 @@ KEY FILES:
   Package scripts     → package.json (lines 8-14)
   Main process        → src/main/index.js
   Backend manager     → src/main/backend.js
-  Service launcher    → src/main/services/prompt-enhancer.js
-  IPC handlers        → src/main/ipc/prompt-enhancer.js
+  IPC handlers        → src/main/ipc/
   Frontend            → src/renderer/App.svelte
-  Python service      → backend-services/prompt-enhancer/app/
 
 ────────────────────────────────────────────────────────────────
 
@@ -59,10 +53,6 @@ TROUBLESHOOTING:
 
   ❌ "cargo not found"
   → Install Rust: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-
-  ❌ "Python not found"  
-  → Check: python --version (need 3.8+)
-  → Install deps: cd backend-services/prompt-enhancer && pip install -r requirements.txt
 
   ❌ "Port already in use"
   → Kill existing process: lsof -i :3001 && kill -9 <PID>

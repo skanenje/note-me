@@ -91,13 +91,40 @@ async function simpleEnhance(prompt, frameworkId, fields) {
   return enhanced;
 }
 
-function generateExplanations(prompt, enhancedPrompt, frameworkId) {
-    return [
-        "Added specific learning objectives to clarify goals",
-        "Included context to improve understanding",
-        "Structured the prompt for better information retention",
-        "Applied pedagogical best practices for effective learning"
-    ];
+function generateExplanations(prompt, enhancedPrompt, framework) {
+    const explanations = [];
+
+    if (framework) {
+        explanations.push(`Applied the ${framework.name} framework to structure the prompt.`);
+    }
+
+    if (enhancedPrompt.length > prompt.length * 1.2) {
+        explanations.push("Expanded the prompt to provide more detail and context.");
+    }
+
+    const originalWords = new Set(prompt.toLowerCase().split(/\s+/));
+    const enhancedWords = new Set(enhancedPrompt.toLowerCase().split(/\s+/));
+
+    let addedWords = 0;
+    for (const word of enhancedWords) {
+        if (!originalWords.has(word)) {
+            addedWords++;
+        }
+    }
+
+    if (addedWords > 5) {
+        explanations.push("Introduced new keywords to refine the scope of the prompt.");
+    }
+
+    if (/\n\n/.test(enhancedPrompt) && !/\n\n/.test(prompt)) {
+        explanations.push("Added paragraph breaks to improve readability.");
+    }
+
+    if (explanations.length === 0) {
+        explanations.push("The prompt was enhanced, but no specific explanations were generated.");
+    }
+
+    return explanations;
 }
 
 
@@ -110,7 +137,8 @@ async function enhancePrompt({ prompt, framework_id, fields, explain = false }) 
 
         let explanations = [];
         if (explain) {
-            explanations = generateExplanations(prompt, enhanced_prompt, framework_id);
+            const framework = framework_id ? await getFramework(framework_id) : null;
+            explanations = generateExplanations(prompt, enhanced_prompt, framework);
         }
 
         return {
