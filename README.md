@@ -1,72 +1,68 @@
-# Note-me
+# Note Me - Writing App
 
-A writing app similar to Notion, built with Electron and SQLite.
+A modular Electron + Svelte writing application with local-first architecture and mutation tracking.
 
-## Overview
+## Architecture
 
-Note-me is a desktop note-taking application that provides a simple interface for creating and managing documents. Built with Electron, it offers a native desktop experience with persistent storage using SQLite.
+### Main Process (`src/main/`)
+- **index.js** - Application entry point
+- **window.js** - Window management
+- **database/** - SQLite database layer
+  - `index.js` - DatabaseManager class
+  - `schema.js` - Database schema initialization
+- **ipc/** - IPC handlers (separated by domain)
+  - `documents.js` - Document operations
+  - `blocks.js` - Block operations
+  - `mutations.js` - Mutation log operations
 
-## Features
+### Preload (`src/preload/`)
+- **index.js** - Context bridge API exposure
 
-- Create and manage documents
-- SQLite database for reliable local storage
-- Cross-platform desktop application (Windows, macOS, Linux)
-- Fast and lightweight
-
-## Tech Stack
-
-- **Electron** - Desktop application framework
-- **better-sqlite3** - SQLite database integration
-- **Node.js** - Runtime environment
-
-## Installation
-
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd note-me
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-## Usage
-
-Start the application:
-```bash
-npm start
-```
-
-## Project Structure
-
-```
-note-me/
-├── main.js          # Electron main process
-├── database.js      # Database manager with SQLite operations
-├── index.html       # Application UI
-├── package.json     # Project configuration
-└── README.md        # This file
-```
-
-## Database
-
-The application uses SQLite with Write-Ahead Logging (WAL) mode for improved performance. The database file is stored in the user's application data directory.
-
-### Schema
-
-- **documents** table:
-  - `id` (TEXT, PRIMARY KEY) - Unique document identifier
-  - `title` (TEXT) - Document title
-  - `created_at` (INTEGER) - Creation timestamp
-  - `updated_at` (INTEGER) - Last update timestamp
-  - `deleted` (INTEGER) - Soft delete flag
+### Renderer (`src/renderer/`)
+- **main.js** - Svelte app entry
+- **App.svelte** - Root component
+- **components/** - UI components
+  - `Sidebar.svelte` - Document list
+  - `Editor.svelte` - Document editor
+  - `Block.svelte` - Block component
+  - `MutationLog.svelte` - Mutation tracking panel
+- **stores/** - Svelte stores (state management)
+  - `documents.js` - Document state
+  - `mutations.js` - Mutation state
+- **styles/** - CSS modules
+  - `global.css` - Global styles
 
 ## Development
 
-The application is currently in early development. The basic Electron setup and database layer are functional.
+```bash
+# Install dependencies
+npm install
 
-## License
+# Run in development mode (with hot reload)
+npm run dev
 
-ISC
+# Build for production
+npm run build
+
+# Run production build
+npm start
+
+# Package for distribution
+npm run package
+```
+
+## Features
+
+- Local-first SQLite database
+- Mutation tracking for sync capabilities
+- Modular architecture with separation of concerns
+- Svelte reactive UI
+- Hot reload in development
+
+## Tech Stack
+
+- **Electron** - Desktop framework
+- **Svelte** - Reactive UI framework
+- **Vite** - Build tool and dev server
+- **better-sqlite3** - SQLite database
+- **UUID** - Unique ID generation
