@@ -7,8 +7,8 @@ let mainWindow;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 1000,
-    height: 700,
+    width: 1200,
+    height: 800,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -17,11 +17,10 @@ function createWindow() {
   });
   
   mainWindow.loadFile('index.html');
-  // mainWindow.webContents.openDevTools(); // For debugging
+  mainWindow.webContents.openDevTools();
 }
 
 app.whenReady().then(() => {
-  // Initialize database
   dbManager = new DatabaseManager();
   console.log('Database ready');
   
@@ -37,7 +36,8 @@ app.on('window-all-closed', () => {
   }
 });
 
-// IPC Handlers
+// ===== DOCUMENT HANDLERS =====
+
 ipcMain.handle('create-document', async (event, title) => {
   try {
     const doc = dbManager.createDocument(title);
@@ -52,10 +52,54 @@ ipcMain.handle('create-document', async (event, title) => {
 ipcMain.handle('get-documents', async () => {
   try {
     const docs = dbManager.getAllDocuments();
-    console.log('Fetched documents:', docs);
     return { success: true, documents: docs };
   } catch (error) {
     console.error('Error fetching documents:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('get-document-with-blocks', async (event, documentId) => {
+  try {
+    const doc = dbManager.getDocumentWithBlocks(documentId);
+    return { success: true, document: doc };
+  } catch (error) {
+    console.error('Error fetching document with blocks:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+// ===== BLOCK HANDLERS =====
+
+ipcMain.handle('create-block', async (event, { documentId, type, content }) => {
+  try {
+    const block = dbManager.createBlock(documentId, type, content);
+    console.log('Created block:', block);
+    return { success: true, block };
+  } catch (error) {
+    console.error('Error creating block:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('update-block', async (event, { blockId, content }) => {
+  try {
+    const block = dbManager.updateBlock(blockId, content);
+    console.log('Updated block:', block);
+    return { success: true, block };
+  } catch (error) {
+    console.error('Error updating block:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('delete-block', async (event, blockId) => {
+  try {
+    const result = dbManager.deleteBlock(blockId);
+    console.log('Deleted block:', blockId, result);
+    return { success: result };
+  } catch (error) {
+    console.error('Error deleting block:', error);
     return { success: false, error: error.message };
   }
 });
