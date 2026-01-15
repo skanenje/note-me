@@ -1,66 +1,96 @@
-import os
-import sys
-import subprocess
-import time
-from pathlib import Path
+const { spawn } = require('child_process');
+const path = require('path');
+const { execSync } = require('child_process');
+const fs = require('fs');
 
-def start_prompt_enhancer():
-    """Start the Prompt Enhancer FastAPI service."""
-    service_dir = Path(__file__).parent.parent / "backend-services" / "prompt-enhancer"
-    
-    if not service_dir.exists():
-        print(f"[PROMPT_ENHANCER] Service directory not found: {service_dir}")
-        return None
-    
-    # Check if Python and FastAPI are available
-    try:
-        result = subprocess.run([sys.executable, "-c", "import fastapi"], capture_output=True)
-        if result.returncode != 0:
-            print("[PROMPT_ENHANCER] FastAPI not installed. Installing...")
-            subprocess.run([sys.executable, "-m", "pip", "install", "-q", "-r", 
-                          str(service_dir / "requirements.txt")])
-    except Exception as e:
-        print(f"[PROMPT_ENHANCER] Failed to check/install dependencies: {e}")
-        return None
-    
-    # Start the service
-    try:
-        proc = subprocess.Popen(
-            [sys.executable, "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8001"],
-            cwd=str(service_dir),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            env={**os.environ, "PYTHONUNBUFFERED": "1"}
-        )
-        
-        print("[PROMPT_ENHANCER] Started on http://127.0.0.1:8001")
-        
-        # Wait a moment for startup
-        time.sleep(1)
-        
-        # Check if process is still running
-        if proc.poll() is not None:
-            stdout, stderr = proc.communicate()
-            print(f"[PROMPT_ENHANCER] Failed to start: {stderr.decode()}")
-            return None
-        
-        return proc
-    except Exception as e:
-        print(f"[PROMPT_ENHANCER] Failed to start service: {e}")
-        return None
+function findPythonExecutable() {
+    // List of common python executable locations
+    const pythonPaths = [
+        '/usr/bin/python3',
+        '/usr/local/bin/python3',
+        '/opt/homebrew/bin/python3',
+        '/usr/bin/python',
+        '/usr/local/bin/python',
+        process.env.PYTHON_HOME ? path.join(process.env.PYTHON_HOME, 'bin', 'python3') : null,
+        process.env.PYTHON_HOME ? path.join(process.env.PYTHON_HOME, 'bin', 'python') : null,
+    ].filter(Boolean);
 
-def stop_prompt_enhancer(process):
-    """Stop the Prompt Enhancer service."""
-    if process:
-        try:
-            process.terminate()
-            process.wait(timeout=5)
-            print("[PROMPT_ENHANCER] Stopped")
-        except subprocess.TimeoutExpired:
-            process.kill()
-            print("[PROMPT_ENHANCER] Force killed")
+    for (const pythonPath of pythonPaths) {
+        if (fs.existsSync(pythonPath)) {
+            try {
+                execSync(`"${pythonPath}" --version`, { stdio: 'ignore' });
+                return pythonPath;
+            } catch {
+                continue;
+            }
+        }
+    }
+
+    // Fall back to just 'python3' or 'python' and hope it's in PATH
+    try {
+        execSync('python3 --version', { stdio: 'ignore' });
+        return 'python3';
+    } catch {
+        try {
+            execSync('python --version', { stdio: 'ignore' });
+            return 'python';
+        } catch {
+            return null;
+        }
+    }
+}
+
+function startPromptEnhancer() {
+    const serviceDir = path.join(__dirname, '../../backend-services/prompt-enhancer');
+    
+    try {
+        console.log('[PROMPT_ENHANCER] Starting service from:', serviceDir);
+        
+        const pythonCmd = findPythonExecutable();
+        if (!pythonCmd) {
+            console.error('[PROMPT_ENHANCER] Python executable not found');
+            return null;
+        }
+        
+        console.log('[PROMPT_ENHANCER] Using Python command:', pythonCmd);
+        
+        const proc = spawn(pythonCmd, ['-m', 'uvicorn', 'app.main:app', '--host', '127.0.0.1', '--port', '8001'], {
+            cwd: serviceDir,
+            stdio: 'inherit',
+            env: {
+                ...process.env,
+                PYTHONUNBUFFERED: '1'
+            }
+        });
+        
+        proc.on('error', (err) => {
+            console.error('[PROMPT_ENHANCER] Spawn error:', err.message);
+        });
+        
+        proc.on('exit', (code) => {
+            console.log('[PROMPT_ENHANCER] Process exited with code:', code);
+        });
+        
+        console.log('[PROMPT_ENHANCER] Started on http://127.0.0.1:8001');
+        return proc;
+    } catch (err) {
+        console.error('[PROMPT_ENHANCER] Failed to start:', err.message);
+        return null;
+    }
+}
+
+function stopPromptEnhancer(proc) {
+    if (proc) {
+        try {
+            console.log('[PROMPT_ENHANCER] Stopping...');
+            proc.kill();
+        } catch (err) {
+            console.error('[PROMPT_ENHANCER] Error stopping:', err.message);
+        }
+    }
+}
 
 module.exports = {
-    startPromptEnhancer: start_prompt_enhancer,
-    stopPromptEnhancer: stop_prompt_enhancer
-}
+    startPromptEnhancer,
+    stopPromptEnhancer
+};

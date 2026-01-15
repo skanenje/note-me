@@ -26,8 +26,8 @@
   },
   "dependencies": {
     "better-sqlite3": "^12.6.0",
+    "node-fetch": "^2.7.0",
     "uuid": "^13.0.0",
-    "wait-on": "^9.0.3",
-    "node-fetch": "^2.7.0"
+    "wait-on": "^9.0.3"
   }
 }
