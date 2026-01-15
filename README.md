@@ -1,113 +1,65 @@
-# Note-Me LMS - Interactive AI Learning Platform
+# Note-Me - Integrated Learning & AI Tools Platform
 
-A desktop learning management system built with Electron, Svelte, and SQLite. Designed for 15-20 year olds to learn AI concepts through interactive, hands-on experiences.
+A desktop application combining note-taking, learning management, and AI tools browser functionality. Built with Electron, Svelte, SQLite, and Rust.
 
-## 🎯 Vision
+## 🎯 Features
 
-Transform from a Notion-like note-taking app into an **Interactive LMS** that teaches AI concepts through:
-- **Executable Learning Blocks** - Run code and prompts directly in lessons
-- **AI Tutoring** - Chat with AI to get explanations and guidance
-- **Progress Tracking** - Visual progress through learning tracks
-- **Local-First** - All data stored locally with SQLite
+### 📚 Learning Tracks
+- Interactive lessons with executable code blocks
+- Progress tracking through learning materials
+- JavaScript code playground for hands-on practice
+
+### 📝 My Notes
+- Notion-like note-taking interface
+- Block-based document editing
+- Local-first storage with SQLite
+- Mutation tracking for all changes
+
+### 🤖 AI Tools Browser
+- Integrated browser for multiple AI platforms
+- Session management for different AI tools
+- Tabbed interface for easy switching
+- Persistent sessions across app restarts
+
+**Supported AI Tools:**
+- ChatGPT
+- Claude
+- Gemini
+- Copilot
+- DeepSeek
+- Perplexity
+- Grok
+- NotebookLM
+- v0
+- Mistral
+- And more...
 
 ## 🏗️ Architecture
 
-### Main Process (`src/main/`)
-- **index.js** - Application entry point
-- **window.js** - Window management
-- **database/** - SQLite database layer
-  - `index.js` - DatabaseManager class
-  - `schema.js` - Core schema initialization
-  - `lms-schema.js` - LMS-specific tables
-  - `lms-methods.js` - LMS database operations
-  - `seed.js` - Initial content seeding
-- **ipc/** - IPC handlers (separated by domain)
-  - `documents.js` - Document operations
-  - `blocks.js` - Block operations
-  - `mutations.js` - Mutation log operations
-  - `lessons.js` - Lesson and progress tracking
-  - `ai.js` - AI integration handlers
-- **services/** - Business logic
-  - `aiService.js` - AI provider integration (OpenAI/Ollama)
+### Frontend (Electron + Svelte)
+- **Main Process** (`src/main/`)
+  - `index.js` - Application entry point
+  - `window.js` - Window management
+  - `backend.js` - Rust backend lifecycle management
+  - `tabs.js` - BrowserView tab management
+  - `database/` - SQLite database layer
+  - `ipc/` - IPC handlers for documents, blocks, lessons
 
-### Preload (`src/preload/`)
-- **index.js** - Secure context bridge API
+- **Renderer** (`src/renderer/`)
+  - Svelte components for UI
+  - Stores for state management
+  - Three main views: Learning, Notes, AI Tools
 
-### Renderer (`src/renderer/`)
-- **main.js** - Svelte app entry
-- **App.svelte** - Root component with navigation
-- **components/** - UI components
-  - `Navigation.svelte` - Main navigation
-  - `LessonList.svelte` - Learning tracks overview
-  - `LessonView.svelte` - Individual lesson display
-  - `PlaygroundBlock.svelte` - Interactive AI/code playground
-  - `CodeBlock.svelte` - Executable code snippets
-  - `Sidebar.svelte` - Document list (notes mode)
-  - `Editor.svelte` - Document editor (notes mode)
-  - `MutationLog.svelte` - Activity tracking
-- **stores/** - Svelte stores (state management)
-  - `documents.js` - Document state
-  - `mutations.js` - Mutation state
-- **styles/** - CSS modules
-  - `global.css` - Global styles
-
-## 📊 Database Schema
-
-### LMS Tables
-
-**lessons** - Curriculum structure
-```sql
-CREATE TABLE lessons (
-  id TEXT PRIMARY KEY,
-  title TEXT NOT NULL,
-  description TEXT,
-  order_index INTEGER NOT NULL,
-  created_at INTEGER NOT NULL,
-  updated_at INTEGER NOT NULL
-);
-```
-
-**learning_blocks** - Executable content
-```sql
-CREATE TABLE learning_blocks (
-  id TEXT PRIMARY KEY,
-  lesson_id TEXT NOT NULL,
-  type TEXT CHECK(type IN ('text', 'prompt', 'code', 'playground', 'quiz')),
-  content TEXT NOT NULL,
-  language TEXT,
-  order_index INTEGER NOT NULL,
-  created_at INTEGER NOT NULL,
-  updated_at INTEGER NOT NULL
-);
-```
-
-**user_progress** - State tracking
-```sql
-CREATE TABLE user_progress (
-  id TEXT PRIMARY KEY,
-  lesson_id TEXT NOT NULL,
-  block_id TEXT,
-  status TEXT CHECK(status IN ('locked', 'started', 'completed')),
-  last_interaction INTEGER NOT NULL
-);
-```
-
-**code_runs** - Execution history
-```sql
-CREATE TABLE code_runs (
-  id TEXT PRIMARY KEY,
-  block_id TEXT NOT NULL,
-  input TEXT NOT NULL,
-  output TEXT,
-  error TEXT,
-  created_at INTEGER NOT NULL
-);
-```
+### Backend (Rust + Axum)
+- REST API server running on `localhost:3001`
+- SQLite database for AI tool sessions
+- Manages tool definitions and session persistence
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js 18+
+- Rust (for building the backend)
 - npm or yarn
 
 ### Installation
@@ -116,76 +68,57 @@ CREATE TABLE code_runs (
 # Install dependencies
 npm install
 
-# Copy environment template
-cp .env.example .env
-
-# Edit .env and add your API keys (optional - for AI features)
-# AI_PROVIDER=openai
-# OPENAI_API_KEY=your_key_here
+# Build the Rust backend (first time only)
+npm run build-backend
 ```
 
 ### Development
 
 ```bash
-# Run in development mode (with hot reload)
+# Run in development mode
 npm run dev
 
-# Build for production
+# This will:
+# 1. Build the Rust backend (if needed)
+# 2. Start Vite dev server
+# 3. Launch Electron app
+```
+
+### Production Build
+
+```bash
+# Build frontend
 npm run build
 
-# Run production build
+# Build backend (if not already built)
+npm run build-backend
+
+# Run production app
 npm start
 
 # Package for distribution
 npm run package
 ```
 
-## 🤖 AI Integration
+## 📊 Database Schema
 
-### Supported Providers
+### SQLite (Main App)
+- **documents** - User notes and pages
+- **blocks** - Content blocks within documents
+- **lessons** - Learning curriculum
+- **learning_blocks** - Lesson content
+- **user_progress** - Learning progress tracking
 
-1. **OpenAI** (GPT-4, GPT-3.5)
-   - Set `AI_PROVIDER=openai`
-   - Add `OPENAI_API_KEY` to `.env`
-
-2. **Ollama** (Local AI)
-   - Install Ollama: https://ollama.ai
-   - Set `AI_PROVIDER=ollama`
-   - Set `OLLAMA_HOST=http://localhost:11434`
-
-### Security
-
-- API keys stored in `.env` (never in renderer)
-- Main process handles all AI communication
-- Renderer communicates via secure IPC bridge
-
-## 📚 Initial Content
-
-The app seeds with **"Prompt Engineering 101"** lesson including:
-- Introduction to prompts
-- Interactive AI playground
-- Key principles of prompt engineering
-- Code examples
-
-## 🎨 Features
-
-### Learning Mode
-- **Interactive Playgrounds** - Execute prompts and code
-- **AI Tutoring** - Ask questions, get explanations
-- **Progress Tracking** - Visual completion status
-- **Execution History** - Review past attempts
-
-### Notes Mode
-- **Documents & Blocks** - Freeform note-taking
-- **Mutation Log** - Track all changes
-- **Local-First** - All data stored locally
+### SQLite (Rust Backend)
+- **tools** - AI platform definitions
+- **tool_sessions** - Active and historical sessions
 
 ## 🔒 Security
 
 - Context isolation enabled
 - No `nodeIntegration` in renderer
-- API keys never exposed to renderer
-- Sandboxed code execution (VM module)
+- Sandboxed BrowserViews for AI tools
+- Each AI tool session runs in isolated partition
 
 ## 🛠️ Tech Stack
 
@@ -193,23 +126,70 @@ The app seeds with **"Prompt Engineering 101"** lesson including:
 - **Svelte 4** - Reactive UI framework
 - **Vite** - Build tool and dev server
 - **better-sqlite3** - SQLite database
-- **UUID** - Unique ID generation
+- **Rust + Axum** - Backend API server
+- **Tailwind CSS** - Styling
+
+## 📁 Project Structure
+
+```
+note-me/
+├── src/
+│   ├── main/           # Electron main process
+│   │   ├── database/   # SQLite layer
+│   │   ├── ipc/        # IPC handlers
+│   │   ├── backend.js  # Rust backend manager
+│   │   └── tabs.js     # BrowserView management
+│   ├── preload/        # Preload scripts
+│   └── renderer/       # Svelte frontend
+│       ├── components/ # UI components
+│       └── stores/     # State management
+├── backend/            # Rust backend server
+│   └── src/
+│       ├── main.rs     # Axum server
+│       ├── db.rs       # Database layer
+│       └── commands.rs # API handlers
+└── static/             # AI tool icons
+
+```
+
+## 🎨 Key Components
+
+### AIToolsView.svelte
+Main component for the AI tools browser, displays tool bookmarks and manages tabs.
+
+### Toolbar
+Shows available AI tools and active sessions with tab switching.
+
+### PlaygroundBlock
+Interactive code execution for learning (JavaScript only, no external AI calls).
+
+## 🔄 Changes from Original Projects
+
+### From wax-spes:
+- ✅ Integrated Rust backend for AI tool management
+- ✅ BrowserView-based tab system
+- ✅ Session persistence
+- ✅ Tool icons and definitions
+
+### From note-me:
+- ✅ Note-taking functionality
+- ✅ Learning management system
+- ❌ Removed external AI API calls (OpenAI/Ollama)
+- ✅ Kept local code execution for learning
 
 ## 📈 Roadmap
 
-- [ ] Python code execution (subprocess)
+- [ ] Sync sessions across devices
+- [ ] Custom tool additions via UI
+- [ ] Export notes as markdown
+- [ ] Python code execution
 - [ ] Quiz blocks with validation
-- [ ] Multi-user progress (profiles)
-- [ ] Export lessons as markdown
-- [ ] Custom lesson creation UI
-- [ ] Offline AI with Ollama
-- [ ] Mobile companion app (sync)
+- [ ] Multi-user profiles
 
 ## 🤝 Contributing
 
-This is a learning project. Feel free to fork and experiment!
+This is a combined learning and productivity project. Feel free to fork and experiment!
 
 ## 📄 License
 
 ISC
-

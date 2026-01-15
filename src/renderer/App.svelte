@@ -5,6 +5,7 @@
   import LessonView from "./components/LessonView.svelte";
   import Sidebar from "./components/Sidebar.svelte";
   import Editor from "./components/Editor.svelte";
+  import AIToolsView from "./components/AIToolsView.svelte";
   import { loadDocuments } from "./stores/documents";
 
   let currentView = "lessons"; // 'lessons', 'documents'
@@ -35,7 +36,10 @@
     {#if currentView === "lessons"}
       {#if selectedLessonId}
         <div class="p-5">
-          <button class="mb-5 bg-white border border-gray-300 px-5 py-2 rounded-md cursor-pointer text-sm hover:bg-gray-50" on:click={handleBackToLessons}>
+          <button
+            class="mb-5 bg-white border border-gray-300 px-5 py-2 rounded-md cursor-pointer text-sm hover:bg-gray-50"
+            on:click={handleBackToLessons}
+          >
             ← Back to Lessons
           </button>
           <LessonView lessonId={selectedLessonId} />
@@ -48,6 +52,8 @@
         <Sidebar />
         <Editor />
       </div>
+    {:else if currentView === "aitools"}
+      <AIToolsView />
     {/if}
   </main>
 </div>
