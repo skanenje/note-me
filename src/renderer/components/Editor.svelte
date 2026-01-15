@@ -1,6 +1,5 @@
 <script>
   import { currentDocument, updateDocumentTitle } from "../stores/documents";
-  import { loadMutations } from "../stores/mutations";
   import Block from "./Block.svelte";
 
   let blockType = "paragraph";
@@ -20,7 +19,6 @@
 
     if (title !== $currentDocument.title) {
       await updateDocumentTitle($currentDocument.id, title);
-      await loadMutations();
     }
   }
 
@@ -41,7 +39,6 @@
       if (updated.success) {
         currentDocument.set(updated.document);
       }
-      await loadMutations();
     }
   }
 
@@ -57,7 +54,6 @@
       if (updated.success) {
         currentDocument.set(updated.document);
       }
-      await loadMutations();
     }
   }
 </script>

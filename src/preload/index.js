@@ -12,8 +12,14 @@ contextBridge.exposeInMainWorld('api', {
   updateBlock: (data) => ipcRenderer.invoke('update-block', data),
   deleteBlock: (blockId) => ipcRenderer.invoke('delete-block', blockId),
   
-  // Mutations
-  getAllMutations: (limit) => ipcRenderer.invoke('get-all-mutations', limit),
-  getUnsyncedMutations: () => ipcRenderer.invoke('get-unsynced-mutations'),
-  markMutationsSynced: (mutationIds) => ipcRenderer.invoke('mark-mutations-synced', mutationIds)
+  // Lessons (LMS)
+  getLessons: () => ipcRenderer.invoke('lessons:get-all'),
+  getLessonWithBlocks: (lessonId) => ipcRenderer.invoke('lessons:get-with-blocks', lessonId),
+  updateProgress: (data) => ipcRenderer.invoke('lessons:update-progress', data),
+  getLessonProgress: (lessonId) => ipcRenderer.invoke('lessons:get-progress', lessonId),
+  
+  // AI Integration
+  aiExplain: (data) => ipcRenderer.invoke('ai:explain', data),
+  executeCode: (data) => ipcRenderer.invoke('ai:execute-code', data),
+  getCodeHistory: (blockId) => ipcRenderer.invoke('ai:get-code-history', blockId)
 });

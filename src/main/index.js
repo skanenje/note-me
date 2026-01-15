@@ -3,7 +3,8 @@ const { createWindow } = require('./window');
 const DatabaseManager = require('./database');
 const registerDocumentHandlers = require('./ipc/documents');
 const registerBlockHandlers = require('./ipc/blocks');
-const registerMutationHandlers = require('./ipc/mutations');
+const registerLessonHandlers = require('./ipc/lessons');
+const registerAIHandlers = require('./ipc/ai');
 
 let dbManager;
 let mainWindow;
@@ -15,7 +16,8 @@ app.whenReady().then(() => {
   // Register IPC handlers
   registerDocumentHandlers(dbManager);
   registerBlockHandlers(dbManager);
-  registerMutationHandlers(dbManager);
+  registerLessonHandlers(dbManager);
+  registerAIHandlers(dbManager);
   
   mainWindow = createWindow();
 });

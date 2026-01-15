@@ -3,6 +3,7 @@ const path = require('path');
 const { app } = require('electron');
 const { v4: uuidv4 } = require('uuid');
 const initSchema = require('./schema');
+const lmsMethods = require('./lms-methods');
 
 class DatabaseManager {
   constructor() {
@@ -15,6 +16,10 @@ class DatabaseManager {
     this.db.pragma('journal_mode = WAL');
     
     initSchema(this.db);
+    
+    // Bind LMS methods to this instance
+    Object.assign(this, lmsMethods);
+    
     console.log('Schema initialized');
   }
   

@@ -1,4 +1,6 @@
 // Database schema initialization
+const initLMSSchema = require('./lms-schema');
+
 module.exports = function initSchema(db) {
   // Documents table
   db.exec(`
@@ -51,4 +53,11 @@ module.exports = function initSchema(db) {
     ON mutations(synced, created_at)
     WHERE synced = 0
   `);
+  
+  // Initialize LMS schema
+  initLMSSchema(db);
+  
+  // Seed initial content if database is empty
+  const seedData = require('./seed');
+  seedData(db);
 };

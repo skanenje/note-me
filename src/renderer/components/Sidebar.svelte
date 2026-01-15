@@ -8,7 +8,6 @@
     selectDocument,
     setView,
   } from "../stores/documents";
-  import { loadMutations } from "../stores/mutations";
 
   let newTitle = "";
   let showNewPageInput = false;
@@ -22,7 +21,6 @@
       newTitle = "";
       showNewPageInput = false;
       await selectDocument(doc.id);
-      await loadMutations();
     } catch (error) {
       alert("Error: " + error.message);
     }
