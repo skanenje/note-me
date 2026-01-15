@@ -12,11 +12,19 @@ function createWindow() {
     }
   });
   
+  // Open DevTools to see errors
+  mainWindow.webContents.openDevTools();
+  
   if (process.env.NODE_ENV === 'development') {
     mainWindow.loadURL('http://localhost:5173');
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+    mainWindow.loadFile(path.join(__dirname, '../../dist/renderer/index.html'));
   }
+  
+  // Log any load errors
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+    console.error('Failed to load:', errorCode, errorDescription);
+  });
   
   return mainWindow;
 }
