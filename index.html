@@ -2,57 +2,126 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Writing App - Step 1</title>
+  <title>Writing App - Step 2</title>
   <style>
     body {
       font-family: system-ui, -apple-system, sans-serif;
-      padding: 40px;
-      max-width: 800px;
-      margin: 0 auto;
+      padding: 20px;
+      margin: 0;
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 20px;
+      height: 100vh;
     }
-    h1 { color: #333; }
-    button {
-      padding: 10px 20px;
-      margin: 10px 5px;
-      font-size: 14px;
+    h1 { margin-top: 0; color: #333; }
+    h2 { color: #666; font-size: 18px; }
+    
+    /* Sidebar */
+    #sidebar {
+      border-right: 1px solid #ddd;
+      padding-right: 20px;
+      overflow-y: auto;
+    }
+    
+    .doc-item {
+      padding: 10px;
+      margin: 5px 0;
+      background: #f5f5f5;
+      border-radius: 4px;
       cursor: pointer;
     }
-    #documents {
-      margin-top: 20px;
-      padding: 20px;
-      background: #f5f5f5;
-      border-radius: 8px;
+    
+    .doc-item:hover {
+      background: #e8e8e8;
     }
-    .document {
-      padding: 10px;
-      margin: 10px 0;
+    
+    .doc-item.active {
+      background: #007bff;
+      color: white;
+    }
+    
+    /* Main content */
+    #main {
+      overflow-y: auto;
+    }
+    
+    button {
+      padding: 8px 16px;
+      margin: 5px;
+      font-size: 14px;
+      cursor: pointer;
+      border: 1px solid #ccc;
       background: white;
       border-radius: 4px;
     }
-    input {
+    
+    button:hover {
+      background: #f5f5f5;
+    }
+    
+    input, textarea {
       padding: 8px;
       font-size: 14px;
-      width: 300px;
+      width: 100%;
+      box-sizing: border-box;
+      margin: 5px 0;
+    }
+    
+    .block {
+      margin: 15px 0;
+      padding: 15px;
+      background: #f9f9f9;
+      border-left: 3px solid #007bff;
+      border-radius: 4px;
+    }
+    
+    .block-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .block-type {
+      font-weight: bold;
+      color: #666;
+      font-size: 12px;
+    }
+    
+    .block-content {
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+    
+    .create-section {
+      background: #f0f8ff;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
     }
   </style>
 </head>
 <body>
-  <h1>Step 1: Database Test</h1>
-  
-  <div>
-    <input type="text" id="titleInput" placeholder="Document title" />
+  <div id="sidebar">
+    <h1>Documents</h1>
+    <input type="text" id="newDocTitle" placeholder="New document title" />
     <button onclick="createDoc()">Create Document</button>
+    <div id="docList"></div>
   </div>
   
-  <div>
-    <button onclick="loadDocs()">Load All Documents</button>
+  <div id="main">
+    <div id="documentView">
+      <p style="color: #999;">Select or create a document</p>
+    </div>
   </div>
-  
-  <div id="documents"></div>
   
   <script>
+    let currentDocId = null;
+    
+    // ===== DOCUMENTS =====
+    
     async function createDoc() {
-      const title = document.getElementById('titleInput').value;
+      const title = document.getElementById('newDocTitle').value;
       if (!title) {
         alert('Enter a title');
         return;
@@ -61,9 +130,9 @@
       const result = await window.api.createDocument(title);
       
       if (result.success) {
-        console.log('Created:', result.document);
-        document.getElementById('titleInput').value = '';
+        document.getElementById('newDocTitle').value = '';
         loadDocs();
+        selectDocument(result.document.id);
       } else {
         alert('Error: ' + result.error);
       }
@@ -73,22 +142,112 @@
       const result = await window.api.getDocuments();
       
       if (result.success) {
-        const container = document.getElementById('documents');
+        const container = document.getElementById('docList');
         
         if (result.documents.length === 0) {
-          container.innerHTML = '<p>No documents yet. Create one above.</p>';
+          container.innerHTML = '<p style="color: #999;">No documents yet</p>';
         } else {
-          container.innerHTML = '<h3>Documents:</h3>' + 
-            result.documents.map(doc => `
-              <div class="document">
-                <strong>${doc.title}</strong><br>
-                <small>ID: ${doc.id}</small><br>
-                <small>Created: ${new Date(doc.created_at).toLocaleString()}</small>
-              </div>
-            `).join('');
+          container.innerHTML = result.documents.map(doc => `
+            <div class="doc-item ${doc.id === currentDocId ? 'active' : ''}" 
+                 onclick="selectDocument('${doc.id}')">
+              <strong>${doc.title}</strong><br>
+              <small>${new Date(doc.updated_at).toLocaleString()}</small>
+            </div>
+          `).join('');
         }
+      }
+    }
+    
+    async function selectDocument(docId) {
+      currentDocId = docId;
+      loadDocs(); // Refresh active state
+      loadDocument(docId);
+    }
+    
+    async function loadDocument(docId) {
+      const result = await window.api.getDocumentWithBlocks(docId);
+      
+      if (result.success && result.document) {
+        const doc = result.document;
+        
+        document.getElementById('documentView').innerHTML = `
+          <h1>${doc.title}</h1>
+          <small>Created: ${new Date(doc.created_at).toLocaleString()}</small>
+          
+          <div class="create-section">
+            <h2>Add Block</h2>
+            <select id="blockType">
+              <option value="paragraph">Paragraph</option>
+              <option value="heading">Heading</option>
+              <option value="list">List</option>
+            </select>
+            <textarea id="blockContent" rows="3" placeholder="Block content..."></textarea>
+            <button onclick="createBlock()">Add Block</button>
+          </div>
+          
+          <h2>Blocks (${doc.blocks.length})</h2>
+          <div id="blockList">
+            ${doc.blocks.length === 0 
+              ? '<p style="color: #999;">No blocks yet. Add one above.</p>'
+              : doc.blocks.map(renderBlock).join('')
+            }
+          </div>
+        `;
+      }
+    }
+    
+    function renderBlock(block) {
+      return `
+        <div class="block">
+          <div class="block-header">
+            <span class="block-type">${block.type.toUpperCase()} - Position ${block.position}</span>
+            <button onclick="deleteBlock('${block.id}')">Delete</button>
+          </div>
+          <div class="block-content">${block.content}</div>
+          <small style="color: #999;">ID: ${block.id}</small>
+        </div>
+      `;
+    }
+    
+    // ===== BLOCKS =====
+    
+    async function createBlock() {
+      if (!currentDocId) {
+        alert('No document selected');
+        return;
+      }
+      
+      const type = document.getElementById('blockType').value;
+      const content = document.getElementById('blockContent').value;
+      
+      if (!content) {
+        alert('Enter content');
+        return;
+      }
+      
+      const result = await window.api.createBlock({
+        documentId: currentDocId,
+        type,
+        content
+      });
+      
+      if (result.success) {
+        document.getElementById('blockContent').value = '';
+        loadDocument(currentDocId);
       } else {
-        alert('Error loading: ' + result.error);
+        alert('Error: ' + result.error);
+      }
+    }
+    
+    async function deleteBlock(blockId) {
+      if (!confirm('Delete this block?')) return;
+      
+      const result = await window.api.deleteBlock(blockId);
+      
+      if (result.success) {
+        loadDocument(currentDocId);
+      } else {
+        alert('Error deleting block');
       }
     }
     
