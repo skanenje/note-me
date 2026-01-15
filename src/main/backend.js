@@ -1,10 +1,8 @@
 const { spawn } = require('child_process');
 const path = require('path');
 const { app } = require('electron');
-const { startPromptEnhancer, stopPromptEnhancer } = require('./services/prompt-enhancer');
 
 let backendProcess = null;
-let promptEnhancerProcess = null;
 const isDev = !app.isPackaged;
 
 function startBackend() {
@@ -58,25 +56,15 @@ function startBackend() {
     console.log('[BACKEND] Backend started successfully');
 }
 
-function startServices() {
-    startBackend();
-    // Start prompt enhancer service after main backend
-    setTimeout(() => {
-        promptEnhancerProcess = startPromptEnhancer();
-    }, 1000);
-}
-
 function stopBackend() {
     if (backendProcess) {
         console.log('[BACKEND] Stopping backend...');
         backendProcess.kill();
         backendProcess = null;
     }
-    stopPromptEnhancer(promptEnhancerProcess);
-    promptEnhancerProcess = null;
 }
 
 module.exports = {
-    startBackend: startServices,
+    startBackend: startBackend,
     stopBackend
 };

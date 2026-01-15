@@ -1,4 +1,4 @@
-const { spawn } = require('child_process');
+const { spawn, execFile } = require('child_process');
 const path = require('path');
 const { execSync } = require('child_process');
 const fs = require('fs');
@@ -59,14 +59,31 @@ function startPromptEnhancer() {
         
         console.log('[PROMPT_ENHANCER] Using Python command:', pythonCmd);
         
-        const proc = spawn(pythonCmd, ['-m', 'uvicorn', 'app.main:app', '--host', '127.0.0.1', '--port', '8001'], {
-            cwd: serviceDir,
-            stdio: 'inherit',
-            env: {
-                ...process.env,
-                PYTHONUNBUFFERED: '1'
-            }
-        });
+        // Use execFile for absolute paths, spawn for PATH-based commands
+        const isAbsolutePath = pythonCmd.startsWith('/');
+        let proc;
+        
+        if (isAbsolutePath) {
+            // Use execFile for absolute paths (more reliable)
+            proc = execFile(pythonCmd, ['-m', 'uvicorn', 'app.main:app', '--host', '127.0.0.1', '--port', '8001'], {
+                cwd: serviceDir,
+                stdio: 'inherit',
+                env: {
+                    ...process.env,
+                    PYTHONUNBUFFERED: '1'
+                }
+            });
+        } else {
+            // Use spawn for PATH-based commands
+            proc = spawn(pythonCmd, ['-m', 'uvicorn', 'app.main:app', '--host', '127.0.0.1', '--port', '8001'], {
+                cwd: serviceDir,
+                stdio: 'inherit',
+                env: {
+                    ...process.env,
+                    PYTHONUNBUFFERED: '1'
+                }
+            });
+        }
         
         proc.on('error', (err) => {
             console.error('[PROMPT_ENHANCER] Spawn error:', err.message);
