@@ -30,91 +30,24 @@
   }
 </script>
 
-<div class="code-block">
-  <div class="code-header">
-    <span class="language">{language}</span>
-    <button on:click={handleRun} disabled={loading}>
+<div class="my-5 border border-gray-700 rounded-md overflow-hidden bg-gray-900 text-gray-300">
+  <div class="bg-gray-800 px-4 py-2 flex justify-between items-center">
+    <span class="text-xs text-gray-500 uppercase font-bold">{language}</span>
+    <button 
+      on:click={handleRun} 
+      disabled={loading}
+      class="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600 disabled:opacity-50"
+    >
       {loading ? '⏳' : '▶'} Run
     </button>
   </div>
   
-  <pre class="code-content"><code>{code}</code></pre>
+  <pre class="p-4 overflow-x-auto"><code class="font-mono text-sm leading-relaxed">{code}</code></pre>
   
   {#if output}
-    <div class="code-output">
-      <div class="output-label">Output:</div>
-      <pre>{output}</pre>
+    <div class="bg-gray-800 border-t border-gray-700">
+      <div class="px-4 py-2 text-xs text-gray-500 uppercase">Output:</div>
+      <pre class="px-4 pb-4 text-green-400 text-sm">{output}</pre>
     </div>
   {/if}
 </div>
-
-<style>
-  .code-block {
-    margin: 20px 0;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    overflow: hidden;
-    background: #1e1e1e;
-    color: #d4d4d4;
-  }
-  
-  .code-header {
-    background: #2d2d2d;
-    padding: 10px 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .language {
-    font-size: 12px;
-    color: #858585;
-    text-transform: uppercase;
-    font-weight: bold;
-  }
-  
-  .code-header button {
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 5px 12px;
-    border-radius: 4px;
-    font-size: 12px;
-    cursor: pointer;
-  }
-  
-  .code-header button:hover {
-    background: #0056b3;
-  }
-  
-  .code-content {
-    padding: 15px;
-    margin: 0;
-    overflow-x: auto;
-  }
-  
-  .code-content code {
-    font-family: 'Monaco', 'Courier New', monospace;
-    font-size: 13px;
-    line-height: 1.6;
-  }
-  
-  .code-output {
-    background: #252526;
-    border-top: 1px solid #3e3e42;
-  }
-  
-  .output-label {
-    padding: 8px 15px;
-    font-size: 11px;
-    color: #858585;
-    text-transform: uppercase;
-  }
-  
-  .code-output pre {
-    padding: 0 15px 15px;
-    margin: 0;
-    color: #4ec9b0;
-    font-size: 13px;
-  }
-</style>

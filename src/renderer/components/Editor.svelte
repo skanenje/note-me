@@ -58,18 +58,18 @@
   }
 </script>
 
-<main class="editor">
+<main class="h-screen overflow-y-auto bg-gray-50">
   {#if !$currentDocument}
-    <div class="empty-state">
-      <div class="empty-icon">📄</div>
-      <h2>No page selected</h2>
-      <p class="text-secondary">
+    <div class="flex flex-col items-center justify-center h-full text-center p-8">
+      <div class="text-6xl mb-4 opacity-30">📄</div>
+      <h2 class="text-xl font-semibold mb-2 text-gray-800">No page selected</h2>
+      <p class="text-gray-600">
         Select a page from the sidebar or create a new one
       </p>
     </div>
   {:else}
-    <div class="editor-content">
-      <div class="page-header">
+    <div class="max-w-4xl mx-auto p-8">
+      <div class="mb-8">
         <h1
           bind:this={titleElement}
           contenteditable="true"
@@ -80,19 +80,20 @@
               titleElement.blur();
             }
           }}
+          class="text-4xl font-bold leading-tight outline-none border-none py-2 min-h-[50px] cursor-text hover:bg-gray-100 focus:bg-white rounded empty:before:content-['Untitled'] empty:before:text-gray-400"
         >
           {$currentDocument.title}
         </h1>
-        <div class="page-meta text-tertiary text-small">
+        <div class="text-sm text-gray-500 pl-2 mt-1">
           Last edited {new Date($currentDocument.updated_at).toLocaleString()}
         </div>
       </div>
 
       <!-- Blocks -->
-      <div class="blocks-container">
+      <div class="mb-8">
         {#if $currentDocument.blocks.length === 0}
-          <div class="empty-blocks">
-            <p class="text-tertiary">Start writing or add a block below...</p>
+          <div class="p-8 text-center">
+            <p class="text-gray-400">Start writing or add a block below...</p>
           </div>
         {:else}
           {#each $currentDocument.blocks as block (block.id)}
@@ -102,10 +103,10 @@
       </div>
 
       <!-- Add Block Section -->
-      <div class="add-block-section">
-        <div class="add-block-header">
-          <span class="text-secondary text-small">Add a block</span>
-          <select bind:value={blockType} class="block-type-select">
+      <div class="bg-white border border-gray-300 rounded-lg p-4 mt-6">
+        <div class="flex justify-between items-center mb-3">
+          <span class="text-sm text-gray-600">Add a block</span>
+          <select bind:value={blockType} class="text-sm px-2 py-1 border border-gray-300 rounded">
             <option value="paragraph">Paragraph</option>
             <option value="heading">Heading</option>
             <option value="list">List</option>
@@ -115,6 +116,7 @@
           bind:value={blockContent}
           rows="3"
           placeholder="Type something..."
+          class="w-full px-3 py-2 border border-gray-300 rounded resize-y min-h-[80px] mb-3"
           on:keydown={(e) => {
             if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
               e.preventDefault();
@@ -122,123 +124,11 @@
             }
           }}
         ></textarea>
-        <div class="add-block-footer">
-          <span class="text-tertiary text-tiny">Press Ctrl+Enter to add</span>
-          <button class="primary" on:click={handleCreateBlock}>Add Block</button
-          >
+        <div class="flex justify-between items-center">
+          <span class="text-xs text-gray-400">Press Ctrl+Enter to add</span>
+          <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" on:click={handleCreateBlock}>Add Block</button>
         </div>
       </div>
     </div>
   {/if}
 </main>
-
-<style>
-  .editor {
-    height: 100vh;
-    overflow-y: auto;
-    background: var(--color-bg-secondary);
-  }
-
-  .empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    text-align: center;
-    padding: var(--spacing-2xl);
-  }
-
-  .empty-icon {
-    font-size: 64px;
-    margin-bottom: var(--spacing-lg);
-    opacity: 0.3;
-  }
-
-  .empty-state h2 {
-    margin-bottom: var(--spacing-sm);
-    color: var(--color-text-primary);
-  }
-
-  .editor-content {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: var(--spacing-2xl);
-  }
-
-  .page-header {
-    margin-bottom: var(--spacing-2xl);
-  }
-
-  .page-header h1 {
-    font-size: 40px;
-    font-weight: 700;
-    line-height: 1.2;
-    outline: none;
-    border: none;
-    padding: var(--spacing-sm) 0;
-    margin: 0 0 var(--spacing-sm) 0;
-    min-height: 50px;
-    cursor: text;
-  }
-
-  .page-header h1:hover {
-    background: var(--color-bg-hover);
-    border-radius: var(--radius-sm);
-  }
-
-  .page-header h1:focus {
-    background: var(--color-bg-primary);
-  }
-
-  .page-header h1:empty:before {
-    content: "Untitled";
-    color: var(--color-text-tertiary);
-  }
-
-  .page-meta {
-    padding-left: var(--spacing-sm);
-  }
-
-  .blocks-container {
-    margin-bottom: var(--spacing-2xl);
-  }
-
-  .empty-blocks {
-    padding: var(--spacing-2xl);
-    text-align: center;
-  }
-
-  .add-block-section {
-    background: var(--color-bg-primary);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: var(--spacing-lg);
-    margin-top: var(--spacing-xl);
-  }
-
-  .add-block-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-md);
-  }
-
-  .block-type-select {
-    width: auto;
-    font-size: 13px;
-    padding: var(--spacing-xs) var(--spacing-sm);
-  }
-
-  .add-block-section textarea {
-    margin-bottom: var(--spacing-md);
-    resize: vertical;
-    min-height: 80px;
-  }
-
-  .add-block-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-</style>

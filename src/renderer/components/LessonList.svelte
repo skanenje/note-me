@@ -20,86 +20,23 @@
   }
 </script>
 
-<div class="lesson-list">
-  <h2>📚 Learning Tracks</h2>
+<div class="p-5">
+  <h2 class="text-2xl font-bold mb-5">📚 Learning Tracks</h2>
   
   {#if loading}
-    <p class="loading">Loading...</p>
+    <p class="text-gray-500 text-center mt-10">Loading...</p>
   {:else if lessons.length === 0}
-    <p class="empty">No lessons available yet</p>
+    <p class="text-gray-500 text-center mt-10">No lessons available yet</p>
   {:else}
     {#each lessons as lesson (lesson.id)}
       <button 
-        class="lesson-card"
+        class="w-full text-left p-5 my-2 bg-white border-2 border-gray-200 rounded-lg cursor-pointer transition-all hover:border-blue-500 hover:-translate-y-0.5 hover:shadow-lg relative group"
         on:click={() => onSelectLesson(lesson.id)}
       >
-        <h3>{lesson.title}</h3>
-        <p>{lesson.description}</p>
-        <span class="arrow">→</span>
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">{lesson.title}</h3>
+        <p class="text-sm text-gray-600 leading-relaxed">{lesson.description}</p>
+        <span class="absolute right-5 top-1/2 -translate-y-1/2 text-2xl text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
       </button>
     {/each}
   {/if}
 </div>
-
-<style>
-  .lesson-list {
-    padding: 20px;
-  }
-  
-  .lesson-list h2 {
-    margin-bottom: 20px;
-  }
-  
-  .loading, .empty {
-    color: #999;
-    text-align: center;
-    margin-top: 40px;
-  }
-  
-  .lesson-card {
-    width: 100%;
-    text-align: left;
-    padding: 20px;
-    margin: 10px 0;
-    background: white;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-  }
-  
-  .lesson-card:hover {
-    border-color: #007bff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  }
-  
-  .lesson-card h3 {
-    margin: 0 0 8px 0;
-    font-size: 18px;
-    color: #333;
-  }
-  
-  .lesson-card p {
-    margin: 0;
-    color: #666;
-    font-size: 14px;
-    line-height: 1.5;
-  }
-  
-  .arrow {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 24px;
-    color: #007bff;
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-  
-  .lesson-card:hover .arrow {
-    opacity: 1;
-  }
-</style>

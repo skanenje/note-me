@@ -24,26 +24,26 @@
   function renderTextBlock(content) {
     // Simple markdown-like rendering
     return content
-      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold my-5">$1</h1>')
+      .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-semibold my-4 text-gray-700">$1</h2>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="text-blue-500 font-semibold">$1</strong>')
       .replace(/\n/g, '<br>');
   }
 </script>
 
-<div class="lesson-view">
+<div class="max-w-4xl mx-auto py-10 px-5">
   {#if loading}
-    <p class="loading">Loading lesson...</p>
+    <p class="text-center text-gray-500 mt-24">Loading lesson...</p>
   {:else if lesson}
-    <header class="lesson-header">
-      <h1>{lesson.title}</h1>
-      <p class="description">{lesson.description}</p>
+    <header class="mb-10">
+      <h1 class="text-4xl font-bold mb-2">{lesson.title}</h1>
+      <p class="text-gray-600 text-lg leading-relaxed">{lesson.description}</p>
     </header>
     
-    <div class="lesson-content">
+    <div>
       {#each lesson.blocks as block (block.id)}
         {#if block.type === 'text'}
-          <div class="text-block">
+          <div class="my-8 leading-loose">
             {@html renderTextBlock(block.content)}
           </div>
         {:else if block.type === 'playground'}
@@ -62,55 +62,6 @@
       {/each}
     </div>
   {:else}
-    <p class="error">Lesson not found</p>
+    <p class="text-center text-red-500 mt-24">Lesson not found</p>
   {/if}
 </div>
-
-<style>
-  .lesson-view {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 40px 20px;
-  }
-  
-  .loading, .error {
-    text-align: center;
-    color: #999;
-    margin-top: 100px;
-  }
-  
-  .lesson-header {
-    margin-bottom: 40px;
-  }
-  
-  .lesson-header h1 {
-    font-size: 32px;
-    margin-bottom: 10px;
-  }
-  
-  .description {
-    color: #666;
-    font-size: 16px;
-    line-height: 1.6;
-  }
-  
-  .text-block {
-    margin: 30px 0;
-    line-height: 1.8;
-  }
-  
-  .text-block :global(h1) {
-    font-size: 28px;
-    margin: 20px 0 10px;
-  }
-  
-  .text-block :global(h2) {
-    font-size: 22px;
-    margin: 20px 0 10px;
-    color: #444;
-  }
-  
-  .text-block :global(strong) {
-    color: #007bff;
-  }
-</style>

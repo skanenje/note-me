@@ -28,14 +28,14 @@
   }
 </script>
 
-<div class="app-container">
+<div class="grid grid-cols-[250px_1fr] h-screen">
   <Navigation {currentView} onNavigate={handleNavigate} />
 
-  <main class="main-content">
+  <main class="overflow-y-auto bg-gray-50">
     {#if currentView === "lessons"}
       {#if selectedLessonId}
-        <div class="lesson-container">
-          <button class="back-button" on:click={handleBackToLessons}>
+        <div class="p-5">
+          <button class="mb-5 bg-white border border-gray-300 px-5 py-2 rounded-md cursor-pointer text-sm hover:bg-gray-50" on:click={handleBackToLessons}>
             ← Back to Lessons
           </button>
           <LessonView lessonId={selectedLessonId} />
@@ -44,47 +44,10 @@
         <LessonList onSelectLesson={handleSelectLesson} />
       {/if}
     {:else if currentView === "documents"}
-      <div class="documents-view">
+      <div class="grid grid-cols-[280px_1fr] h-full">
         <Sidebar />
         <Editor />
       </div>
     {/if}
   </main>
 </div>
-
-<style>
-  .app-container {
-    display: grid;
-    grid-template-columns: 250px 1fr;
-    height: 100vh;
-  }
-
-  .main-content {
-    overflow-y: auto;
-    background: #f8f9fa;
-  }
-
-  .lesson-container {
-    padding: 20px;
-  }
-
-  .back-button {
-    margin-bottom: 20px;
-    background: white;
-    border: 1px solid #ddd;
-    padding: 10px 20px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-  }
-
-  .back-button:hover {
-    background: #f8f9fa;
-  }
-
-  .documents-view {
-    display: grid;
-    grid-template-columns: 280px 1fr;
-    height: 100%;
-  }
-</style>
