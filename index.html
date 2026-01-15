@@ -2,53 +2,62 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Writing App - Step 2</title>
+  <title>Writing App - Step 3</title>
   <style>
     body {
       font-family: system-ui, -apple-system, sans-serif;
-      padding: 20px;
+      padding: 0;
       margin: 0;
       display: grid;
-      grid-template-columns: 300px 1fr;
-      gap: 20px;
+      grid-template-columns: 280px 1fr 350px;
+      gap: 0;
       height: 100vh;
     }
-    h1 { margin-top: 0; color: #333; }
-    h2 { color: #666; font-size: 18px; }
     
-    /* Sidebar */
-    #sidebar {
-      border-right: 1px solid #ddd;
-      padding-right: 20px;
+    h1 { margin-top: 0; color: #333; font-size: 20px; }
+    h2 { color: #666; font-size: 16px; }
+    
+    /* Panels */
+    #sidebar, #main, #mutations {
+      padding: 20px;
       overflow-y: auto;
     }
     
+    #sidebar {
+      border-right: 1px solid #ddd;
+      background: #fafafa;
+    }
+    
+    #mutations {
+      border-left: 1px solid #ddd;
+      background: #f5f5f5;
+    }
+    
+    /* Documents */
     .doc-item {
       padding: 10px;
       margin: 5px 0;
-      background: #f5f5f5;
+      background: white;
       border-radius: 4px;
       cursor: pointer;
+      border: 1px solid #e0e0e0;
     }
     
     .doc-item:hover {
-      background: #e8e8e8;
+      background: #f0f0f0;
     }
     
     .doc-item.active {
       background: #007bff;
       color: white;
+      border-color: #007bff;
     }
     
-    /* Main content */
-    #main {
-      overflow-y: auto;
-    }
-    
+    /* Buttons */
     button {
-      padding: 8px 16px;
-      margin: 5px;
-      font-size: 14px;
+      padding: 8px 14px;
+      margin: 5px 2px;
+      font-size: 13px;
       cursor: pointer;
       border: 1px solid #ccc;
       background: white;
@@ -59,20 +68,41 @@
       background: #f5f5f5;
     }
     
-    input, textarea {
+    button.primary {
+      background: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+    
+    button.primary:hover {
+      background: #0056b3;
+    }
+    
+    button.danger {
+      background: #dc3545;
+      color: white;
+      border-color: #dc3545;
+    }
+    
+    /* Inputs */
+    input, textarea, select {
       padding: 8px;
       font-size: 14px;
       width: 100%;
       box-sizing: border-box;
       margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
     }
     
+    /* Blocks */
     .block {
       margin: 15px 0;
       padding: 15px;
-      background: #f9f9f9;
+      background: white;
       border-left: 3px solid #007bff;
       border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     
     .block-header {
@@ -85,34 +115,105 @@
     .block-type {
       font-weight: bold;
       color: #666;
-      font-size: 12px;
+      font-size: 11px;
+      text-transform: uppercase;
     }
     
     .block-content {
       white-space: pre-wrap;
-      line-height: 1.5;
+      line-height: 1.6;
+      color: #333;
+    }
+    
+    /* Mutations */
+    .mutation {
+      margin: 10px 0;
+      padding: 10px;
+      background: white;
+      border-radius: 4px;
+      font-size: 12px;
+      border-left: 3px solid #28a745;
+    }
+    
+    .mutation.unsynced {
+      border-left-color: #ffc107;
+    }
+    
+    .mutation-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .mutation-operation {
+      color: #007bff;
+      text-transform: uppercase;
+    }
+    
+    .mutation-payload {
+      background: #f9f9f9;
+      padding: 8px;
+      border-radius: 3px;
+      margin-top: 5px;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      max-height: 100px;
+      overflow-y: auto;
     }
     
     .create-section {
-      background: #f0f8ff;
+      background: white;
       padding: 15px;
       border-radius: 4px;
       margin-bottom: 20px;
+      border: 1px solid #ddd;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: bold;
+    }
+    
+    .badge.synced {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .badge.unsynced {
+      background: #fff3cd;
+      color: #856404;
     }
   </style>
 </head>
 <body>
+  <!-- SIDEBAR: Documents -->
   <div id="sidebar">
-    <h1>Documents</h1>
-    <input type="text" id="newDocTitle" placeholder="New document title" />
-    <button onclick="createDoc()">Create Document</button>
-    <div id="docList"></div>
+    <h1>📄 Documents</h1>
+    <input type="text" id="newDocTitle" placeholder="New document..." />
+    <button class="primary" onclick="createDoc()">Create</button>
+    <div id="docList" style="margin-top: 15px;"></div>
   </div>
   
+  <!-- MAIN: Document Editor -->
   <div id="main">
     <div id="documentView">
-      <p style="color: #999;">Select or create a document</p>
+      <p style="color: #999; text-align: center; margin-top: 100px;">
+        ← Select or create a document
+      </p>
     </div>
+  </div>
+  
+  <!-- RIGHT PANEL: Mutation Log -->
+  <div id="mutations">
+    <h1>📋 Mutation Log</h1>
+    <button onclick="refreshMutations()">Refresh</button>
+    <button onclick="simulateSync()">Simulate Sync</button>
+    <div id="mutationStats" style="margin: 10px 0;"></div>
+    <div id="mutationList"></div>
   </div>
   
   <script>
@@ -133,6 +234,7 @@
         document.getElementById('newDocTitle').value = '';
         loadDocs();
         selectDocument(result.document.id);
+        refreshMutations();
       } else {
         alert('Error: ' + result.error);
       }
@@ -145,13 +247,13 @@
         const container = document.getElementById('docList');
         
         if (result.documents.length === 0) {
-          container.innerHTML = '<p style="color: #999;">No documents yet</p>';
+          container.innerHTML = '<p style="color: #999; font-size: 13px;">No documents</p>';
         } else {
           container.innerHTML = result.documents.map(doc => `
             <div class="doc-item ${doc.id === currentDocId ? 'active' : ''}" 
                  onclick="selectDocument('${doc.id}')">
               <strong>${doc.title}</strong><br>
-              <small>${new Date(doc.updated_at).toLocaleString()}</small>
+              <small style="opacity: 0.7;">${new Date(doc.updated_at).toLocaleString()}</small>
             </div>
           `).join('');
         }
@@ -160,7 +262,7 @@
     
     async function selectDocument(docId) {
       currentDocId = docId;
-      loadDocs(); // Refresh active state
+      loadDocs();
       loadDocument(docId);
     }
     
@@ -171,18 +273,23 @@
         const doc = result.document;
         
         document.getElementById('documentView').innerHTML = `
-          <h1>${doc.title}</h1>
-          <small>Created: ${new Date(doc.created_at).toLocaleString()}</small>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h1 contenteditable="true" id="docTitle" style="flex: 1; outline: none; border-bottom: 2px solid #eee; padding: 10px 0;">
+              ${doc.title}
+            </h1>
+            <button onclick="saveTitle()">Save Title</button>
+          </div>
+          <small style="color: #999;">Created: ${new Date(doc.created_at).toLocaleString()}</small>
           
-          <div class="create-section">
-            <h2>Add Block</h2>
+          <div class="create-section" style="margin-top: 20px;">
+            <h2>➕ Add Block</h2>
             <select id="blockType">
               <option value="paragraph">Paragraph</option>
               <option value="heading">Heading</option>
               <option value="list">List</option>
             </select>
-            <textarea id="blockContent" rows="3" placeholder="Block content..."></textarea>
-            <button onclick="createBlock()">Add Block</button>
+            <textarea id="blockContent" rows="3" placeholder="Write something..."></textarea>
+            <button class="primary" onclick="createBlock()">Add Block</button>
           </div>
           
           <h2>Blocks (${doc.blocks.length})</h2>
@@ -196,15 +303,35 @@
       }
     }
     
+    async function saveTitle() {
+      if (!currentDocId) return;
+      
+      const title = document.getElementById('docTitle').innerText.trim();
+      if (!title) {
+        alert('Title cannot be empty');
+        return;
+      }
+      
+      const result = await window.api.updateDocumentTitle({
+        documentId: currentDocId,
+        title
+      });
+      
+      if (result.success) {
+        loadDocs();
+        refreshMutations();
+      }
+    }
+    
     function renderBlock(block) {
       return `
         <div class="block">
           <div class="block-header">
-            <span class="block-type">${block.type.toUpperCase()} - Position ${block.position}</span>
-            <button onclick="deleteBlock('${block.id}')">Delete</button>
+            <span class="block-type">${block.type} • Position ${block.position}</span>
+            <button class="danger" onclick="deleteBlock('${block.id}')">Delete</button>
           </div>
           <div class="block-content">${block.content}</div>
-          <small style="color: #999;">ID: ${block.id}</small>
+          <small style="color: #999;">ID: ${block.id.substring(0, 8)}...</small>
         </div>
       `;
     }
@@ -234,6 +361,7 @@
       if (result.success) {
         document.getElementById('blockContent').value = '';
         loadDocument(currentDocId);
+        refreshMutations();
       } else {
         alert('Error: ' + result.error);
       }
@@ -246,13 +374,78 @@
       
       if (result.success) {
         loadDocument(currentDocId);
+        refreshMutations();
       } else {
         alert('Error deleting block');
       }
     }
     
+    // ===== MUTATIONS =====
+    
+    async function refreshMutations() {
+      const result = await window.api.getAllMutations(50);
+      
+      if (result.success) {
+        const mutations = result.mutations;
+        const unsynced = mutations.filter(m => !m.synced);
+        
+        document.getElementById('mutationStats').innerHTML = `
+          <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
+            <strong>Total:</strong> ${mutations.length} | 
+            <span class="badge unsynced">${unsynced.length} Unsynced</span>
+            <span class="badge synced">${mutations.length - unsynced.length} Synced</span>
+          </div>
+        `;
+        
+        const container = document.getElementById('mutationList');
+        
+        if (mutations.length === 0) {
+          container.innerHTML = '<p style="color: #999;">No mutations yet</p>';
+        } else {
+          container.innerHTML = mutations.map(renderMutation).join('');
+        }
+      }
+    }
+    
+    function renderMutation(mut) {
+      return `
+        <div class="mutation ${mut.synced ? 'synced' : 'unsynced'}">
+          <div class="mutation-header">
+            <span class="mutation-operation">${mut.operation}</span>
+            <span>${mut.entity_type}</span>
+          </div>
+          <div style="font-size: 11px; color: #666; margin: 3px 0;">
+            ${new Date(mut.created_at).toLocaleTimeString()}
+            ${mut.synced ? '<span class="badge synced">✓ Synced</span>' : '<span class="badge unsynced">⏳ Pending</span>'}
+          </div>
+          <div class="mutation-payload">${JSON.stringify(mut.payload, null, 2)}</div>
+        </div>
+      `;
+    }
+    
+    async function simulateSync() {
+      const result = await window.api.getUnsyncedMutations();
+      
+      if (result.success && result.mutations.length > 0) {
+        const ids = result.mutations.map(m => m.id);
+        
+        console.log('Simulating sync for', ids.length, 'mutations');
+        
+        await window.api.markMutationsSynced(ids);
+        
+        alert(`Marked ${ids.length} mutations as synced`);
+        refreshMutations();
+      } else {
+        alert('No unsynced mutations');
+      }
+    }
+    
     // Load on start
     loadDocs();
+    refreshMutations();
+    
+    // Auto-refresh mutations every 5 seconds
+    setInterval(refreshMutations, 5000);
   </script>
 </body>
 </html>
