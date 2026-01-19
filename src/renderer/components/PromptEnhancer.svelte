@@ -1,9 +1,6 @@
 <script>
     import { onMount } from "svelte";
-    import { writable } from "svelte/store";
 
-    let frameworks = [];
-    let selectedFramework = "";
     let prompt = "";
     let enhancedPrompt = "";
     let qualityMetrics = null;
@@ -11,50 +8,19 @@
     let showExplanation = false;
     let explanations = [];
     let error = null;
-    let useAI = false;
-    let selectedModel = "nvidia/nemotron-3-nano-30b-a3b:free";
+    let selectedModel = "google/gemini-2.0-flash-lite-preview-02-05";
 
     const aiModels = [
-        { id: "nvidia/nemotron-3-nano-30b-a3b:free", name: "Nvidia Nemotron 3 Nano (Free)" },
+        { id: "google/gemini-2.0-flash-lite-preview-02-05", name: "Gemini 2.0 Flash Lite (Recommended)" },
+        { id: "meta-llama/llama-3.1-8b-instruct:free", name: "Llama 3.1 8B (Free)" },
+        { id: "mistral/mistral-7b-instruct:free", name: "Mistral 7B (Free)" },
         { id: "openrouter/auto", name: "Auto (Best available)" },
-        { id: "meta-llama/llama-3-8b-instruct:free", name: "Llama 3 8B (Free)" },
-        { id: "gpt-3.5-turbo", name: "GPT-3.5 Turbo" },
-        { id: "gpt-4", name: "GPT-4" },
+        { id: "anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet" },
     ];
-
-    onMount(async () => {
-        await loadFrameworks();
-    });
-
-    async function loadFrameworks() {
-        try {
-            const result = await window.electronAPI.invoke(
-                "prompt-enhancer:get-frameworks",
-                {}
-            );
-
-            if (result.success) {
-                frameworks = result.data.frameworks;
-                if (frameworks.length > 0) {
-                    selectedFramework = frameworks[0].id;
-                }
-            } else {
-                error = `Failed to load frameworks: ${result.error}`;
-            }
-        } catch (err) {
-            error = `Error loading frameworks: ${err.message}`;
-            console.error(err);
-        }
-    }
 
     async function enhancePrompt() {
         if (!prompt.trim()) {
             error = "Please enter a prompt to enhance";
-            return;
-        }
-
-        if (!useAI && !selectedFramework) {
-            error = "Please select a framework or enable AI enhancement";
             return;
         }
 
@@ -69,9 +35,8 @@
                 "prompt-enhancer:enhance",
                 {
                     prompt: prompt.trim(),
-                    framework_id: useAI ? null : selectedFramework,
                     explain: showExplanation,
-                    use_ai: useAI,
+                    use_ai: true,
                     model: selectedModel,
                 }
             );
@@ -110,7 +75,7 @@
 <div class="flex flex-col h-full bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100 p-8 overflow-y-auto">
     <div class="text-center mb-8">
         <h1 class="text-4xl font-bold text-gray-900 mb-2">🚀 Prompt Enhancer</h1>
-        <p class="text-lg text-gray-600">Transform your prompts with AI-powered learning frameworks</p>
+        <p class="text-lg text-gray-600">Powered by OpenRouter AI for intelligent prompt enhancement</p>
     </div>
 
     {#if error}
@@ -122,46 +87,18 @@
     <div class="flex flex-col gap-8 max-w-4xl mx-auto w-full">
         <!-- Input Section -->
         <div class="bg-white rounded-xl p-8 shadow-sm border border-gray-100">
-            <h2 class="text-2xl font-semibold text-gray-900 mb-6">Enter Your Prompt</h2>
+            <h2 class="text-2xl font-semibold text-gray-900 mb-6">Enhance Your Prompt</h2>
 
-            <div class="flex flex-row gap-6 mb-6">
-                <div class="flex-1">
-                    <label for="framework-select" class="font-medium text-gray-700 mb-2 text-sm">Learning Framework</label>
-                    <select bind:value={selectedFramework} id="framework-select" disabled={useAI || isLoading} class="w-full px-3 py-2 border-2 border-gray-100 rounded-lg text-base font-inherit transition-colors focus:outline-none focus:border-indigo-500 focus:ring-3 focus:ring-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed">
-                        {#each frameworks as fw (fw.id)}
-                            <option value={fw.id}>
-                                {fw.name} — {fw.description}
-                            </option>
-                        {/each}
-                    </select>
-                </div>
-                
-                <div class="flex flex-col justify-center">
-                    <div class="flex items-center gap-3 h-full">
-                        <input
-                            type="checkbox"
-                            id="ai-toggle"
-                            bind:checked={useAI}
-                            disabled={isLoading}
-                            class="w-5 h-5 cursor-pointer"
-                        />
-                        <label for="ai-toggle" class="text-gray-700 cursor-pointer font-medium whitespace-nowrap">Use AI Enhancement</label>
-                    </div>
-                </div>
+            <div class="flex flex-col mb-6">
+                <label for="model-select" class="font-medium text-gray-700 mb-2 text-sm">AI Model</label>
+                <select bind:value={selectedModel} id="model-select" disabled={isLoading} class="px-3 py-2 border-2 border-indigo-200 rounded-lg text-base font-inherit transition-colors focus:outline-none focus:border-indigo-500 focus:ring-3 focus:ring-indigo-100 bg-indigo-50">
+                    {#each aiModels as model (model.id)}
+                        <option value={model.id}>
+                            {model.name}
+                        </option>
+                    {/each}
+                </select>
             </div>
-
-            {#if useAI}
-                <div class="flex flex-col mb-6">
-                    <label for="model-select" class="font-medium text-gray-700 mb-2 text-sm">AI Model</label>
-                    <select bind:value={selectedModel} id="model-select" disabled={isLoading} class="px-3 py-2 border-2 border-indigo-200 rounded-lg text-base font-inherit transition-colors focus:outline-none focus:border-indigo-500 focus:ring-3 focus:ring-indigo-100 bg-indigo-50">
-                        {#each aiModels as model (model.id)}
-                            <option value={model.id}>
-                                {model.name}
-                            </option>
-                        {/each}
-                    </select>
-                </div>
-            {/if}
 
             <div class="flex flex-col mb-6">
                 <label for="prompt-input" class="font-medium text-gray-700 mb-2 text-sm">Your Prompt</label>
