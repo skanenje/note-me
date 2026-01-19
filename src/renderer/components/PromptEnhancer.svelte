@@ -11,11 +11,11 @@
     let selectedModel = "qwen/qwen3-next-80b-a3b-instruct:free";
 
     const aiModels = [
-        { id: "qwen/qwen3-next-80b-a3b-instruct:free", name: "Qwen 3 Next 80B (Free)" },
-        { id: "arcee-ai/trinity-mini:free", name: "Trinity Mini (Free)" },
-        { id: "mistralai/devstral-2512:free", name: "Devstral 2512 (Free)" },
+        { id: "qwen/qwen-2.5-72b-instruct", name: "Qwen 2.5 72B (Fast & Smart)" },
+        { id: "meta-llama/llama-3.1-70b-instruct", name: "Llama 3.1 70B" },
+        { id: "google/gemini-2.0-flash-lite-preview-02-05", name: "Gemini 2.0 Flash Lite" },
         { id: "openrouter/auto", name: "Auto (Best available)" },
-        { id: "xiaomi/mimo-v2-flash:free", name: "Cerebras Mimo V2 Flash (Free)" },
+        { id: "anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet" },
     ];
 
     async function enhancePrompt() {
@@ -31,27 +31,37 @@
         explanations = [];
 
         try {
+            console.log('[UI] Starting enhancement with model:', selectedModel);
+            console.log('[UI] Prompt:', prompt.trim());
+            
+            const requestPayload = {
+                prompt: prompt.trim(),
+                explain: showExplanation,
+                use_ai: true,
+                model: selectedModel,
+            };
+            console.log('[UI] Request payload:', JSON.stringify(requestPayload, null, 2));
+            
             const result = await window.electronAPI.invoke(
                 "prompt-enhancer:enhance",
-                {
-                    prompt: prompt.trim(),
-                    explain: showExplanation,
-                    use_ai: true,
-                    model: selectedModel,
-                }
+                requestPayload
             );
+
+            console.log('[UI] Response received:', JSON.stringify(result, null, 2));
 
             if (result.success) {
                 const data = result.data;
+                console.log('[UI] Enhancement successful');
                 enhancedPrompt = data.enhanced_prompt;
                 qualityMetrics = data.quality;
                 explanations = data.explain || [];
             } else {
                 error = `Enhancement failed: ${result.error}`;
+                console.error('[UI] Enhancement error:', error);
             }
         } catch (err) {
             error = `Error during enhancement: ${err.message}`;
-            console.error(err);
+            console.error('[UI] Exception caught:', err);
         } finally {
             isLoading = false;
         }

@@ -140,19 +140,31 @@ function generateExplanations(prompt, enhancedPrompt, framework) {
 
 
 async function enhancePrompt({ prompt, framework_id, fields, explain = false, use_ai = false, model = 'openrouter/auto' }) {
+    console.log('[ENHANCER] enhancePrompt called');
+    console.log('[ENHANCER] Parameters:', {
+        prompt_length: prompt?.length,
+        framework_id,
+        explain,
+        use_ai,
+        model,
+    });
+    
     try {
         let enhanced_prompt;
         
         // Use OpenRouter AI enhancement if requested
         if (use_ai) {
+            console.log('[ENHANCER] Using AI enhancement with model:', model);
             try {
                 enhanced_prompt = await enhanceWithOpenRouter(prompt, model);
+                console.log('[ENHANCER] AI enhancement succeeded');
             } catch (error) {
-                console.error(`[PROMPT_ENHANCER] OpenRouter enhancement failed: ${error.message}`);
-                console.log('[PROMPT_ENHANCER] Falling back to template-based enhancement');
+                console.error(`[ENHANCER] OpenRouter enhancement failed: ${error.message}`);
+                console.log('[ENHANCER] Falling back to template-based enhancement');
                 enhanced_prompt = await simpleEnhance(prompt, framework_id, fields);
             }
         } else {
+            console.log('[ENHANCER] Using template-based enhancement');
             // Use template-based enhancement
             enhanced_prompt = await simpleEnhance(prompt, framework_id, fields);
         }
@@ -166,6 +178,7 @@ async function enhancePrompt({ prompt, framework_id, fields, explain = false, us
             explanations = generateExplanations(prompt, enhanced_prompt, framework);
         }
 
+        console.log('[ENHANCER] Returning result with enhanced_prompt length:', enhanced_prompt.length);
         return {
             selected_framework,
             enhanced_prompt,
@@ -173,7 +186,8 @@ async function enhancePrompt({ prompt, framework_id, fields, explain = false, us
             explain: explanations
         };
     } catch (error) {
-        console.error(`Error enhancing prompt: ${error}`);
+        console.error(`[ENHANCER] Exception in enhancePrompt: ${error.message}`);
+        console.error('[ENHANCER] Full error:', error);
         const enhanced_prompt = await simpleEnhance(prompt, framework_id, fields);
         const quality = calculateQualityMetrics(prompt, enhanced_prompt);
         return {
