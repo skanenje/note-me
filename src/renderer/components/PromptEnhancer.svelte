@@ -8,14 +8,14 @@
     let showExplanation = false;
     let explanations = [];
     let error = null;
-    let selectedModel = "google/gemini-2.0-flash-lite-preview-02-05";
+    let selectedModel = "qwen/qwen3-next-80b-a3b-instruct:free";
 
     const aiModels = [
-        { id: "google/gemini-2.0-flash-lite-preview-02-05", name: "Gemini 2.0 Flash Lite (Recommended)" },
-        { id: "meta-llama/llama-3.1-8b-instruct:free", name: "Llama 3.1 8B (Free)" },
-        { id: "mistral/mistral-7b-instruct:free", name: "Mistral 7B (Free)" },
+        { id: "qwen/qwen3-next-80b-a3b-instruct:free", name: "Qwen 3 Next 80B (Free)" },
+        { id: "arcee-ai/trinity-mini:free", name: "Trinity Mini (Free)" },
+        { id: "mistralai/devstral-2512:free", name: "Devstral 2512 (Free)" },
         { id: "openrouter/auto", name: "Auto (Best available)" },
-        { id: "anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet" },
+        { id: "xiaomi/mimo-v2-flash:free", name: "Cerebras Mimo V2 Flash (Free)" },
     ];
 
     async function enhancePrompt() {
