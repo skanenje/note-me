@@ -4,7 +4,7 @@
  * @param {string} model - The model to use
  * @returns {Promise<string>} - The enhanced prompt
  */
-async function enhanceWithOpenRouter(prompt, model = 'qwen/qwen3-next-80b-a3b-instruct:free') {
+async function enhanceWithOpenRouter(prompt, model = 'qwen/qwen-2.5-72b-instruct') {
     const apiKey = process.env.OPENROUTER_API_KEY;
     
     console.log('[OPENROUTER] Starting enhancement');

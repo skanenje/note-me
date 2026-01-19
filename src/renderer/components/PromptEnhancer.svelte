@@ -8,12 +8,12 @@
     let showExplanation = false;
     let explanations = [];
     let error = null;
-    let selectedModel = "qwen/qwen3-next-80b-a3b-instruct:free";
+    let selectedModel = "xiaomi/mimo-v2-flash:free";
 
     const aiModels = [
-        { id: "qwen/qwen-2.5-72b-instruct", name: "Qwen 2.5 72B (Fast & Smart)" },
-        { id: "meta-llama/llama-3.1-70b-instruct", name: "Llama 3.1 70B" },
-        { id: "google/gemini-2.0-flash-lite-preview-02-05", name: "Gemini 2.0 Flash Lite" },
+        { id: "xiaomi/mimo-v2-flash:free", name: "Mimo V2 Flash" },
+        { id: "nvidia/nemotron-3-nano-30b-a3b:free", name: "Nemotron 3 Nano 30B" },
+        { id: "mistralai/devstral-2512:free", name: "Devstral 2512" },
         { id: "openrouter/auto", name: "Auto (Best available)" },
         { id: "anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet" },
     ];
