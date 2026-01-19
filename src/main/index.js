@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { app } = require('electron');
 const { createWindow } = require('./window');
 const DatabaseManager = require('./database');
@@ -7,6 +8,18 @@ const registerLessonHandlers = require('./ipc/lessons');
 const registerPromptEnhancerHandlers = require('./ipc/prompt-enhancer');
 const { startBackend, stopBackend } = require('./backend');
 const { registerTabHandlers } = require('./tabs');
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  // Silently handle to prevent process crash
+  // Errors are already handled in IPC handlers
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  // Silently handle to prevent process crash
+  // Errors are already handled in IPC handlers
+});
 
 let dbManager;
 let mainWindow;
