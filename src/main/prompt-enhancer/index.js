@@ -1,5 +1,6 @@
 const fs = require('fs/promises');
 const path = require('path');
+const { enhanceWithOpenRouter } = require('../services/prompt-enhancer');
 
 const FRAME_DIR = path.join(__dirname, 'frameworks');
 
@@ -138,11 +139,25 @@ function generateExplanations(prompt, enhancedPrompt, framework) {
 }
 
 
-async function enhancePrompt({ prompt, framework_id, fields, explain = false }) {
+async function enhancePrompt({ prompt, framework_id, fields, explain = false, use_ai = false, model = 'openrouter/auto' }) {
     try {
-        const enhanced_prompt = await simpleEnhance(prompt, framework_id, fields);
-        const selected_framework = framework_id || "basic";
+        let enhanced_prompt;
+        
+        // Use OpenRouter AI enhancement if requested
+        if (use_ai) {
+            try {
+                enhanced_prompt = await enhanceWithOpenRouter(prompt, model);
+            } catch (error) {
+                console.error(`[PROMPT_ENHANCER] OpenRouter enhancement failed: ${error.message}`);
+                console.log('[PROMPT_ENHANCER] Falling back to template-based enhancement');
+                enhanced_prompt = await simpleEnhance(prompt, framework_id, fields);
+            }
+        } else {
+            // Use template-based enhancement
+            enhanced_prompt = await simpleEnhance(prompt, framework_id, fields);
+        }
 
+        const selected_framework = framework_id || "basic";
         const quality = calculateQualityMetrics(prompt, enhanced_prompt);
 
         let explanations = [];
