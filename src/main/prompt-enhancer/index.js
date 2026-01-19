@@ -39,7 +39,9 @@ async function getFramework(frameworkId) {
   const filePath = path.join(FRAME_DIR, `${frameworkId}.json`);
   try {
     const data = await fs.readFile(filePath, 'utf-8');
-    return JSON.parse(data);
+    const parsed = JSON.parse(data);
+    frameworkCache.set(frameworkId, parsed); // Cache on direct hit
+    return parsed;
   } catch (error) {
     if (error.code === 'ENOENT') {
       // try case insensitive
