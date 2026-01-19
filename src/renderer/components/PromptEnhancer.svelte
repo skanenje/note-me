@@ -95,26 +95,26 @@
     }
 </script>
 
-<div class="prompt-enhancer-container">
-    <div class="header">
-        <h1>🚀 Prompt Enhancer</h1>
-        <p>Transform your prompts with AI-powered learning frameworks</p>
+<div class="flex flex-col h-full bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100 p-8 overflow-y-auto">
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">🚀 Prompt Enhancer</h1>
+        <p class="text-lg text-gray-600">Transform your prompts with AI-powered learning frameworks</p>
     </div>
 
     {#if error}
-        <div class="alert alert-error">
+        <div class="px-4 py-3 rounded-lg mb-4 bg-red-100 text-red-700 border border-red-300">
             {error}
         </div>
     {/if}
 
-    <div class="content">
+    <div class="flex flex-col gap-8 max-w-4xl mx-auto w-full">
         <!-- Input Section -->
-        <div class="card input-card">
-            <h2>Enter Your Prompt</h2>
+        <div class="bg-white rounded-xl p-8 shadow-sm border border-gray-100">
+            <h2 class="text-2xl font-semibold text-gray-900 mb-6">Enter Your Prompt</h2>
 
-            <div class="form-group">
-                <label for="framework-select">Learning Framework</label>
-                <select bind:value={selectedFramework} id="framework-select">
+            <div class="flex flex-col mb-6">
+                <label for="framework-select" class="font-medium text-gray-700 mb-2 text-sm">Learning Framework</label>
+                <select bind:value={selectedFramework} id="framework-select" class="px-3 py-2 border-2 border-gray-100 rounded-lg text-base font-inherit transition-colors focus:outline-none focus:border-indigo-500 focus:ring-3 focus:ring-indigo-100">
                     {#each frameworks as fw (fw.id)}
                         <option value={fw.id}>
                             {fw.name} — {fw.description}
@@ -123,35 +123,37 @@
                 </select>
             </div>
 
-            <div class="form-group">
-                <label for="prompt-input">Your Prompt</label>
+            <div class="flex flex-col mb-6">
+                <label for="prompt-input" class="font-medium text-gray-700 mb-2 text-sm">Your Prompt</label>
                 <textarea
                     id="prompt-input"
                     bind:value={prompt}
                     placeholder="Type or paste your prompt here..."
                     disabled={isLoading}
+                    class="px-3 py-2 border-2 border-gray-100 rounded-lg text-base font-inherit transition-colors focus:outline-none focus:border-indigo-500 focus:ring-3 focus:ring-indigo-100 min-h-32 resize-y"
                 />
             </div>
 
-            <div class="form-group checkbox">
+            <div class="flex flex-row items-center gap-3 mb-6">
                 <input
                     type="checkbox"
                     id="explain-checkbox"
                     bind:checked={showExplanation}
                     disabled={isLoading}
+                    class="w-4 h-4 cursor-pointer"
                 />
-                <label for="explain-checkbox">Include explanations</label>
+                <label for="explain-checkbox" class="text-gray-700 cursor-pointer">Include explanations</label>
             </div>
 
-            <div class="button-group">
+            <div class="flex gap-4 mt-8">
                 <button
-                    class="btn btn-primary"
+                    class="flex-1 px-6 py-3 border-none rounded-lg text-base font-semibold cursor-pointer transition-all bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                     on:click={enhancePrompt}
                     disabled={isLoading || !prompt.trim()}
                 >
                     {isLoading ? "Enhancing..." : "Enhance Prompt"}
                 </button>
-                <button class="btn btn-secondary" on:click={clearAll} disabled={isLoading}>
+                <button class="flex-1 px-6 py-3 border-none rounded-lg text-base font-semibold cursor-pointer transition-all bg-gray-100 text-gray-800 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed" on:click={clearAll} disabled={isLoading}>
                     Clear
                 </button>
             </div>
@@ -159,69 +161,69 @@
 
         <!-- Output Section -->
         {#if enhancedPrompt}
-            <div class="card output-card">
-                <div class="output-header">
-                    <h2>Enhanced Prompt</h2>
-                    <button class="btn-icon" on:click={copyToClipboard} title="Copy to clipboard">
+            <div class="bg-white rounded-xl p-8 shadow-sm border border-gray-100">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-semibold text-gray-900">Enhanced Prompt</h2>
+                    <button class="px-4 py-2 bg-green-500 text-white border-none rounded-lg cursor-pointer font-semibold transition-colors hover:bg-green-600" on:click={copyToClipboard} title="Copy to clipboard">
                         📋 Copy
                     </button>
                 </div>
 
-                <div class="enhanced-content">
+                <div class="bg-blue-50 px-6 py-6 rounded-lg border-l-4 border-indigo-500 mb-6 whitespace-pre-wrap break-words leading-relaxed text-gray-800">
                     <p>{enhancedPrompt}</p>
                 </div>
 
                 <!-- Quality Metrics -->
                 {#if qualityMetrics}
-                    <div class="metrics-section">
-                        <h3>Quality Metrics</h3>
-                        <div class="metrics-grid">
-                            <div class="metric">
-                                <span class="label">Overall Score</span>
-                                <span class="value">{qualityMetrics.overall.toFixed(1)}/10</span>
-                                <div class="bar">
+                    <div class="mb-8 pt-6 border-t border-gray-100">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Quality Metrics</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="flex flex-col gap-2">
+                                <span class="text-sm font-medium text-gray-600">Overall Score</span>
+                                <span class="text-xl font-bold text-indigo-500">{qualityMetrics.overall.toFixed(1)}/10</span>
+                                <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
                                     <div
-                                        class="fill"
+                                        class="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all"
                                         style="width: {(qualityMetrics.overall / 10) * 100}%"
                                     />
                                 </div>
                             </div>
-                            <div class="metric">
-                                <span class="label">Clarity</span>
-                                <span class="value">{qualityMetrics.clarity.toFixed(1)}/10</span>
-                                <div class="bar">
+                            <div class="flex flex-col gap-2">
+                                <span class="text-sm font-medium text-gray-600">Clarity</span>
+                                <span class="text-xl font-bold text-indigo-500">{qualityMetrics.clarity.toFixed(1)}/10</span>
+                                <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
                                     <div
-                                        class="fill"
+                                        class="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all"
                                         style="width: {(qualityMetrics.clarity / 10) * 100}%"
                                     />
                                 </div>
                             </div>
-                            <div class="metric">
-                                <span class="label">Specificity</span>
-                                <span class="value">{qualityMetrics.specificity.toFixed(1)}/10</span>
-                                <div class="bar">
+                            <div class="flex flex-col gap-2">
+                                <span class="text-sm font-medium text-gray-600">Specificity</span>
+                                <span class="text-xl font-bold text-indigo-500">{qualityMetrics.specificity.toFixed(1)}/10</span>
+                                <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
                                     <div
-                                        class="fill"
+                                        class="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all"
                                         style="width: {(qualityMetrics.specificity / 10) * 100}%"
                                     />
                                 </div>
                             </div>
-                            <div class="metric">
-                                <span class="label">Context Richness</span>
-                                <span class="value">{qualityMetrics.context_richness.toFixed(1)}/10</span>
-                                <div class="bar">
+                            <div class="flex flex-col gap-2">
+                                <span class="text-sm font-medium text-gray-600">Context Richness</span>
+                                <span class="text-xl font-bold text-indigo-500">{qualityMetrics.context_richness.toFixed(1)}/10</span>
+                                <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
                                     <div
-                                        class="fill"
+                                        class="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all"
                                         style="width: {(qualityMetrics.context_richness / 10) * 100}%"
                                     />
                                 </div>
                             </div>
-                            <div class="metric">
-                                <span class="label">Actionability</span>
-                                <span class="value">{qualityMetrics.actionability.toFixed(1)}/10</span>
-                                <div class="bar">
+                            <div class="flex flex-col gap-2">
+                                <span class="text-sm font-medium text-gray-600">Actionability</span>
+                                <span class="text-xl font-bold text-indigo-500">{qualityMetrics.actionability.toFixed(1)}/10</span>
+                                <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
                                     <div
-                                        class="fill"
+                                        class="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all"
                                         style="width: {(qualityMetrics.actionability / 10) * 100}%"
                                     />
                                 </div>
@@ -232,11 +234,11 @@
 
                 <!-- Explanations -->
                 {#if explanations.length > 0}
-                    <div class="explanations-section">
-                        <h3>Enhancement Details</h3>
-                        <ul>
+                    <div class="pt-6 border-t border-gray-100">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Enhancement Details</h3>
+                        <ul class="list-none p-0 m-0">
                             {#each explanations as exp}
-                                <li>{exp}</li>
+                                <li class="py-2 pl-6 text-gray-800 relative before:content-['✓'] before:absolute before:left-0 before:text-green-500 before:font-bold">{exp}</li>
                             {/each}
                         </ul>
                     </div>
@@ -245,293 +247,3 @@
         {/if}
     </div>
 </div>
-
-<style>
-    .prompt-enhancer-container {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        padding: 2rem;
-        overflow-y: auto;
-    }
-
-    .header {
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-
-    .header h1 {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #1a202c;
-        margin-bottom: 0.5rem;
-    }
-
-    .header p {
-        font-size: 1rem;
-        color: #4a5568;
-    }
-
-    .content {
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-        max-width: 900px;
-        margin: 0 auto;
-        width: 100%;
-    }
-
-    .card {
-        background: white;
-        border-radius: 12px;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        border: 1px solid #e2e8f0;
-    }
-
-    .card h2 {
-        font-size: 1.3rem;
-        font-weight: 600;
-        color: #1a202c;
-        margin-bottom: 1.5rem;
-    }
-
-    .card h3 {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #2d3748;
-        margin-bottom: 1rem;
-    }
-
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        margin-bottom: 1.5rem;
-    }
-
-    .form-group label {
-        font-weight: 500;
-        color: #2d3748;
-        margin-bottom: 0.5rem;
-        font-size: 0.95rem;
-    }
-
-    .form-group select,
-    .form-group textarea {
-        padding: 0.75rem;
-        border: 2px solid #e2e8f0;
-        border-radius: 8px;
-        font-size: 1rem;
-        font-family: inherit;
-        transition: border-color 0.2s;
-    }
-
-    .form-group select:focus,
-    .form-group textarea:focus {
-        outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    .form-group textarea {
-        min-height: 120px;
-        resize: vertical;
-    }
-
-    .form-group.checkbox {
-        flex-direction: row;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .form-group.checkbox input {
-        width: 18px;
-        height: 18px;
-        cursor: pointer;
-    }
-
-    .form-group.checkbox label {
-        margin-bottom: 0;
-        cursor: pointer;
-    }
-
-    .button-group {
-        display: flex;
-        gap: 1rem;
-        margin-top: 2rem;
-    }
-
-    .btn {
-        padding: 0.75rem 1.5rem;
-        border: none;
-        border-radius: 8px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s;
-        flex: 1;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white;
-    }
-
-    .btn-primary:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
-    }
-
-    .btn-secondary {
-        background: #e2e8f0;
-        color: #2d3748;
-    }
-
-    .btn-secondary:hover:not(:disabled) {
-        background: #cbd5e0;
-    }
-
-    .btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
-    .btn-icon {
-        padding: 0.5rem 1rem;
-        background: #48bb78;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: 600;
-        transition: background 0.2s;
-    }
-
-    .btn-icon:hover {
-        background: #38a169;
-    }
-
-    .output-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-    }
-
-    .enhanced-content {
-        background: #f7fafc;
-        padding: 1.5rem;
-        border-radius: 8px;
-        border-left: 4px solid #667eea;
-        margin-bottom: 1.5rem;
-        white-space: pre-wrap;
-        word-wrap: break-word;
-        line-height: 1.6;
-        color: #2d3748;
-    }
-
-    .metrics-section {
-        margin-bottom: 2rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid #e2e8f0;
-    }
-
-    .metrics-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 1rem;
-    }
-
-    .metric {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .metric .label {
-        font-size: 0.9rem;
-        font-weight: 500;
-        color: #4a5568;
-    }
-
-    .metric .value {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: #667eea;
-    }
-
-    .bar {
-        height: 6px;
-        background: #e2e8f0;
-        border-radius: 3px;
-        overflow: hidden;
-    }
-
-    .bar .fill {
-        height: 100%;
-        background: linear-gradient(90deg, #667eea, #764ba2);
-        border-radius: 3px;
-        transition: width 0.3s ease;
-    }
-
-    .explanations-section {
-        padding-top: 1.5rem;
-        border-top: 1px solid #e2e8f0;
-    }
-
-    .explanations-section ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .explanations-section li {
-        padding: 0.75rem 0;
-        padding-left: 1.5rem;
-        color: #2d3748;
-        position: relative;
-    }
-
-    .explanations-section li::before {
-        content: "✓";
-        position: absolute;
-        left: 0;
-        color: #48bb78;
-        font-weight: bold;
-    }
-
-    .alert {
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 1rem;
-    }
-
-    .alert-error {
-        background: #fed7d7;
-        color: #c53030;
-        border: 1px solid #fc8181;
-    }
-
-    @media (max-width: 768px) {
-        .prompt-enhancer-container {
-            padding: 1rem;
-        }
-
-        .header h1 {
-            font-size: 1.5rem;
-        }
-
-        .card {
-            padding: 1.5rem;
-        }
-
-        .button-group {
-            flex-direction: column;
-        }
-
-        .metrics-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>

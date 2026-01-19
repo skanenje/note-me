@@ -20,6 +20,12 @@ contextBridge.exposeInMainWorld('api', {
 });
 
 // Separate API for Electron-specific features (tab management)
+// Whitelist of allowed invoke channels for security
+const ALLOWED_INVOKE_CHANNELS = new Set([
+  'prompt-enhancer:get-frameworks',
+  'prompt-enhancer:enhance',
+]);
+
 contextBridge.exposeInMainWorld('electronAPI', {
   platform: process.platform,
   createTab: (sessionId, toolUrl) => {
@@ -39,5 +45,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   onTabClosed: (callback) => {
     ipcRenderer.on('tab-closed', (event, sessionId) => callback(sessionId));
+  },
+  // Safe invoke wrapper with whitelisted channels
+  invoke: (channel, data) => {
+    if (!ALLOWED_INVOKE_CHANNELS.has(channel)) {
+      throw new Error(`IPC channel "${channel}" is not allowed`);
+    }
+    return ipcRenderer.invoke(channel, data);
   }
 });
