@@ -17,7 +17,30 @@
         { id: "openrouter/auto", name: "Auto (Best available)" },
         { id: "anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet" },
     ];
+        onMount(async () => {
+        await loadFrameworks();
+    });
 
+    async function loadFrameworks() {
+        try {
+            const result = await window.electronAPI.invoke(
+                "prompt-enhancer:get-frameworks",
+                {}
+            );
+
+            if (result.success) {
+                frameworks = result.data.frameworks;
+                if (frameworks.length > 0) {
+                    selectedFramework = frameworks[0].id;
+                }
+            } else {
+                error = `Failed to load frameworks: ${result.error}`;
+            }
+        } catch (err) {
+            error = `Error loading frameworks: ${err.message}`;
+            console.error(err);
+        }
+    }
     async function enhancePrompt() {
         if (!prompt.trim()) {
             error = "Please enter a prompt to enhance";
@@ -120,7 +143,7 @@
                     class="px-3 py-2 border-2 border-gray-100 rounded-lg text-base font-inherit transition-colors focus:outline-none focus:border-indigo-500 focus:ring-3 focus:ring-indigo-100 min-h-32 resize-y"
                 />
             </div>
-
+            
             <div class="flex flex-row items-center gap-3 mb-6">
                 <input
                     type="checkbox"
