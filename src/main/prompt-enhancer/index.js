@@ -3,6 +3,8 @@ const path = require('path');
 
 const FRAME_DIR = path.join(__dirname, 'frameworks');
 
+const frameworkCache = new Map();
+
 async function listFrameworks() {
   try {
     const files = await fs.readdir(FRAME_DIR);
@@ -30,6 +32,10 @@ async function listFrameworks() {
 }
 
 async function getFramework(frameworkId) {
+  if (frameworkCache.has(frameworkId)) {
+    return frameworkCache.get(frameworkId);
+  }
+
   const filePath = path.join(FRAME_DIR, `${frameworkId}.json`);
   try {
     const data = await fs.readFile(filePath, 'utf-8');
@@ -42,7 +48,9 @@ async function getFramework(frameworkId) {
         if (file.toLowerCase() === `${frameworkId.toLowerCase()}.json`) {
           const correctFilePath = path.join(FRAME_DIR, file);
           const data = await fs.readFile(correctFilePath, 'utf-8');
-          return JSON.parse(data);
+          const parsed = JSON.parse(data);
+          frameworkCache.set(frameworkId, parsed);
+          return parsed;
         }
       }
     }

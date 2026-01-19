@@ -4,20 +4,21 @@ const tabs = new Map(); // sessionId -> { view, tool, session }
 let activeTabId = null;
 let mainWindow = null;
 
-const TOOLBAR_HEIGHT = 92; // Adjusted for our toolbar height
+let currentViewBounds = { x: 250, y: 92, width: 800, height: 600 };
 
 function updateActiveViewBounds() {
     if (!activeTabId || !tabs.has(activeTabId) || !mainWindow) return;
 
-    const bounds = mainWindow.getContentBounds();
     const view = tabs.get(activeTabId).view;
 
-    // Position below the navigation (250px) and toolbar
+    // Use stored bounds or calculate based on window if needed
+    // Ideally, these come from the renderer
+    const windowBounds = mainWindow.getContentBounds();
     view.setBounds({
-        x: 250, // Navigation width
-        y: TOOLBAR_HEIGHT,
-        width: bounds.width - 250,
-        height: bounds.height - TOOLBAR_HEIGHT
+        x: currentViewBounds.x,
+        y: currentViewBounds.y,
+        width: windowBounds.width - currentViewBounds.x,
+        height: windowBounds.height - currentViewBounds.y
     });
     view.setAutoResize({ width: true, height: true });
 }
@@ -100,6 +101,13 @@ function registerTabHandlers(window) {
         if (activeTabId && tabs.has(activeTabId)) {
             updateActiveViewBounds();
         }
+    });
+    
+    // New handler to allow frontend to update layout metrics
+    ipcMain.on('update-layout-metrics', (event, { sidebarWidth, toolbarHeight }) => {
+        currentViewBounds.x = sidebarWidth;
+        currentViewBounds.y = toolbarHeight;
+        updateActiveViewBounds();
     });
 
     // IPC handlers
