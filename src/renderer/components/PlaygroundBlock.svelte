@@ -17,8 +17,9 @@
       // Simple local JavaScript execution
       if (language === "javascript") {
         try {
-          // Create a simple eval-based execution (for learning purposes)
-          const result = eval(input);
+          // Use Function constructor instead of eval for safer execution
+          const fn = new Function(input);
+          const result = fn();
           output = String(result);
         } catch (error) {
           output = `Error: ${error.message}`;
