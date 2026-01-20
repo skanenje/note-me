@@ -7,8 +7,8 @@
   "type": "commonjs",
   "main": "src/main/index.js",
   "scripts": {
-    "dev": "npm run build-backend && concurrently \"vite\" \"wait-on http://localhost:5173 && NODE_ENV=development electron .\"",
-    "start": "npm run build-backend && npm run build && NODE_ENV=production electron .",
+    "dev": "npm run build-backend && concurrently \"vite\" \"wait-on http://localhost:5173 && NODE_ENV=development npx electron .\"",
+    "start": "npm run build-backend && npm run build && NODE_ENV=production npx electron .",
     "build": "vite build",
     "build-backend": "cd backend && cargo build --release",
     "package": "electron-builder"

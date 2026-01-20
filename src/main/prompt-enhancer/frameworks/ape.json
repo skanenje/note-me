@@ -7,5 +7,5 @@
     "Purpose": {"hint":"Why are we doing this", "required": false},
     "Expectation": {"hint":"What success looks like", "required": false}
   },
-  "template": "{Action}. Purpose: {Purpose}. Expectation: {Expectation}."
+  "template": "**Action:**\n{Action}\n\n**Purpose:**\n{Purpose}\n\n**Expectation:**\n{Expectation}\n\n---\nPrompt:\n{prompt}"
 }

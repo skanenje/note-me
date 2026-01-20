@@ -6,8 +6,6 @@
     let enhancedPrompt = "";
     let qualityMetrics = null;
     let isLoading = false;
-    let showExplanation = false;
-    let explanations = [];
     let error = null;
     let selectedModel = "xiaomi/mimo-v2-flash:free";
 
@@ -21,6 +19,7 @@
 
     onMount(async () => {
     await loadFrameworks();
+    selectedFramework = "";
     });
 
     async function loadFrameworks() {
@@ -32,9 +31,6 @@
 
             if (result.success) {
                 frameworks = result.data.frameworks;
-                if (frameworks.length > 0) {
-                    selectedFramework = frameworks[0].id;
-                }
             } else {
                 error = `Failed to load frameworks: ${result.error}`;
             }
@@ -53,7 +49,6 @@
         error = null;
         enhancedPrompt = "";
         qualityMetrics = null;
-        explanations = [];
 
         try {
             console.log('[UI] Starting enhancement with model:', selectedModel);
@@ -61,9 +56,8 @@
             
             const requestPayload = {
                 prompt: prompt.trim(),
-                explain: showExplanation,
-                use_ai: true,
                 model: selectedModel,
+                framework_id: selectedFramework,
             };
             console.log('[UI] Request payload:', JSON.stringify(requestPayload, null, 2));
             
@@ -79,7 +73,6 @@
                 console.log('[UI] Enhancement successful');
                 enhancedPrompt = data.enhanced_prompt;
                 qualityMetrics = data.quality;
-                explanations = data.explain || [];
             } else {
                 error = `Enhancement failed: ${result.error}`;
                 console.error('[UI] Enhancement error:', error);
@@ -101,9 +94,7 @@
         prompt = "";
         enhancedPrompt = "";
         qualityMetrics = null;
-        explanations = [];
         error = null;
-        showExplanation = false;
     }
 </script>
 
@@ -136,7 +127,8 @@
             </div>
                 <div class="flex-1">
                     <label for="framework-select" class="font-medium text-gray-700 mb-2 text-sm">Learning Framework</label>
-                    <select bind:value={selectedFramework} id="framework-select" disabled={useAI || isLoading} class="w-full px-3 py-2 border-2 border-gray-100 rounded-lg text-base font-inherit transition-colors focus:outline-none focus:border-indigo-500 focus:ring-3 focus:ring-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <select bind:value={selectedFramework} id="framework-select" class="w-full px-3 py-2 border-2 border-gray-100 rounded-lg text-base font-inherit transition-colors focus:outline-none focus:border-indigo-500 focus:ring-3 focus:ring-indigo-100">
+                        <option value="">None</option>
                         {#each frameworks as fw (fw.id)}
                             <option value={fw.id}>
                                 {fw.name} — {fw.description}
@@ -155,17 +147,6 @@
                 />
             </div>
             
-            <div class="flex flex-row items-center gap-3 mb-6">
-                <input
-                    type="checkbox"
-                    id="explain-checkbox"
-                    bind:checked={showExplanation}
-                    disabled={isLoading}
-                    class="w-4 h-4 cursor-pointer"
-                />
-                <label for="explain-checkbox" class="text-gray-700 cursor-pointer">Include explanations</label>
-            </div>
-
             <div class="flex gap-4 mt-8">
                 <button
                     class="flex-1 px-6 py-3 border-none rounded-lg text-base font-semibold cursor-pointer transition-all bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -253,17 +234,6 @@
                     </div>
                 {/if}
 
-                <!-- Explanations -->
-                {#if explanations.length > 0}
-                    <div class="pt-6 border-t border-gray-100">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Enhancement Details</h3>
-                        <ul class="list-none p-0 m-0">
-                            {#each explanations as exp}
-                                <li class="py-2 pl-6 text-gray-800 relative before:content-['✓'] before:absolute before:left-0 before:text-green-500 before:font-bold">{exp}</li>
-                            {/each}
-                        </ul>
-                    </div>
-                {/if}
             </div>
         {/if}
     </div>

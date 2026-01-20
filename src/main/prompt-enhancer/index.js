@@ -102,99 +102,53 @@ async function simpleEnhance(prompt, frameworkId, fields) {
   return enhanced;
 }
 
-function generateExplanations(prompt, enhancedPrompt, framework) {
-    const explanations = [];
-
-    if (framework) {
-        explanations.push(`Applied the ${framework.name} framework to structure the prompt.`);
-    }
-
-    if (enhancedPrompt.length > prompt.length * 1.2) {
-        explanations.push("Expanded the prompt to provide more detail and context.");
-    }
-
-    const originalWords = new Set(prompt.toLowerCase().split(/\s+/));
-    const enhancedWords = new Set(enhancedPrompt.toLowerCase().split(/\s+/));
-
-    let addedWords = 0;
-    for (const word of enhancedWords) {
-        if (!originalWords.has(word)) {
-            addedWords++;
-        }
-    }
-
-    if (addedWords > 5) {
-        explanations.push("Introduced new keywords to refine the scope of the prompt.");
-    }
-
-    if (/\n\n/.test(enhancedPrompt) && !/\n\n/.test(prompt)) {
-        explanations.push("Added paragraph breaks to improve readability.");
-    }
-
-    if (explanations.length === 0) {
-        explanations.push("The prompt was enhanced, but no specific explanations were generated.");
-    }
-
-    return explanations;
-}
 
 
-async function enhancePrompt({ prompt, framework_id, fields, explain = false, use_ai = false, model = 'openrouter/auto' }) {
+
+async function enhancePrompt({ prompt, framework_id, fields, model = 'openrouter/auto' }) {
     console.log('[ENHANCER] enhancePrompt called');
     console.log('[ENHANCER] Parameters:', {
         prompt_length: prompt?.length,
         framework_id,
-        explain,
-        use_ai,
         model,
     });
     
     try {
         let enhanced_prompt;
         
-        // Use OpenRouter AI enhancement if requested
-        if (use_ai) {
+        if (framework_id) {
+            console.log('[ENHANCER] Using template-based enhancement with framework:', framework_id);
+            enhanced_prompt = await simpleEnhance(prompt, framework_id, fields);
+        } else {
             console.log('[ENHANCER] Using AI enhancement with model:', model);
             try {
                 enhanced_prompt = await enhanceWithOpenRouter(prompt, model);
                 console.log('[ENHANCER] AI enhancement succeeded');
             } catch (error) {
                 console.error(`[ENHANCER] OpenRouter enhancement failed: ${error.message}`);
-                console.log('[ENHANCER] Falling back to template-based enhancement');
-                enhanced_prompt = await simpleEnhance(prompt, framework_id, fields);
+                console.log('[ENHANCER] Falling back to basic template enhancement');
+                enhanced_prompt = await simpleEnhance(prompt, null, fields); // Fallback to default
             }
-        } else {
-            console.log('[ENHANCER] Using template-based enhancement');
-            // Use template-based enhancement
-            enhanced_prompt = await simpleEnhance(prompt, framework_id, fields);
         }
 
-        const selected_framework = framework_id || "basic";
         const quality = calculateQualityMetrics(prompt, enhanced_prompt);
-
-        let explanations = [];
-        if (explain) {
-            const framework = framework_id ? await getFramework(framework_id) : null;
-            explanations = generateExplanations(prompt, enhanced_prompt, framework);
-        }
 
         console.log('[ENHANCER] Returning result with enhanced_prompt length:', enhanced_prompt.length);
         return {
-            selected_framework,
+            selected_framework: framework_id || 'ai_default',
             enhanced_prompt,
             quality,
-            explain: explanations
         };
     } catch (error) {
         console.error(`[ENHANCER] Exception in enhancePrompt: ${error.message}`);
         console.error('[ENHANCER] Full error:', error);
-        const enhanced_prompt = await simpleEnhance(prompt, framework_id, fields);
+        // Fallback to the simplest enhancement in case of any unexpected error
+        const enhanced_prompt = await simpleEnhance(prompt, null, fields);
         const quality = calculateQualityMetrics(prompt, enhanced_prompt);
         return {
-            selected_framework: framework_id || "basic",
+            selected_framework: framework_id || 'fallback',
             enhanced_prompt,
             quality,
-            explain: []
         };
     }
 }

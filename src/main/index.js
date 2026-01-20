@@ -25,23 +25,31 @@ let dbManager;
 let mainWindow;
 
 app.whenReady().then(() => {
+  console.log('[MAIN] App is ready, initializing...');
+
   dbManager = new DatabaseManager();
-  console.log('Database ready');
+  console.log('[MAIN] Database ready');
 
   // Register IPC handlers
+  console.log('[MAIN] Registering IPC handlers...');
   registerDocumentHandlers(dbManager);
   registerBlockHandlers(dbManager);
   registerLessonHandlers(dbManager);
   registerPromptEnhancerHandlers();
+  console.log('[MAIN] IPC handlers registered');
 
   // Start Rust backend server
+  console.log('[MAIN] Starting backend...');
   startBackend();
 
   // Create window after backend starts
+  console.log('[MAIN] Scheduling window creation...');
   setTimeout(() => {
+    console.log('[MAIN] Creating window...');
     mainWindow = createWindow();
     registerTabHandlers(mainWindow);
-  }, 2000);
+    console.log('[MAIN] Window created and tab handlers registered');
+  }, 500);
 });
 
 app.on('window-all-closed', () => {

@@ -42,8 +42,22 @@ function startBackend() {
 
     backendProcess = spawn(backendPath, [], {
         cwd: isDev ? path.dirname(backendPath) : process.resourcesPath,
-        stdio: 'inherit'
+        stdio: ['ignore', 'pipe', 'pipe']  // Changed from 'inherit' to 'pipe'
     });
+
+    // Handle stdout
+    if (backendProcess.stdout) {
+        backendProcess.stdout.on('data', (data) => {
+            console.log('[BACKEND]', data.toString().trim());
+        });
+    }
+
+    // Handle stderr
+    if (backendProcess.stderr) {
+        backendProcess.stderr.on('data', (data) => {
+            console.error('[BACKEND ERROR]', data.toString().trim());
+        });
+    }
 
     backendProcess.on('error', (err) => {
         console.error('[BACKEND] Backend spawn error:', err);
