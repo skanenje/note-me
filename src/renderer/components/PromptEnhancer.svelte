@@ -18,7 +18,7 @@
         { id: "openrouter/auto", name: "Auto (Best available)" },
         { id: "anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet" },
     ];
-    
+
     onMount(async () => {
     await loadFrameworks();
     });
@@ -134,7 +134,16 @@
                     {/each}
                 </select>
             </div>
-
+                <div class="flex-1">
+                    <label for="framework-select" class="font-medium text-gray-700 mb-2 text-sm">Learning Framework</label>
+                    <select bind:value={selectedFramework} id="framework-select" disabled={useAI || isLoading} class="w-full px-3 py-2 border-2 border-gray-100 rounded-lg text-base font-inherit transition-colors focus:outline-none focus:border-indigo-500 focus:ring-3 focus:ring-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed">
+                        {#each frameworks as fw (fw.id)}
+                            <option value={fw.id}>
+                                {fw.name} — {fw.description}
+                            </option>
+                        {/each}
+                    </select>
+                </div>
             <div class="flex flex-col mb-6">
                 <label for="prompt-input" class="font-medium text-gray-700 mb-2 text-sm">Your Prompt</label>
                 <textarea
