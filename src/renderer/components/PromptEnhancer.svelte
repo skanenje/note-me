@@ -1,6 +1,7 @@
 <script>
     import { onMount } from "svelte";
-
+    let frameworks = [];
+    let selectedFramework = "";
     let prompt = "";
     let enhancedPrompt = "";
     let qualityMetrics = null;
@@ -17,8 +18,9 @@
         { id: "openrouter/auto", name: "Auto (Best available)" },
         { id: "anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet" },
     ];
-        onMount(async () => {
-        await loadFrameworks();
+    
+    onMount(async () => {
+    await loadFrameworks();
     });
 
     async function loadFrameworks() {
