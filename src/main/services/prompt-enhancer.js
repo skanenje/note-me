@@ -4,21 +4,24 @@
  * @param {string} model - The model to use
  * @returns {Promise<string>} - The enhanced prompt
  */
-async function enhanceWithOpenRouter(prompt, model = 'qwen/qwen-2.5-72b-instruct') {
+async function enhanceWithOpenRouter(prompt, model = 'qwen/qwen-2.5-72b-instruct', systemContext = null) {
     const apiKey = process.env.OPENROUTER_API_KEY;
-    
+
     try {
         if (!apiKey) {
             const errMsg = 'OPENROUTER_API_KEY environment variable is not set. Get your key from: https://openrouter.ai/keys';
             throw new Error(errMsg);
         }
 
+        const defaultSystemPromp = 'You are an expert prompt engineer. Your task is to enhance and refine user prompts to make them more effective, clear, and specific. Return only the enhanced prompt without any additional explanation.';
+        const systemPrompt = systemContext ? `${defaultSystemPromp}\n\n${systemContext}` : defaultSystemPromp;
+
         const requestBody = {
             model: model,
             messages: [
                 {
                     role: 'system',
-                    content: 'You are an expert prompt engineer. Your task is to enhance and refine user prompts to make them more effective, clear, and specific. Return only the enhanced prompt without any additional explanation.'
+                    content: systemPrompt
                 },
                 {
                     role: 'user',
@@ -28,11 +31,11 @@ async function enhanceWithOpenRouter(prompt, model = 'qwen/qwen-2.5-72b-instruct
             temperature: 0.7,
             max_tokens: 500
         };
-        
+
         // Create abort controller with 30 second timeout
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 30000);
-        
+
         let response;
         try {
             response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -64,7 +67,7 @@ async function enhanceWithOpenRouter(prompt, model = 'qwen/qwen-2.5-72b-instruct
 
         const data = await response.json();
         const enhancedPrompt = data.choices[0]?.message?.content;
-        
+
         if (!enhancedPrompt) {
             throw new Error('No content in OpenRouter response');
         }
