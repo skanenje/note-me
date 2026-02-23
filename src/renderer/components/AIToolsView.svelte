@@ -46,6 +46,28 @@
     function handleTabClose(sessionId) {
         closeTab(sessionId);
     }
+    
+    // Helper to construct image URL
+    function getImageUrl(iconPath) {
+        if (!iconPath) return '';
+        
+        // In production (file:// URLs), use relative paths
+        // In development (http:// URLs), use absolute paths
+        if (window.location.protocol === 'file:') {
+            // For file:// protocol, use relative path from current location
+            if (iconPath.startsWith('/')) {
+                // Remove leading slash and make it relative
+                return './' + iconPath.substring(1);
+            }
+            return './' + iconPath;
+        } else {
+            // For http:// or https://, use absolute paths
+            if (iconPath.startsWith('/') || iconPath.startsWith('http')) {
+                return iconPath;
+            }
+            return '/' + iconPath;
+        }
+    }
 </script>
 
 <div class="flex flex-col h-full bg-gray-100">
@@ -58,7 +80,7 @@
                     on:click={() => handleToolClick(tool)}
                     title={tool.name}
                 >
-                    <img src={tool.icon_path} alt={tool.name} class="w-6 h-6" />
+                    <img src={getImageUrl(tool.icon_path)} alt={tool.name} class="w-6 h-6" />
                 </button>
             {/each}
         </div>
@@ -73,7 +95,7 @@
                     role="button"
                     tabindex="0"
                 >
-                    <img src={tab.tool.icon_path} alt={tab.tool.name} class="w-4 h-4 flex-shrink-0" />
+                    <img src={getImageUrl(tab.tool.icon_path)} alt={tab.tool.name} class="w-4 h-4 flex-shrink-0" />
                     <span class="flex-1 text-xs whitespace-nowrap overflow-hidden text-ellipsis">{tab.tool.name}</span>
                     <button
                         class="w-5 h-5 border-none bg-transparent rounded cursor-pointer text-lg leading-none text-gray-600 flex-shrink-0 hover:bg-gray-400 hover:text-black"

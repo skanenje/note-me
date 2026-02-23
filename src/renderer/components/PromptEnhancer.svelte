@@ -126,7 +126,7 @@
                 </select>
             </div>
                 <div class="flex-1">
-                    <label for="framework-select" class="font-medium text-gray-700 mb-2 text-sm">Learning Framework</label>
+                    <label for="framework-select" class="font-medium text-gray-700 mb-2 text-sm">Framework</label>
                     <select bind:value={selectedFramework} id="framework-select" class="w-full px-3 py-2 border-2 border-gray-100 rounded-lg text-base font-inherit transition-colors focus:outline-none focus:border-indigo-500 focus:ring-3 focus:ring-indigo-100">
                         <option value="">None</option>
                         {#each frameworks as fw (fw.id)}

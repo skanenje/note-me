@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [svelte()],
   base: './',
   root: 'src/renderer',
+  publicDir: '../../static',
   build: {
     outDir: '../../dist/renderer',
     emptyOutDir: true

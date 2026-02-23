@@ -94,21 +94,21 @@ impl Database {
 
     fn seed_tools(&self) -> Result<()> {
         let tools = vec![
-            ("chatgpt", "ChatGPT", "https://chatgpt.com", "/openai-color.svg"),
-            ("claude", "Claude", "https://claude.ai", "/claude-color.svg"),
-            ("mistral", "Mistral", "https://mistral.ai", "/mistral-color.svg"),
-            ("gemini", "Gemini", "https://gemini.google.com", "/gemini-color.svg"),
-            ("copilot", "Copilot", "https://copilot.microsoft.com", "/copilot-color.svg"),
-            ("deepseek", "DeepSeek", "https://chat.deepseek.com", "/deepseek-color.svg"),
-            ("perplexity", "Perplexity", "https://perplexity.ai", "/perplexity-color.svg"),
-            ("grok", "Grok", "https://grok.com", "/grok.svg"),
-            ("notebooklm", "NotebookLM", "https://notebooklm.google", "/notebooklm.svg"),
-            ("v0", "v0", "https://v0.dev", "/v0.svg"),
-            ("sora", "Sora", "https://sora.com", "/sora-color.svg"),
-            ("azureai", "Azure AI Foundry", "https://ai.azure.com", "/azureai-color.svg"),
-            ("vertexai", "Vertex AI", "https://console.cloud.google.com", "/vertexai-color.svg"),
-            ("openrouter", "OpenRouter", "https://openrouter.ai", "/openrouter.svg"),
-            ("huggingface", "Hugging Face", "https://huggingface.co/chat", "/huggingface-color.svg"),
+            ("chatgpt", "ChatGPT", "https://chatgpt.com", "openai-color.svg"),
+            ("claude", "Claude", "https://claude.ai", "claude-color.svg"),
+            ("mistral", "Mistral", "https://mistral.ai", "mistral-color.svg"),
+            ("gemini", "Gemini", "https://gemini.google.com", "gemini-color.svg"),
+            ("copilot", "Copilot", "https://copilot.microsoft.com", "copilot-color.svg"),
+            ("deepseek", "DeepSeek", "https://chat.deepseek.com", "deepseek-color.svg"),
+            ("perplexity", "Perplexity", "https://perplexity.ai", "perplexity-color.svg"),
+            ("grok", "Grok", "https://grok.com", "grok.svg"),
+            ("notebooklm", "NotebookLM", "https://notebooklm.google", "notebooklm.svg"),
+            ("v0", "v0", "https://v0.dev", "v0.svg"),
+            ("sora", "Sora", "https://sora.com", "sora-color.svg"),
+            ("azureai", "Azure AI Foundry", "https://ai.azure.com", "azureai-color.svg"),
+            ("vertexai", "Vertex AI", "https://console.cloud.google.com", "vertexai-color.svg"),
+            ("openrouter", "OpenRouter", "https://openrouter.ai", "openrouter.svg"),
+            ("huggingface", "Hugging Face", "https://huggingface.co/chat", "huggingface-color.svg"),
         ];
 
         for (id, name, url, icon) in tools {
