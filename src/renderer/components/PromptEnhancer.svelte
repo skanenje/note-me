@@ -129,11 +129,11 @@
             <div class="flex flex-col lg:flex-row gap-6 mb-6">
                 <div class="flex-1">
                     <label for="framework-select" class="font-medium text-gray-700 mb-2 text-sm block">Framework</label>
-                    <select bind:value={selectedFramework} id="framework-select" class="w-full px-3 py-2 border-2 border-gray-100 rounded-lg text-sm md:text-base font-inherit transition-colors focus:outline-none focus:border-indigo-500 focus:ring-3 focus:ring-indigo-100 overflow-hidden text-ellipsis">
+                    <select bind:value={selectedFramework} id="framework-select" class="w-full px-3 py-2 border-2 border-gray-100 rounded-lg text-sm md:text-base font-inherit transition-colors focus:outline-none focus:border-indigo-500 focus:ring-3 focus:ring-indigo-100 truncate">
                         <option value="">None</option>
                         {#each frameworks as fw (fw.id)}
-                            <option value={fw.id}>
-                                {fw.name} — {fw.description}
+                            <option value={fw.id} class="truncate">
+                                {fw.name}
                             </option>
                         {/each}
                     </select>
