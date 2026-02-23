@@ -137,6 +137,16 @@
                             </option>
                         {/each}
                     </select>
+                    
+                    {#if selectedFramework}
+                        {@const selectedFw = frameworks.find(fw => fw.id === selectedFramework)}
+                        {#if selectedFw}
+                            <div class="mt-3 p-3 bg-indigo-50 border border-indigo-200 rounded-lg text-sm text-gray-700">
+                                <p class="font-medium text-indigo-900 mb-1">{selectedFw.name}</p>
+                                <p class="text-gray-600">{selectedFw.description}</p>
+                            </div>
+                        {/if}
+                    {/if}
                 </div>
             </div>
             
