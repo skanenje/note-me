@@ -14,11 +14,24 @@
 
   onMount(() => {
     loadDocuments();
+    
+    // Send initial view to backend
+    if (window.electronAPI && window.electronAPI.navigateView) {
+      console.log('[APP] Sending initial view:', currentView);
+      window.electronAPI.navigateView(currentView);
+    }
   });
 
   function handleNavigate(view) {
+    console.log('[APP] handleNavigate called with view:', view);
     currentView = view;
     selectedLessonId = null;
+    
+    // CRITICAL: Send navigate event to backend
+    if (window.electronAPI && window.electronAPI.navigateView) {
+      console.log('[APP] ✓ Sending navigateView event:', view);
+      window.electronAPI.navigateView(view);
+    }
   }
 
   function handleSelectLesson(lessonId) {

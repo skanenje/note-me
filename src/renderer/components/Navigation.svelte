@@ -1,6 +1,24 @@
 <script>
   export let currentView = "lessons";
   export let onNavigate;
+
+  function handleNavigate(view) {
+    console.log('✓ [NAV] handleNavigate called with view:', view);
+    console.log('✓ [NAV] electronAPI available:', !!window.electronAPI);
+    console.log('✓ [NAV] navigateView method available:', !!(window.electronAPI?.navigateView));
+    
+    currentView = view;
+    onNavigate(view);
+    
+    // Notify main process about view change
+    if (window.electronAPI && window.electronAPI.navigateView) {
+      console.log('✓ [NAV] SENDING navigateView event with:', view);
+      window.electronAPI.navigateView(view);
+      console.log('✓ [NAV] navigateView event sent successfully');
+    } else {
+      console.error('✗ [NAV] navigateView NOT available!');
+    }
+  }
 </script>
 
 <nav
@@ -17,7 +35,7 @@
       'lessons'
         ? 'bg-white text-primary font-bold'
         : 'bg-white/10 hover:bg-white/20'}"
-      on:click={() => onNavigate("lessons")}
+      on:click={() => handleNavigate("lessons")}
     >
       <span class="text-xl">📚</span>
       <span>Learning Tracks</span>
@@ -28,7 +46,7 @@
       'documents'
         ? 'bg-white text-primary font-bold'
         : 'bg-white/10 hover:bg-white/20'}"
-      on:click={() => onNavigate("documents")}
+      on:click={() => handleNavigate("documents")}
     >
       <span class="text-xl">📝</span>
       <span>My Notes</span>
@@ -39,7 +57,7 @@
       'aitools'
         ? 'bg-white text-primary font-bold'
         : 'bg-white/10 hover:bg-white/20'}"
-      on:click={() => onNavigate("aitools")}
+      on:click={() => handleNavigate("aitools")}
     >
       <span class="text-xl">🤖</span>
       <span>AI Tools</span>

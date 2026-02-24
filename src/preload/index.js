@@ -37,6 +37,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   closeTab: (sessionId) => {
     ipcRenderer.send('close-tab', sessionId);
   },
+  navigateView: (viewName) => {
+    ipcRenderer.send('navigate-view', viewName);
+  },
   onTabCreated: (callback) => {
     ipcRenderer.on('tab-created', (event, sessionId) => callback(sessionId));
   },
