@@ -169,6 +169,22 @@ function registerTabHandlers(window) {
         }
     });
     
+    // Also listen for DevTools toggle (F12 or Ctrl+Shift+I)
+    mainWindow.webContents.on('before-input-event', (event, input) => {
+        // DevTools toggle keys
+        const isDevToolsKey = (input.control && input.shift && input.key.toLowerCase() === 'i') ||
+                              input.key === 'F12';
+        if (isDevToolsKey && isAIToolsViewActive) {
+            console.log('[TABS] DevTools toggle detected - will update bounds in 150ms');
+            setTimeout(() => {
+                if (activeTabId && tabs.has(activeTabId) && isAIToolsViewActive) {
+                    console.log('[TABS] DevTools toggle complete - updating bounds');
+                    updateActiveViewBounds();
+                }
+            }, 150);
+        }
+    });
+    
     // New handler to allow frontend to update layout metrics
     ipcMain.on('update-layout-metrics', (event, { sidebarWidth, toolbarHeight }) => {
         currentViewBounds.x = sidebarWidth;
