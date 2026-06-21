@@ -1,17 +1,17 @@
-=== Note-Me startup log — 2026-06-21T13:56:45.975Z ===
-[2026-06-21T13:56:46.766Z] [WINDOW] Creating BrowserWindow
-[2026-06-21T13:56:46.867Z] [RENDERER-SERVER] dist path: /home/swapo/projects/note-me/dist/renderer
-[2026-06-21T13:56:46.891Z] [RENDERER-SERVER] Listening on http://127.0.0.1:5174
-[2026-06-21T13:56:46.892Z] [WINDOW] Production mode — loading http://127.0.0.1:5174
-[2026-06-21T13:56:46.953Z] [RENDERER-SERVER] 200 /index.html (text/html, 359 bytes)
-[2026-06-21T13:56:47.125Z] [RENDERER-SERVER] 200 /assets/index-Clj-Dykp.js (application/javascript, 72952 bytes)
-[2026-06-21T13:56:47.127Z] [RENDERER-SERVER] 200 /assets/index-B7C0kpbf.css (text/css, 51486 bytes)
-[2026-06-21T13:56:47.276Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte script tag is executing! (http://127.0.0.1:5174/assets/index-Clj-Dykp.js:8)
-[2026-06-21T13:56:47.277Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte script tag is executing! (http://127.0.0.1:5174/assets/index-Clj-Dykp.js:1)
-[2026-06-21T13:56:47.283Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte DOM element mounted! Loading lessons... (http://127.0.0.1:5174/assets/index-Clj-Dykp.js:1)
-[2026-06-21T13:56:47.284Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte DOM element mounted! Loading documents... (http://127.0.0.1:5174/assets/index-Clj-Dykp.js:8)
-[2026-06-21T13:56:47.505Z] [WINDOW] did-finish-load fired
-[2026-06-21T13:56:47.515Z] [RENDERER-CONSOLE] [Level 2] %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+=== Note-Me startup log — 2026-06-21T13:58:53.189Z ===
+[2026-06-21T13:58:53.945Z] [WINDOW] Creating BrowserWindow
+[2026-06-21T13:58:54.101Z] [RENDERER-SERVER] dist path: /home/swapo/projects/note-me/dist/renderer
+[2026-06-21T13:58:54.137Z] [RENDERER-SERVER] Listening on http://127.0.0.1:5174
+[2026-06-21T13:58:54.137Z] [WINDOW] Production mode — loading http://127.0.0.1:5174
+[2026-06-21T13:58:54.256Z] [RENDERER-SERVER] 200 /index.html (text/html, 359 bytes)
+[2026-06-21T13:58:54.340Z] [RENDERER-SERVER] 200 /assets/index-Clj-Dykp.js (application/javascript, 72952 bytes)
+[2026-06-21T13:58:54.341Z] [RENDERER-SERVER] 200 /assets/index-B7C0kpbf.css (text/css, 51486 bytes)
+[2026-06-21T13:58:54.451Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte script tag is executing! (http://127.0.0.1:5174/assets/index-Clj-Dykp.js:8)
+[2026-06-21T13:58:54.453Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte script tag is executing! (http://127.0.0.1:5174/assets/index-Clj-Dykp.js:1)
+[2026-06-21T13:58:54.460Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte DOM element mounted! Loading lessons... (http://127.0.0.1:5174/assets/index-Clj-Dykp.js:1)
+[2026-06-21T13:58:54.463Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte DOM element mounted! Loading documents... (http://127.0.0.1:5174/assets/index-Clj-Dykp.js:8)
+[2026-06-21T13:58:54.745Z] [WINDOW] did-finish-load fired
+[2026-06-21T13:58:54.759Z] [RENDERER-CONSOLE] [Level 2] %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
   Policy set or a policy with "unsafe-eval" enabled. This exposes users of
   this app to unnecessary security risks.
 
@@ -19,18 +19,35 @@ For more information and help, consult
 https://electronjs.org/docs/tutorial/security.
 This warning will not show up
 once the app is packaged. (node:electron/js2c/sandbox_bundle:2)
-[2026-06-21T13:56:47.542Z] [PROBE] fetch http://127.0.0.1:3001/api/tools => {"ok":true,"status":200,"count":15,"raw":"[{\"enabled\":true,\"icon_path\":\"/azureai-color.svg\",\"id\":\"azureai\",\"name\":\"Azure AI Foundry\",\"url\":\"https://ai.azure.com\"},{\"enabled\":true,\"icon_path\":\"/openai-color.svg\",\"id\":\"chatgpt\",\"name\":\"ChatGPT\""}
-[2026-06-21T13:56:47.543Z] [PROBE] window APIs: {"hasApi":true,"hasElectronAPI":true,"apiKeys":["createDocument","getDocuments","getDocumentWithBlocks","updateDocumentTitle","deleteDocument","createBlock","updateBlock","deleteBlock","getLessons","getLessonWithBlocks","updateProgress","getLessonProgress","getFrameworks","enhancePrompt"],"electronAPIKeys":["platform","createTab","switchTab","closeTab","updateLayoutMetrics","onTabCreated","onTabSwitched","onTabClosed"]}
-[2026-06-21T13:56:47.547Z] [PROBE] window.api.getLessons() => {"ok":true,"success":true,"count":2,"first":"Prompt Engineering 101"}
-[2026-06-21T13:56:47.549Z] [PROBE] document.body.innerHTML => 
+[2026-06-21T13:58:54.906Z] [PROBE] fetch http://127.0.0.1:3001/api/tools => {"ok":true,"status":200,"count":15,"raw":"[{\"enabled\":true,\"icon_path\":\"/azureai-color.svg\",\"id\":\"azureai\",\"name\":\"Azure AI Foundry\",\"url\":\"https://ai.azure.com\"},{\"enabled\":true,\"icon_path\":\"/openai-color.svg\",\"id\":\"chatgpt\",\"name\":\"ChatGPT\""}
+[2026-06-21T13:58:54.910Z] [PROBE] window APIs: {"hasApi":true,"hasElectronAPI":true,"apiKeys":["createDocument","getDocuments","getDocumentWithBlocks","updateDocumentTitle","deleteDocument","createBlock","updateBlock","deleteBlock","getLessons","getLessonWithBlocks","updateProgress","getLessonProgress","getFrameworks","enhancePrompt"],"electronAPIKeys":["platform","createTab","switchTab","closeTab","updateLayoutMetrics","onTabCreated","onTabSwitched","onTabClosed"]}
+[2026-06-21T13:58:54.920Z] [PROBE] window.api.getLessons() => {"ok":true,"success":true,"count":2,"first":"Prompt Engineering 101"}
+[2026-06-21T13:58:54.923Z] [PROBE] document.body.innerHTML => 
   <div id="app"><div class="app-shell svelte-1uqstex"><nav class="nav svelte-j06usk"><div class="nav__logo svelte-j06usk"><div class="nav__logo-icon svelte-j06usk">🎓</div> <div><div class="nav__logo-name svelte-j06usk">Note-Me</div> <div class="nav__logo-tagline svelte-j06usk">Learn AI · Build AI</div></div></div> <div class="nav__divider svelte-j06usk"></div> <ul class="nav__list svelte-j06usk"><li><button class="nav__item svelte-j06usk nav__item--active" aria-current="page"><span class="nav__item-icon svelte-j06usk">📚</span> <span class="nav__item-label svelte-j06usk">Learning Tracks</span> <span class="nav__item-indicator svelte-j06usk"></span></button> </li><li><button class="nav__item svelte-j06usk"><span class="nav__item-icon svelte-j06usk">📝</span> <span class="nav__item-label svelte-j06usk">My Notes</span> </button> </li><li><button class="nav__item svelte-j06usk"><span class="nav__item-icon svelte-j06usk">🤖</span> <span class="nav__item-label svelte-j06usk">AI Tools</span> </button> </li><li><button class="nav__item svelte-j06usk"><span class="nav__item-icon svelte-j06usk">🚀</span> <span class="nav__item-label svelte-j06usk">Prompt Enhancer</span> </button> </li></ul> <div class="nav__footer svelte-j06usk"><div class="nav__status svelte-j06usk"><span class="nav__status-dot svelte-j06usk"></span> <span>Ready</span></div></div></nav> <main class="main-content svelte-1uqstex"><div class="page-enter"><div class="lesson-list svelte-1h2ayk2"><header class="lesson-list__header svelte-1h2ayk2"><div class="lesson-list__title-wrap"><h1 class="lesson-list__title svelte-1h2ayk2">Learning Tracks</h1> <p class="lesson-list__sub svelte-1h2ayk2">Master AI concepts through interactive lessons</p></div> <div class="dashboard-stats svelte-1h2ayk2"><div class="stat-card svelte-1h2ayk2"><span class="stat-card__val svelte-1h2ayk2">0/2</span> <span class="stat-card__lbl svelte-1h2ayk2">Completed Tracks</span></div> <div class="stat-card svelte-1h2ayk2"><span class="stat-card__val svelte-1h2ayk2">0%</span> <span class="stat-card__lbl svelte-1h2ayk2">Overall Progress</span></div></div></header> <div class="cards-grid svelte-1h2ayk2"><button class="lesson-card svelte-1h2ayk2" style="animation-delay: 0ms;"><div class="lesson-card__accent svelte-1h2ayk2"></div> <div class="lesson-card__body svelte-1h2ayk2"><div class="lesson-card__top svelte-1h2ayk2"><div class="lesson-card__icon svelte-1h2ayk2">📖</div> <div class="lesson-card__badges svelte-1h2ayk2"> </div></div> <h3 class="lesson-card__title svelte-1h2ayk2">Prompt Engineering 101</h3> <p class="lesson-card__desc svelte-1h2ayk2">Learn how to communicate effectively with AI systems. Master the art of crafting prompts that get you the results you want.</p> </div> <div class="lesson-card__footer svelte-1h2ayk2"><span class="lesson-card__cta svelte-1h2ayk2">Start lesson →</span></div> </button><button class="lesson-card svelte-1h2ayk2" style="animation-delay: 60ms;"><div class="lesson-card__accent svelte-1h2ayk2"></div> <div class="lesson-card__body svelte-1h2ayk2"><div class="lesson-card__top svelte-1h2ayk2"><div class="lesson-card__icon svelte-1h2ayk2">📖</div> <div class="lesson-card__badges svelte-1h2ayk2"> </div></div> <h3 class="lesson-card__title svelte-1h2ayk2">RAG &amp; Context Windows 101</h3> <p class="lesson-card__desc svelte-1h2ayk2">Learn how Retrieval-Augmented Generation bridges the gap between static LLMs and dynamic, search-enhanced context retrieval.</p> </div> <div class="lesson-card__footer svelte-1h2ayk2"><span class="lesson-card__cta svelte-1h2ayk2">Start lesson →</span></div> </button></div></div></div></main> </div></div>
 
 
 
-[2026-06-21T13:56:51.914Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonView.svelte DOM element mounted! Loading lesson and progress... (http://127.0.0.1:5174/assets/index-Clj-Dykp.js:4)
-[2026-06-21T13:56:53.349Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte script tag is executing! (http://127.0.0.1:5174/assets/index-Clj-Dykp.js:1)
-[2026-06-21T13:56:53.350Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte DOM element mounted! Loading lessons... (http://127.0.0.1:5174/assets/index-Clj-Dykp.js:1)
-[2026-06-21T13:56:54.133Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonView.svelte DOM element mounted! Loading lesson and progress... (http://127.0.0.1:5174/assets/index-Clj-Dykp.js:4)
-[2026-06-21T13:56:58.167Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte script tag is executing! (http://127.0.0.1:5174/assets/index-Clj-Dykp.js:1)
-[2026-06-21T13:56:58.169Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte DOM element mounted! Loading lessons... (http://127.0.0.1:5174/assets/index-Clj-Dykp.js:1)
-[2026-06-21T13:57:31.255Z] [RENDERER-SERVER] Stopped
+[2026-06-21T13:58:54.923Z] [TEST-PROBE] Starting interactive lesson and quiz test...
+[2026-06-21T13:58:54.926Z] [RENDERER-CONSOLE] [Level 1] [TEST-PROBE-CLIENT] Found 2 lesson cards (:21)
+[2026-06-21T13:58:54.927Z] [RENDERER-CONSOLE] [Level 1] [TEST-PROBE-CLIENT] Clicking RAG lesson card... (:38)
+[2026-06-21T13:58:54.930Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonView.svelte DOM element mounted! Loading lesson and progress... (http://127.0.0.1:5174/assets/index-Clj-Dykp.js:4)
+[2026-06-21T13:58:55.167Z] [RENDERER-CONSOLE] [Level 1] [TEST-PROBE-CLIENT] Lesson view loaded (:43)
+[2026-06-21T13:58:55.170Z] [RENDERER-CONSOLE] [Level 1] [TEST-PROBE-CLIENT] Quiz block found (:47)
+[2026-06-21T13:58:55.171Z] [RENDERER-CONSOLE] [Level 1] [TEST-PROBE-CLIENT] Quiz Question: What is the primary motivation for using RAG instead of simply feeding all files directly to the model's context window? (:50)
+[2026-06-21T13:58:55.172Z] [RENDERER-CONSOLE] [Level 1] [TEST-PROBE-CLIENT] Found 4 options (:53)
+[2026-06-21T13:58:55.173Z] [RENDERER-CONSOLE] [Level 1] [TEST-PROBE-CLIENT] Clicking incorrect option... (:56)
+[2026-06-21T13:58:55.373Z] [RENDERER-CONSOLE] [Level 1] [TEST-PROBE-CLIENT] Option classes after click: ["quiz-option svelte-j3g2l3","quiz-option svelte-j3g2l3 quiz-option--selected","quiz-option svelte-j3g2l3","quiz-option svelte-j3g2l3"] (:64)
+[2026-06-21T13:58:55.373Z] [RENDERER-CONSOLE] [Level 1] [TEST-PROBE-CLIENT] Submit button disabled state: false (:68)
+[2026-06-21T13:58:55.474Z] [RENDERER-CONSOLE] [Level 1] [TEST-PROBE-CLIENT] Feedback after wrong submission: ✕ Incorrect (:74)
+[2026-06-21T13:58:55.674Z] [RENDERER-CONSOLE] [Level 1] [TEST-PROBE-CLIENT] Clicking correct option... (:84)
+[2026-06-21T13:58:55.927Z] [RENDERER-CONSOLE] [Level 1] [TEST-PROBE-CLIENT] Feedback after correct submission: ✓ Correct! (:99)
+[2026-06-21T13:58:56.241Z] [RENDERER-CONSOLE] [Level 1] [TEST-PROBE-CLIENT] Progress: 1/4 completed · 25% (:104)
+[2026-06-21T13:58:56.242Z] [TEST-PROBE] Result: {
+  "success": true,
+  "quizQuestion": "What is the primary motivation for using RAG instead of simply feeding all files directly to the model's context window?",
+  "wrongHeader": "✕ Incorrect",
+  "correctHeader": "✓ Correct!",
+  "explanation": "While context windows have grown larger, loading massive amounts of raw data is highly expensive, introduces latency, and can lead to the model 'getting lost in the middle' of long inputs. RAG optimizes this by pre-filtering relevant content.",
+  "progressLabel": "1/4 completed · 25%"
+}
+[2026-06-21T13:59:42.269Z] [RENDERER-SERVER] Stopped
