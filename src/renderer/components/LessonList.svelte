@@ -1,4 +1,5 @@
 <script>
+  console.log('[SVELTE] LessonList.svelte script tag is executing!');
   import { onMount } from 'svelte';
 
   export let onSelectLesson;
@@ -14,9 +15,10 @@
     Advanced:     'badge--red',
   };
 
-  onMount(async () => {
-    await loadLessons();
-  });
+  function listMounted(node) {
+    console.log('[SVELTE] LessonList.svelte DOM element mounted! Loading lessons...');
+    loadLessons();
+  }
 
   async function loadLessons() {
     loading = true;
@@ -36,7 +38,7 @@
   }
 </script>
 
-<div class="lesson-list">
+<div class="lesson-list" use:listMounted>
   <header class="lesson-list__header">
     <h1 class="lesson-list__title">Learning Tracks</h1>
     <p class="lesson-list__sub">Master AI concepts through interactive lessons</p>

@@ -1,4 +1,5 @@
 <script>
+  console.log('[SVELTE] App.svelte script tag is executing!');
   import { onMount } from "svelte";
   import Navigation from "./components/Navigation.svelte";
   import LessonList from "./components/LessonList.svelte";
@@ -14,9 +15,10 @@
   let selectedLessonId = null;
   let transitioning = false;
 
-  onMount(() => {
+  function appMounted(node) {
+    console.log('[SVELTE] App.svelte DOM element mounted! Loading documents...');
     loadDocuments();
-  });
+  }
 
   async function handleNavigate(view) {
     if (view === currentView) return;
@@ -36,7 +38,7 @@
   }
 </script>
 
-<div class="app-shell">
+<div class="app-shell" use:appMounted>
   <Navigation {currentView} onNavigate={handleNavigate} />
 
   <main class="main-content" class:fading={transitioning}>

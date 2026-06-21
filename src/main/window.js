@@ -169,6 +169,31 @@ async function createWindow() {
     } catch (e) {
       log(`[PROBE] API probe failed: ${e.message}`);
     }
+
+    // Probe database lessons via window.api
+    try {
+      const dbLessons = await mainWindow.webContents.executeJavaScript(`
+        (async () => {
+          try {
+            const res = await window.api.getLessons();
+            return { ok: true, success: res.success, count: res.lessons ? res.lessons.length : -1, first: res.lessons && res.lessons[0] ? res.lessons[0].title : null, error: res.error };
+          } catch (e) {
+            return { ok: false, error: e.message };
+          }
+        })()
+      `);
+      log(`[PROBE] window.api.getLessons() => ${JSON.stringify(dbLessons)}`);
+    } catch (e) {
+      log(`[PROBE] getLessons probe failed: ${e.message}`);
+    }
+
+    // Probe the rendered HTML to see if Svelte successfully mounted
+    try {
+      const html = await mainWindow.webContents.executeJavaScript('document.body.innerHTML');
+      log(`[PROBE] document.body.innerHTML => ${html}`);
+    } catch (e) {
+      log(`[PROBE] HTML probe failed: ${e.message}`);
+    }
   });
 
   if (process.env.NODE_ENV === 'development') {
