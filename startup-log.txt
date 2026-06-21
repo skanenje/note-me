@@ -33,3 +33,4 @@ once the app is packaged. (node:electron/js2c/sandbox_bundle:2)
 [2026-06-21T13:56:54.133Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonView.svelte DOM element mounted! Loading lesson and progress... (http://127.0.0.1:5174/assets/index-Clj-Dykp.js:4)
 [2026-06-21T13:56:58.167Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte script tag is executing! (http://127.0.0.1:5174/assets/index-Clj-Dykp.js:1)
 [2026-06-21T13:56:58.169Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte DOM element mounted! Loading lessons... (http://127.0.0.1:5174/assets/index-Clj-Dykp.js:1)
+[2026-06-21T13:57:31.255Z] [RENDERER-SERVER] Stopped

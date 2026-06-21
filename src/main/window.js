@@ -194,6 +194,121 @@ async function createWindow() {
     } catch (e) {
       log(`[PROBE] HTML probe failed: ${e.message}`);
     }
+
+    // ── INTERACTIVE INTEGRATION TEST PROBE ──
+    try {
+      log('[TEST-PROBE] Starting interactive lesson and quiz test...');
+      const testResult = await mainWindow.webContents.executeJavaScript(\`
+        (async () => {
+          try {
+            // Helper to wait for selector
+            const waitForSelector = (selector, timeout = 5000) => {
+              return new Promise((resolve, reject) => {
+                const start = Date.now();
+                const check = () => {
+                  const el = document.querySelector(selector);
+                  if (el) resolve(el);
+                  else if (Date.now() - start > timeout) reject(new Error('Timeout waiting for: ' + selector));
+                  else setTimeout(check, 100);
+                };
+                check();
+              });
+            };
+
+            // 1. Wait for lesson cards to render
+            await waitForSelector('.lesson-card');
+            const cards = document.querySelectorAll('.lesson-card');
+            console.log('[TEST-PROBE-CLIENT] Found ' + cards.length + ' lesson cards');
+
+            // Find RAG card
+            let ragCard = null;
+            for (const card of cards) {
+              const title = card.querySelector('.lesson-card__title')?.textContent || '';
+              if (title.includes('RAG')) {
+                ragCard = card;
+                break;
+              }
+            }
+
+            if (!ragCard) {
+              return { success: false, error: 'RAG & Context Windows 101 card not found' };
+            }
+
+            // 2. Click the card to open the lesson
+            console.log('[TEST-PROBE-CLIENT] Clicking RAG lesson card...');
+            ragCard.click();
+
+            // 3. Wait for lesson view to load
+            await waitForSelector('.lesson-view');
+            console.log('[TEST-PROBE-CLIENT] Lesson view loaded');
+
+            // Wait for blocks to load
+            await waitForSelector('.quiz-block');
+            console.log('[TEST-PROBE-CLIENT] Quiz block found');
+
+            const quizQuestion = document.querySelector('.quiz-block__question').textContent;
+            console.log('[TEST-PROBE-CLIENT] Quiz Question: ' + quizQuestion);
+
+            const options = document.querySelectorAll('.quiz-option');
+            console.log('[TEST-PROBE-CLIENT] Found ' + options.length + ' options');
+
+            // 4. Click incorrect option (index 1)
+            console.log('[TEST-PROBE-CLIENT] Clicking incorrect option...');
+            options[1].click();
+
+            // Click submit
+            const submitBtn = document.querySelector('.quiz-btn--primary');
+            submitBtn.click();
+
+            // Wait for incorrect feedback
+            await waitForSelector('.quiz-explanation--wrong');
+            const wrongHeader = document.querySelector('.quiz-explanation__header').textContent;
+            console.log('[TEST-PROBE-CLIENT] Feedback after wrong submission: ' + wrongHeader);
+
+            // Click Try Again
+            const retryBtn = document.querySelector('.quiz-btn--secondary');
+            retryBtn.click();
+
+            // Wait for reset
+            await new Promise(r => setTimeout(r, 200));
+
+            // 5. Click correct option (index 0)
+            console.log('[TEST-PROBE-CLIENT] Clicking correct option...');
+            const freshOptions = document.querySelectorAll('.quiz-option');
+            freshOptions[0].click();
+
+            // Click submit
+            const newSubmitBtn = document.querySelector('.quiz-btn--primary');
+            newSubmitBtn.click();
+
+            // Wait for correct feedback
+            await waitForSelector('.quiz-explanation--correct');
+            const correctHeader = document.querySelector('.quiz-explanation__header').textContent;
+            const explanation = document.querySelector('.quiz-explanation__text').textContent;
+            console.log('[TEST-PROBE-CLIENT] Feedback after correct submission: ' + correctHeader);
+
+            // Wait for progress bar label
+            await new Promise(r => setTimeout(r, 300));
+            const progressLabel = document.querySelector('.progress-label')?.textContent || 'none';
+            console.log('[TEST-PROBE-CLIENT] Progress: ' + progressLabel);
+
+            return {
+              success: true,
+              quizQuestion,
+              wrongHeader,
+              correctHeader,
+              explanation,
+              progressLabel
+            };
+          } catch (e) {
+            return { success: false, error: e.message, stack: e.stack };
+          }
+        })()
+      \`);
+      log(\`[TEST-PROBE] Result: \${JSON.stringify(testResult, null, 2)}\`);
+    } catch (e) {
+      log(\`[TEST-PROBE] Script execution failed: \${e.message}\`);
+    }
   });
 
   if (process.env.NODE_ENV === 'development') {
