@@ -1,6 +1,6 @@
 <script>
     import { onMount } from "svelte";
-    import { writable } from "svelte/store";
+    import { toast } from "../stores/toast.js";
 
     let frameworks = [];
     let selectedFramework = "";
@@ -11,20 +11,21 @@
     let showExplanation = false;
     let explanations = [];
     let error = null;
+    let copied = false;
 
     onMount(async () => {
         await loadFrameworks();
     });
 
     async function loadFrameworks() {
+        error = null;
         try {
-            const result = await window.electronAPI.invoke(
-                "prompt-enhancer:get-frameworks",
-                {}
-            );
+            // FIX 1: Use window.api.getFrameworks() — not window.electronAPI.invoke()
+            const result = await window.api.getFrameworks();
 
             if (result.success) {
-                frameworks = result.data.frameworks;
+                // FIX 2: Response shape is { success, frameworks } — not result.data.frameworks
+                frameworks = result.frameworks ?? [];
                 if (frameworks.length > 0) {
                     selectedFramework = frameworks[0].id;
                 }
@@ -37,14 +38,13 @@
         }
     }
 
-    async function enhancePrompt() {
+    async function handleEnhance() {
         if (!prompt.trim()) {
-            error = "Please enter a prompt to enhance";
+            toast.error("Please enter a prompt to enhance");
             return;
         }
-
         if (!selectedFramework) {
-            error = "Please select a framework";
+            toast.error("Please select a framework");
             return;
         }
 
@@ -55,34 +55,42 @@
         explanations = [];
 
         try {
-            const result = await window.electronAPI.invoke(
-                "prompt-enhancer:enhance",
-                {
-                    prompt: prompt.trim(),
-                    framework_id: selectedFramework,
-                    explain: showExplanation,
-                }
-            );
+            // FIX 3: Use window.api.enhancePrompt() — not window.electronAPI.invoke()
+            const result = await window.api.enhancePrompt({
+                prompt: prompt.trim(),
+                framework_id: selectedFramework,
+                explain: showExplanation,
+            });
 
             if (result.success) {
-                const data = result.data;
-                enhancedPrompt = data.enhanced_prompt;
-                qualityMetrics = data.quality;
-                explanations = data.explain || [];
+                // FIX 4: Response shape is { success, enhancement } — enhancement has the data
+                const data = result.enhancement;
+                enhancedPrompt  = data.enhanced_prompt;
+                qualityMetrics  = data.quality;
+                explanations    = data.explain ?? [];
+                toast.success("Prompt enhanced!");
             } else {
                 error = `Enhancement failed: ${result.error}`;
+                toast.error(error);
             }
         } catch (err) {
             error = `Error during enhancement: ${err.message}`;
+            toast.error(error);
             console.error(err);
         } finally {
             isLoading = false;
         }
     }
 
-    function copyToClipboard() {
-        navigator.clipboard.writeText(enhancedPrompt);
-        // Visual feedback could be added here
+    async function copyToClipboard() {
+        try {
+            await navigator.clipboard.writeText(enhancedPrompt);
+            copied = true;
+            toast.success("Copied to clipboard!");
+            setTimeout(() => (copied = false), 2000);
+        } catch {
+            toast.error("Failed to copy");
+        }
     }
 
     function clearAll() {
@@ -93,445 +101,535 @@
         error = null;
         showExplanation = false;
     }
+
+    function scoreColor(val) {
+        if (val >= 7.5) return '#10b981';
+        if (val >= 5)   return '#f59e0b';
+        return '#ef4444';
+    }
 </script>
 
-<div class="prompt-enhancer-container">
-    <div class="header">
-        <h1>🚀 Prompt Enhancer</h1>
-        <p>Transform your prompts with AI-powered learning frameworks</p>
+<div class="pe">
+    <!-- Header -->
+    <div class="pe__header">
+        <div class="pe__header-content">
+            <h1 class="pe__title">Prompt Enhancer</h1>
+            <p class="pe__subtitle">Transform your prompts with AI-powered learning frameworks</p>
+        </div>
     </div>
 
-    {#if error}
-        <div class="alert alert-error">
-            {error}
+    {#if error && !enhancedPrompt}
+        <div class="pe__error">
+            <span>⚠</span> {error}
         </div>
     {/if}
 
-    <div class="content">
-        <!-- Input Section -->
-        <div class="card input-card">
-            <h2>Enter Your Prompt</h2>
+    <div class="pe__layout">
+        <!-- Left: Input Panel -->
+        <div class="pe__panel">
+            <div class="pe__card">
+                <h2 class="pe__card-title">Your Prompt</h2>
 
-            <div class="form-group">
-                <label for="framework-select">Learning Framework</label>
-                <select bind:value={selectedFramework} id="framework-select">
-                    {#each frameworks as fw (fw.id)}
-                        <option value={fw.id}>
-                            {fw.name} — {fw.description}
-                        </option>
-                    {/each}
-                </select>
-            </div>
+                <!-- Framework selector -->
+                <div class="pe__field">
+                    <label class="pe__label" for="fw-select">Learning Framework</label>
+                    {#if frameworks.length === 0}
+                        <div class="pe__fw-loading skeleton" style="height:40px; border-radius:8px;"></div>
+                    {:else}
+                        <select id="fw-select" class="pe__select" bind:value={selectedFramework}>
+                            {#each frameworks as fw (fw.id)}
+                                <option value={fw.id}>{fw.name} — {fw.description}</option>
+                            {/each}
+                        </select>
+                    {/if}
+                </div>
 
-            <div class="form-group">
-                <label for="prompt-input">Your Prompt</label>
-                <textarea
-                    id="prompt-input"
-                    bind:value={prompt}
-                    placeholder="Type or paste your prompt here..."
-                    disabled={isLoading}
-                />
-            </div>
+                <!-- Prompt textarea -->
+                <div class="pe__field">
+                    <label class="pe__label" for="prompt-input">Prompt Text</label>
+                    <textarea
+                        id="prompt-input"
+                        class="pe__textarea"
+                        bind:value={prompt}
+                        placeholder="Type or paste your prompt here…"
+                        rows="8"
+                        disabled={isLoading}
+                    ></textarea>
+                    <div class="pe__char-count">{prompt.length} characters · {prompt.trim().split(/\s+/).filter(Boolean).length} words</div>
+                </div>
 
-            <div class="form-group checkbox">
-                <input
-                    type="checkbox"
-                    id="explain-checkbox"
-                    bind:checked={showExplanation}
-                    disabled={isLoading}
-                />
-                <label for="explain-checkbox">Include explanations</label>
-            </div>
+                <!-- Explain toggle -->
+                <label class="pe__checkbox-row">
+                    <input
+                        type="checkbox"
+                        bind:checked={showExplanation}
+                        disabled={isLoading}
+                        class="pe__checkbox"
+                    />
+                    <span class="pe__checkbox-label">Include enhancement explanations</span>
+                </label>
 
-            <div class="button-group">
-                <button
-                    class="btn btn-primary"
-                    on:click={enhancePrompt}
-                    disabled={isLoading || !prompt.trim()}
-                >
-                    {isLoading ? "Enhancing..." : "Enhance Prompt"}
-                </button>
-                <button class="btn btn-secondary" on:click={clearAll} disabled={isLoading}>
-                    Clear
-                </button>
+                <!-- Actions -->
+                <div class="pe__actions">
+                    <button
+                        class="pe__btn pe__btn--primary"
+                        on:click={handleEnhance}
+                        disabled={isLoading || !prompt.trim()}
+                    >
+                        {#if isLoading}
+                            <span class="pe__spinner"></span> Enhancing…
+                        {:else}
+                            🚀 Enhance
+                        {/if}
+                    </button>
+                    <button
+                        class="pe__btn pe__btn--ghost"
+                        on:click={clearAll}
+                        disabled={isLoading}
+                    >
+                        Clear
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- Output Section -->
-        {#if enhancedPrompt}
-            <div class="card output-card">
-                <div class="output-header">
-                    <h2>Enhanced Prompt</h2>
-                    <button class="btn-icon" on:click={copyToClipboard} title="Copy to clipboard">
-                        📋 Copy
-                    </button>
-                </div>
+        <!-- Right: Output Panel -->
+        <div class="pe__panel">
+            {#if enhancedPrompt}
+                <div class="pe__card pe__card--output">
+                    <div class="pe__output-header">
+                        <h2 class="pe__card-title" style="margin:0">Enhanced Prompt</h2>
+                        <button class="pe__copy-btn" on:click={copyToClipboard}>
+                            {copied ? '✓ Copied!' : '📋 Copy'}
+                        </button>
+                    </div>
 
-                <div class="enhanced-content">
-                    <p>{enhancedPrompt}</p>
-                </div>
+                    <div class="pe__output-content">
+                        <p class="pe__enhanced-text">{enhancedPrompt}</p>
+                    </div>
 
-                <!-- Quality Metrics -->
-                {#if qualityMetrics}
-                    <div class="metrics-section">
-                        <h3>Quality Metrics</h3>
-                        <div class="metrics-grid">
-                            <div class="metric">
-                                <span class="label">Overall Score</span>
-                                <span class="value">{qualityMetrics.overall.toFixed(1)}/10</span>
-                                <div class="bar">
-                                    <div
-                                        class="fill"
-                                        style="width: {(qualityMetrics.overall / 10) * 100}%"
-                                    />
-                                </div>
-                            </div>
-                            <div class="metric">
-                                <span class="label">Clarity</span>
-                                <span class="value">{qualityMetrics.clarity.toFixed(1)}/10</span>
-                                <div class="bar">
-                                    <div
-                                        class="fill"
-                                        style="width: {(qualityMetrics.clarity / 10) * 100}%"
-                                    />
-                                </div>
-                            </div>
-                            <div class="metric">
-                                <span class="label">Specificity</span>
-                                <span class="value">{qualityMetrics.specificity.toFixed(1)}/10</span>
-                                <div class="bar">
-                                    <div
-                                        class="fill"
-                                        style="width: {(qualityMetrics.specificity / 10) * 100}%"
-                                    />
-                                </div>
-                            </div>
-                            <div class="metric">
-                                <span class="label">Context Richness</span>
-                                <span class="value">{qualityMetrics.context_richness.toFixed(1)}/10</span>
-                                <div class="bar">
-                                    <div
-                                        class="fill"
-                                        style="width: {(qualityMetrics.context_richness / 10) * 100}%"
-                                    />
-                                </div>
-                            </div>
-                            <div class="metric">
-                                <span class="label">Actionability</span>
-                                <span class="value">{qualityMetrics.actionability.toFixed(1)}/10</span>
-                                <div class="bar">
-                                    <div
-                                        class="fill"
-                                        style="width: {(qualityMetrics.actionability / 10) * 100}%"
-                                    />
-                                </div>
+                    <!-- Quality Metrics -->
+                    {#if qualityMetrics}
+                        <div class="pe__metrics">
+                            <h3 class="pe__section-title">Quality Metrics</h3>
+                            <div class="pe__metrics-grid">
+                                {#each [
+                                    { label: 'Overall',         key: 'overall' },
+                                    { label: 'Clarity',         key: 'clarity' },
+                                    { label: 'Specificity',     key: 'specificity' },
+                                    { label: 'Context',         key: 'context_richness' },
+                                    { label: 'Actionability',   key: 'actionability' },
+                                ] as m}
+                                    <div class="pe__metric">
+                                        <div class="pe__metric-row">
+                                            <span class="pe__metric-label">{m.label}</span>
+                                            <span class="pe__metric-val" style="color:{scoreColor(qualityMetrics[m.key])}">{qualityMetrics[m.key]?.toFixed(1)}</span>
+                                        </div>
+                                        <div class="pe__bar">
+                                            <div
+                                                class="pe__bar-fill"
+                                                style="width:{(qualityMetrics[m.key]/10)*100}%; background:{scoreColor(qualityMetrics[m.key])}"
+                                            ></div>
+                                        </div>
+                                    </div>
+                                {/each}
                             </div>
                         </div>
-                    </div>
-                {/if}
+                    {/if}
 
-                <!-- Explanations -->
-                {#if explanations.length > 0}
-                    <div class="explanations-section">
-                        <h3>Enhancement Details</h3>
-                        <ul>
-                            {#each explanations as exp}
-                                <li>{exp}</li>
-                            {/each}
-                        </ul>
-                    </div>
-                {/if}
-            </div>
-        {/if}
+                    <!-- Explanations -->
+                    {#if explanations.length > 0}
+                        <div class="pe__explanations">
+                            <h3 class="pe__section-title">Enhancement Details</h3>
+                            <ul class="pe__exp-list">
+                                {#each explanations as exp}
+                                    <li class="pe__exp-item">
+                                        <span class="pe__exp-check">✓</span>
+                                        {exp}
+                                    </li>
+                                {/each}
+                            </ul>
+                        </div>
+                    {/if}
+                </div>
+            {:else}
+                <div class="pe__output-placeholder">
+                    <div class="pe__placeholder-icon">✨</div>
+                    <p class="pe__placeholder-text">Your enhanced prompt will appear here</p>
+                </div>
+            {/if}
+        </div>
     </div>
 </div>
 
 <style>
-    .prompt-enhancer-container {
-        display: flex;
-        flex-direction: column;
+    .pe {
         height: 100%;
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        padding: 2rem;
-        overflow-y: auto;
-    }
-
-    .header {
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-
-    .header h1 {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #1a202c;
-        margin-bottom: 0.5rem;
-    }
-
-    .header p {
-        font-size: 1rem;
-        color: #4a5568;
-    }
-
-    .content {
         display: flex;
         flex-direction: column;
-        gap: 2rem;
-        max-width: 900px;
-        margin: 0 auto;
-        width: 100%;
-    }
-
-    .card {
-        background: white;
-        border-radius: 12px;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        border: 1px solid #e2e8f0;
-    }
-
-    .card h2 {
-        font-size: 1.3rem;
-        font-weight: 600;
-        color: #1a202c;
-        margin-bottom: 1.5rem;
-    }
-
-    .card h3 {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #2d3748;
-        margin-bottom: 1rem;
-    }
-
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        margin-bottom: 1.5rem;
-    }
-
-    .form-group label {
-        font-weight: 500;
-        color: #2d3748;
-        margin-bottom: 0.5rem;
-        font-size: 0.95rem;
-    }
-
-    .form-group select,
-    .form-group textarea {
-        padding: 0.75rem;
-        border: 2px solid #e2e8f0;
-        border-radius: 8px;
-        font-size: 1rem;
-        font-family: inherit;
-        transition: border-color 0.2s;
-    }
-
-    .form-group select:focus,
-    .form-group textarea:focus {
-        outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    .form-group textarea {
-        min-height: 120px;
-        resize: vertical;
-    }
-
-    .form-group.checkbox {
-        flex-direction: row;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .form-group.checkbox input {
-        width: 18px;
-        height: 18px;
-        cursor: pointer;
-    }
-
-    .form-group.checkbox label {
-        margin-bottom: 0;
-        cursor: pointer;
-    }
-
-    .button-group {
-        display: flex;
-        gap: 1rem;
-        margin-top: 2rem;
-    }
-
-    .btn {
-        padding: 0.75rem 1.5rem;
-        border: none;
-        border-radius: 8px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s;
-        flex: 1;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white;
-    }
-
-    .btn-primary:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
-    }
-
-    .btn-secondary {
-        background: #e2e8f0;
-        color: #2d3748;
-    }
-
-    .btn-secondary:hover:not(:disabled) {
-        background: #cbd5e0;
-    }
-
-    .btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
-    .btn-icon {
-        padding: 0.5rem 1rem;
-        background: #48bb78;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: 600;
-        transition: background 0.2s;
-    }
-
-    .btn-icon:hover {
-        background: #38a169;
-    }
-
-    .output-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-    }
-
-    .enhanced-content {
-        background: #f7fafc;
-        padding: 1.5rem;
-        border-radius: 8px;
-        border-left: 4px solid #667eea;
-        margin-bottom: 1.5rem;
-        white-space: pre-wrap;
-        word-wrap: break-word;
-        line-height: 1.6;
-        color: #2d3748;
-    }
-
-    .metrics-section {
-        margin-bottom: 2rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid #e2e8f0;
-    }
-
-    .metrics-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 1rem;
-    }
-
-    .metric {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .metric .label {
-        font-size: 0.9rem;
-        font-weight: 500;
-        color: #4a5568;
-    }
-
-    .metric .value {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: #667eea;
-    }
-
-    .bar {
-        height: 6px;
-        background: #e2e8f0;
-        border-radius: 3px;
+        background: var(--clr-bg);
         overflow: hidden;
     }
 
-    .bar .fill {
+    .pe__header {
+        background: var(--clr-surface);
+        border-bottom: 1px solid var(--clr-border);
+        padding: 20px 32px;
+        flex-shrink: 0;
+    }
+
+    .pe__title {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: var(--clr-text-primary);
+        background: var(--grad-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 4px;
+    }
+
+    .pe__subtitle {
+        font-size: 0.85rem;
+        color: var(--clr-text-secondary);
+    }
+
+    .pe__error {
+        margin: 12px 32px 0;
+        padding: 10px 16px;
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: var(--r-md);
+        color: #fca5a5;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    .pe__layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        padding: 20px 32px;
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    .pe__panel {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .pe__card {
+        background: var(--clr-surface);
+        border: 1px solid var(--clr-border);
+        border-radius: var(--r-lg);
+        padding: 24px;
+        flex: 1;
+    }
+
+    .pe__card--output {
+        border-color: rgba(124, 58, 237, 0.3);
+        animation: slideUp 300ms ease forwards;
+    }
+
+    .pe__card-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--clr-text-primary);
+        margin-bottom: 20px;
+    }
+
+    .pe__field {
+        margin-bottom: 18px;
+    }
+
+    .pe__label {
+        display: block;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--clr-text-muted);
+        margin-bottom: 8px;
+    }
+
+    .pe__select {
+        width: 100%;
+        padding: 10px 12px;
+        background: var(--clr-surface2);
+        border: 1px solid var(--clr-border);
+        border-radius: var(--r-md);
+        color: var(--clr-text-primary);
+        font-size: 0.875rem;
+        cursor: pointer;
+        outline: none;
+        transition: border-color var(--t-fast);
+    }
+
+    .pe__select:focus { border-color: var(--clr-accent); }
+
+    .pe__textarea {
+        width: 100%;
+        padding: 12px 14px;
+        background: var(--clr-surface2);
+        border: 1px solid var(--clr-border);
+        border-radius: var(--r-md);
+        color: var(--clr-text-primary);
+        font-size: 0.9rem;
+        font-family: inherit;
+        line-height: 1.7;
+        resize: vertical;
+        min-height: 180px;
+        outline: none;
+        transition: border-color var(--t-fast), box-shadow var(--t-fast);
+    }
+
+    .pe__textarea:focus {
+        border-color: var(--clr-accent);
+        box-shadow: 0 0 0 3px var(--clr-accent-glow);
+    }
+
+    .pe__textarea:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .pe__char-count {
+        font-size: 0.7rem;
+        color: var(--clr-text-muted);
+        margin-top: 5px;
+        text-align: right;
+    }
+
+    .pe__checkbox-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        cursor: pointer;
+    }
+
+    .pe__checkbox {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--clr-accent);
+        cursor: pointer;
+    }
+
+    .pe__checkbox-label {
+        font-size: 0.875rem;
+        color: var(--clr-text-secondary);
+    }
+
+    .pe__actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .pe__btn {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 11px 20px;
+        border-radius: var(--r-md);
+        font-size: 0.9rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all var(--t-fast);
+        font-family: inherit;
+        border: none;
+    }
+
+    .pe__btn--primary {
+        background: var(--grad-primary);
+        color: white;
+    }
+
+    .pe__btn--primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px var(--clr-accent-glow);
+    }
+
+    .pe__btn--ghost {
+        background: transparent;
+        border: 1px solid var(--clr-border);
+        color: var(--clr-text-secondary);
+        flex: 0;
+        padding: 11px 16px;
+    }
+
+    .pe__btn--ghost:hover:not(:disabled) {
+        background: var(--clr-surface2);
+        color: var(--clr-text-primary);
+    }
+
+    .pe__btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .pe__spinner {
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Output */
+    .pe__output-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .pe__copy-btn {
+        padding: 6px 14px;
+        background: rgba(16, 185, 129, 0.15);
+        border: 1px solid rgba(16, 185, 129, 0.35);
+        border-radius: var(--r-full);
+        color: #6ee7b7;
+        font-size: 0.78rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all var(--t-fast);
+        font-family: inherit;
+    }
+
+    .pe__copy-btn:hover {
+        background: rgba(16, 185, 129, 0.25);
+        transform: translateY(-1px);
+    }
+
+    .pe__output-content {
+        background: var(--clr-surface2);
+        border: 1px solid var(--clr-border);
+        border-left: 3px solid var(--clr-accent);
+        border-radius: var(--r-md);
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+
+    .pe__enhanced-text {
+        color: var(--clr-text-primary);
+        font-size: 0.9rem;
+        line-height: 1.8;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    /* Metrics */
+    .pe__metrics {
+        padding-top: 18px;
+        border-top: 1px solid var(--clr-border);
+        margin-bottom: 16px;
+    }
+
+    .pe__section-title {
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--clr-text-muted);
+        margin-bottom: 14px;
+    }
+
+    .pe__metrics-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .pe__metric { display: flex; flex-direction: column; gap: 5px; }
+
+    .pe__metric-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .pe__metric-label {
+        font-size: 0.8rem;
+        color: var(--clr-text-secondary);
+    }
+
+    .pe__metric-val {
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+
+    .pe__bar {
+        height: 5px;
+        background: var(--clr-surface2);
+        border-radius: var(--r-full);
+        overflow: hidden;
+    }
+
+    .pe__bar-fill {
         height: 100%;
-        background: linear-gradient(90deg, #667eea, #764ba2);
-        border-radius: 3px;
-        transition: width 0.3s ease;
+        border-radius: var(--r-full);
+        transition: width 600ms cubic-bezier(0.4,0,0.2,1);
+        opacity: 0.85;
     }
 
-    .explanations-section {
-        padding-top: 1.5rem;
-        border-top: 1px solid #e2e8f0;
+    /* Explanations */
+    .pe__explanations {
+        padding-top: 16px;
+        border-top: 1px solid var(--clr-border);
     }
 
-    .explanations-section ul {
+    .pe__exp-list {
         list-style: none;
-        padding: 0;
-        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
     }
 
-    .explanations-section li {
-        padding: 0.75rem 0;
-        padding-left: 1.5rem;
-        color: #2d3748;
-        position: relative;
+    .pe__exp-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 0.85rem;
+        color: var(--clr-text-secondary);
+        line-height: 1.5;
     }
 
-    .explanations-section li::before {
-        content: "✓";
-        position: absolute;
-        left: 0;
-        color: #48bb78;
-        font-weight: bold;
+    .pe__exp-check {
+        color: var(--clr-success);
+        font-weight: 700;
+        margin-top: 1px;
+        flex-shrink: 0;
     }
 
-    .alert {
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 1rem;
+    /* Placeholder */
+    .pe__output-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        min-height: 300px;
+        gap: 14px;
+        border: 1px dashed var(--clr-border);
+        border-radius: var(--r-lg);
+        background: var(--clr-surface);
     }
 
-    .alert-error {
-        background: #fed7d7;
-        color: #c53030;
-        border: 1px solid #fc8181;
+    .pe__placeholder-icon { font-size: 3rem; opacity: 0.2; }
+
+    .pe__placeholder-text {
+        font-size: 0.9rem;
+        color: var(--clr-text-muted);
+        text-align: center;
     }
 
-    @media (max-width: 768px) {
-        .prompt-enhancer-container {
-            padding: 1rem;
-        }
+    .pe__fw-loading { margin-bottom: 0; }
 
-        .header h1 {
-            font-size: 1.5rem;
-        }
-
-        .card {
-            padding: 1.5rem;
-        }
-
-        .button-group {
-            flex-direction: column;
-        }
-
-        .metrics-grid {
-            grid-template-columns: 1fr;
-        }
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0); }
     }
 </style>

@@ -2,17 +2,23 @@ import { writable } from 'svelte/store';
 
 export const documents = writable([]);
 export const currentDocument = writable(null);
-export const currentView = writable('home'); // 'home' or 'editor'
-
-export function setView(view) {
-  currentView.set(view);
-}
-
+export const documentsLoading = writable(false);
+export const documentsError = writable(null);
 
 export async function loadDocuments() {
-  const result = await window.api.getDocuments();
-  if (result.success) {
-    documents.set(result.documents);
+  documentsLoading.set(true);
+  documentsError.set(null);
+  try {
+    const result = await window.api.getDocuments();
+    if (result.success) {
+      documents.set(result.documents);
+    } else {
+      documentsError.set(result.error || 'Failed to load documents');
+    }
+  } catch (err) {
+    documentsError.set(err.message);
+  } finally {
+    documentsLoading.set(false);
   }
 }
 
@@ -22,13 +28,15 @@ export async function createDocument(title) {
     await loadDocuments();
     return result.document;
   }
-  throw new Error(result.error);
+  throw new Error(result.error || 'Failed to create document');
 }
 
 export async function selectDocument(documentId) {
   const result = await window.api.getDocumentWithBlocks(documentId);
   if (result.success) {
     currentDocument.set(result.document);
+  } else {
+    throw new Error(result.error || 'Failed to load document');
   }
 }
 
@@ -37,5 +45,24 @@ export async function updateDocumentTitle(documentId, title) {
   if (result.success) {
     await loadDocuments();
     await selectDocument(documentId);
+  } else {
+    throw new Error(result.error || 'Failed to update title');
   }
+}
+
+export async function deleteDocument(documentId) {
+  const result = await window.api.deleteDocument(documentId);
+  if (result.success) {
+    currentDocument.update((doc) => (doc?.id === documentId ? null : doc));
+    await loadDocuments();
+  } else {
+    throw new Error(result.error || 'Failed to delete document');
+  }
+}
+
+export async function refreshCurrentDocument() {
+  let docId;
+  const unsub = currentDocument.subscribe((d) => (docId = d?.id));
+  unsub();
+  if (docId) await selectDocument(docId);
 }

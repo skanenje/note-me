@@ -40,4 +40,14 @@ module.exports = function registerDocumentHandlers(dbManager) {
       return { success: false, error: error.message };
     }
   });
+
+  ipcMain.handle('delete-document', async (_, documentId) => {
+    try {
+      const result = dbManager.deleteDocument(documentId);
+      return { success: result };
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      return { success: false, error: error.message };
+    }
+  });
 };

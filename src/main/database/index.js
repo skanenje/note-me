@@ -126,6 +126,18 @@ class DatabaseManager {
     return this.getDocument(id);
   }
   
+  deleteDocument(id) {
+    const now = Date.now();
+    const stmt = this.db.prepare(`
+      UPDATE documents SET deleted = 1, updated_at = ? WHERE id = ?
+    `);
+    const result = stmt.run(now, id);
+    if (result.changes > 0) {
+      this.logMutation('document', id, 'delete', { updated_at: now });
+    }
+    return result.changes > 0;
+  }
+
   // Blocks
   createBlock(documentId, type, content) {
     const id = uuidv4();

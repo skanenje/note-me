@@ -1,15 +1,18 @@
 // src/main/ipc/prompt-enhancer.js
+// FIX: was importing from '../prompt-enhancer' (the old process-spawner).
+// Now correctly imports from '../services/prompt-enhancer'.
 const { ipcMain } = require('electron');
-const { listFrameworks, enhancePrompt } = require('../prompt-enhancer');
+const { listFrameworks, enhancePrompt } = require('../services/prompt-enhancer');
 
 function registerPromptEnhancerHandlers() {
     ipcMain.handle('prompt-enhancer:get-frameworks', async () => {
         try {
             const frameworks = await listFrameworks();
+            // Return consistent shape: { success, frameworks }
             return { success: true, frameworks };
         } catch (error) {
             console.error('[PROMPT_ENHANCER_IPC] Failed to fetch frameworks:', error);
-            return { success: false, error: error.message };
+            return { success: false, error: error.message, frameworks: [] };
         }
     });
 

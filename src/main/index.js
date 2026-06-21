@@ -1,4 +1,5 @@
 const { app } = require('electron');
+const http = require('http');
 const { createWindow } = require('./window');
 const DatabaseManager = require('./database');
 const registerDocumentHandlers = require('./ipc/documents');
@@ -11,7 +12,35 @@ const { registerTabHandlers } = require('./tabs');
 let dbManager;
 let mainWindow;
 
-app.whenReady().then(() => {
+/**
+ * Poll the Rust backend health endpoint until it responds (or timeout).
+ * Resolves true when ready, false if it timed out.
+ */
+function waitForBackend(url, { intervalMs = 200, timeoutMs = 15000 } = {}) {
+  return new Promise((resolve) => {
+    const deadline = Date.now() + timeoutMs;
+
+    function attempt() {
+      http.get(url, (res) => {
+        // Any HTTP response means the server is up
+        res.resume(); // consume body
+        console.log('[BACKEND] Health check passed — server is ready.');
+        resolve(true);
+      }).on('error', () => {
+        if (Date.now() >= deadline) {
+          console.error('[BACKEND] Timed out waiting for backend to start.');
+          resolve(false);
+        } else {
+          setTimeout(attempt, intervalMs);
+        }
+      });
+    }
+
+    attempt();
+  });
+}
+
+app.whenReady().then(async () => {
   dbManager = new DatabaseManager();
   console.log('Database ready');
 
@@ -24,11 +53,14 @@ app.whenReady().then(() => {
   // Start Rust backend server
   startBackend();
 
-  // Create window after backend starts
-  setTimeout(() => {
-    mainWindow = createWindow();
-    registerTabHandlers(mainWindow);
-  }, 2000);
+  // Wait until backend HTTP server is actually accepting connections
+  const backendReady = await waitForBackend('http://127.0.0.1:3001/api/tools');
+  if (!backendReady) {
+    console.warn('[BACKEND] Backend did not start in time — opening window anyway.');
+  }
+
+  mainWindow = createWindow();
+  registerTabHandlers(mainWindow);
 });
 
 app.on('window-all-closed', () => {
