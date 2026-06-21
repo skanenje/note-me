@@ -1,7 +1,103 @@
-const { BrowserWindow } = require('electron');
+const { BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
+const http = require('http');
+const fs = require('fs');
+const url = require('url');
 
-function createWindow() {
+let rendererServer = null;
+
+// ─── Log file ────────────────────────────────────────────────────────────────
+// All log lines from every layer go here so the user can `tail -f` it.
+const LOG_FILE = path.join(__dirname, '../../startup-log.txt');
+
+function log(line) {
+  const ts = new Date().toISOString();
+  const full = `[${ts}] ${line}\n`;
+  process.stdout.write(full);
+  fs.appendFileSync(LOG_FILE, full);
+}
+
+// Wipe log on each app start
+fs.writeFileSync(LOG_FILE, `=== Note-Me startup log — ${new Date().toISOString()} ===\n`);
+
+// ─── Renderer HTTP server ────────────────────────────────────────────────────
+function startRendererServer(distPath) {
+  return new Promise((resolve, reject) => {
+    log(`[RENDERER-SERVER] dist path: ${distPath}`);
+
+    const mimeTypes = {
+      '.html': 'text/html',
+      '.js':   'application/javascript',
+      '.css':  'text/css',
+      '.svg':  'image/svg+xml',
+      '.png':  'image/png',
+      '.ico':  'image/x-icon',
+      '.json': 'application/json',
+      '.woff': 'font/woff',
+      '.woff2':'font/woff2',
+    };
+
+    const server = http.createServer((req, res) => {
+      let pathname = url.parse(req.url).pathname;
+      if (pathname === '/') pathname = '/index.html';
+      const filePath = path.join(distPath, pathname);
+
+      fs.readFile(filePath, (err, data) => {
+        if (err) {
+          log(`[RENDERER-SERVER] 404 ${pathname} (${err.code})`);
+          // SPA fallback
+          const indexPath = path.join(distPath, 'index.html');
+          fs.readFile(indexPath, (err2, indexData) => {
+            if (err2) {
+              res.writeHead(404);
+              res.end('Not found');
+            } else {
+              res.writeHead(200, { 'Content-Type': 'text/html' });
+              res.end(indexData);
+            }
+          });
+          return;
+        }
+
+        const ext = path.extname(filePath);
+        const contentType = mimeTypes[ext] || 'application/octet-stream';
+        log(`[RENDERER-SERVER] 200 ${pathname} (${contentType}, ${data.length} bytes)`);
+        res.writeHead(200, { 'Content-Type': contentType });
+        res.end(data);
+      });
+    });
+
+    server.listen(5174, '127.0.0.1', () => {
+      log('[RENDERER-SERVER] Listening on http://127.0.0.1:5174');
+      resolve(server);
+    });
+
+    server.on('error', (err) => {
+      log(`[RENDERER-SERVER] ERROR: ${err.message}`);
+      reject(err);
+    });
+
+    rendererServer = server;
+  });
+}
+
+function stopRendererServer() {
+  if (rendererServer) {
+    rendererServer.close();
+    rendererServer = null;
+    log('[RENDERER-SERVER] Stopped');
+  }
+}
+
+// ─── IPC: forward renderer log messages to file ──────────────────────────────
+ipcMain.on('renderer-log', (event, message) => {
+  log(`[RENDERER] ${message}`);
+});
+
+// ─── Window ──────────────────────────────────────────────────────────────────
+async function createWindow() {
+  log('[WINDOW] Creating BrowserWindow');
+
   const mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
@@ -11,22 +107,82 @@ function createWindow() {
       preload: path.join(__dirname, '../preload/index.js')
     }
   });
-  
-  // Open DevTools to see errors
-  mainWindow.webContents.openDevTools();
-  
-  if (process.env.NODE_ENV === 'development') {
-    mainWindow.loadURL('http://localhost:5173');
-  } else {
-    mainWindow.loadFile(path.join(__dirname, '../../dist/renderer/index.html'));
-  }
-  
-  // Log any load errors
-  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
-    console.error('Failed to load:', errorCode, errorDescription);
+
+  mainWindow.webContents.on('console-message', (event, ...args) => {
+    let level, message, line, sourceId;
+    if (args.length === 1 && typeof args[0] === 'object') {
+      level = args[0].level;
+      message = args[0].message;
+      line = args[0].line;
+      sourceId = args[0].sourceId;
+    } else {
+      [level, message, line, sourceId] = args;
+    }
+    log(`[RENDERER-CONSOLE] [Level ${level}] ${message} (${sourceId}:${line})`);
   });
-  
+
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+    log(`[WINDOW] did-fail-load: ${errorCode} ${errorDescription}`);
+  });
+
+  mainWindow.webContents.on('render-process-gone', (event, details) => {
+    log(`[WINDOW] render-process-gone: ${JSON.stringify(details)}`);
+  });
+
+  mainWindow.webContents.on('crashed', () => {
+    log('[WINDOW] renderer crashed');
+  });
+
+  // ── After page is fully loaded, probe the backend directly from the renderer ──
+  mainWindow.webContents.on('did-finish-load', async () => {
+    log('[WINDOW] did-finish-load fired');
+
+    try {
+      // Run a fetch directly in the renderer context and send the result back
+      const result = await mainWindow.webContents.executeJavaScript(`
+        (async () => {
+          try {
+            const r = await fetch('http://127.0.0.1:3001/api/tools');
+            const data = await r.json();
+            return { ok: true, status: r.status, count: Array.isArray(data) ? data.length : -1, raw: JSON.stringify(data).slice(0, 200) };
+          } catch (e) {
+            return { ok: false, error: e.message };
+          }
+        })()
+      `);
+      log(`[PROBE] fetch http://127.0.0.1:3001/api/tools => ${JSON.stringify(result)}`);
+    } catch (e) {
+      log(`[PROBE] executeJavaScript failed: ${e.message}`);
+    }
+
+    // Also probe what window.api and window.electronAPI look like
+    try {
+      const apis = await mainWindow.webContents.executeJavaScript(`
+        JSON.stringify({
+          hasApi: typeof window.api !== 'undefined',
+          hasElectronAPI: typeof window.electronAPI !== 'undefined',
+          apiKeys: window.api ? Object.keys(window.api) : [],
+          electronAPIKeys: window.electronAPI ? Object.keys(window.electronAPI) : []
+        })
+      `);
+      log(`[PROBE] window APIs: ${apis}`);
+    } catch (e) {
+      log(`[PROBE] API probe failed: ${e.message}`);
+    }
+  });
+
+  if (process.env.NODE_ENV === 'development') {
+    log('[WINDOW] Development mode — loading http://localhost:5173');
+    mainWindow.loadURL('http://localhost:5173');
+    mainWindow.webContents.openDevTools();
+  } else {
+    const distPath = path.join(__dirname, '../../dist/renderer');
+    await startRendererServer(distPath);
+    log('[WINDOW] Production mode — loading http://127.0.0.1:5174');
+    await mainWindow.loadURL('http://127.0.0.1:5174');
+  }
+
   return mainWindow;
 }
 
-module.exports = { createWindow };
+module.exports = { createWindow, stopRendererServer, log };

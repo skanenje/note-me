@@ -1,6 +1,6 @@
 const { app } = require('electron');
 const http = require('http');
-const { createWindow } = require('./window');
+const { createWindow, stopRendererServer } = require('./window');
 const DatabaseManager = require('./database');
 const registerDocumentHandlers = require('./ipc/documents');
 const registerBlockHandlers = require('./ipc/blocks');
@@ -22,8 +22,7 @@ function waitForBackend(url, { intervalMs = 200, timeoutMs = 15000 } = {}) {
 
     function attempt() {
       http.get(url, (res) => {
-        // Any HTTP response means the server is up
-        res.resume(); // consume body
+        res.resume(); // consume body so connection closes
         console.log('[BACKEND] Health check passed — server is ready.');
         resolve(true);
       }).on('error', () => {
@@ -59,20 +58,18 @@ app.whenReady().then(async () => {
     console.warn('[BACKEND] Backend did not start in time — opening window anyway.');
   }
 
-  mainWindow = createWindow();
+  mainWindow = await createWindow();
   registerTabHandlers(mainWindow);
 });
 
 app.on('window-all-closed', () => {
-  if (dbManager) {
-    dbManager.close();
-  }
+  if (dbManager) dbManager.close();
   stopBackend();
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  stopRendererServer();
+  if (process.platform !== 'darwin') app.quit();
 });
 
 app.on('before-quit', () => {
   stopBackend();
+  stopRendererServer();
 });

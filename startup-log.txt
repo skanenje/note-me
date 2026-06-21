@@ -1,0 +1,19 @@
+=== Note-Me startup log — 2026-06-21T13:23:14.655Z ===
+[2026-06-21T13:23:14.972Z] [WINDOW] Creating BrowserWindow
+[2026-06-21T13:23:15.025Z] [RENDERER-SERVER] dist path: /home/swapo/projects/note-me/dist/renderer
+[2026-06-21T13:23:15.033Z] [RENDERER-SERVER] Listening on http://127.0.0.1:5174
+[2026-06-21T13:23:15.034Z] [WINDOW] Production mode — loading http://127.0.0.1:5174
+[2026-06-21T13:23:15.060Z] [RENDERER-SERVER] 200 /index.html (text/html, 359 bytes)
+[2026-06-21T13:23:15.101Z] [RENDERER-SERVER] 200 /assets/index-BZWRK1HW.js (application/javascript, 63917 bytes)
+[2026-06-21T13:23:15.105Z] [RENDERER-SERVER] 200 /assets/index-Dvxnnd5X.css (text/css, 45751 bytes)
+[2026-06-21T13:23:15.245Z] [WINDOW] did-finish-load fired
+[2026-06-21T13:23:15.254Z] [RENDERER-CONSOLE] [Level 2] %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged. (node:electron/js2c/sandbox_bundle:2)
+[2026-06-21T13:23:15.260Z] [PROBE] fetch http://127.0.0.1:3001/api/tools => {"ok":true,"status":200,"count":15,"raw":"[{\"enabled\":true,\"icon_path\":\"/azureai-color.svg\",\"id\":\"azureai\",\"name\":\"Azure AI Foundry\",\"url\":\"https://ai.azure.com\"},{\"enabled\":true,\"icon_path\":\"/openai-color.svg\",\"id\":\"chatgpt\",\"name\":\"ChatGPT\""}
+[2026-06-21T13:23:15.261Z] [PROBE] window APIs: {"hasApi":true,"hasElectronAPI":true,"apiKeys":["createDocument","getDocuments","getDocumentWithBlocks","updateDocumentTitle","deleteDocument","createBlock","updateBlock","deleteBlock","getLessons","getLessonWithBlocks","updateProgress","getLessonProgress","getFrameworks","enhancePrompt"],"electronAPIKeys":["platform","createTab","switchTab","closeTab","updateLayoutMetrics","onTabCreated","onTabSwitched","onTabClosed"]}
