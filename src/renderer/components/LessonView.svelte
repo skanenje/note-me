@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import PlaygroundBlock from './PlaygroundBlock.svelte';
   import CodeBlock from './CodeBlock.svelte';
+  import QuizBlock from './QuizBlock.svelte';
 
   export let lessonId;
 
@@ -131,17 +132,25 @@
                 code={block.content}
                 language={block.language}
               />
+            {:else if block.type === 'quiz'}
+              <QuizBlock
+                blockId={block.id}
+                content={block.content}
+                on:run={() => markComplete(block.id)}
+              />
             {/if}
 
-            {#if progress[block.id] !== 'completed'}
-              <button
-                class="mark-done-btn"
-                on:click={() => markComplete(block.id)}
-              >
-                ✓ Mark complete
-              </button>
-            {:else}
-              <span class="done-badge">✓ Completed</span>
+            {#if block.type !== 'quiz'}
+              {#if progress[block.id] !== 'completed'}
+                <button
+                  class="mark-done-btn"
+                  on:click={() => markComplete(block.id)}
+                >
+                  ✓ Mark complete
+                </button>
+              {:else}
+                <span class="done-badge">✓ Completed</span>
+              {/if}
             {/if}
           </div>
         {/each}

@@ -26,7 +26,36 @@
     try {
       const result = await window.api.getLessons();
       if (result.success) {
-        lessons = result.lessons;
+        const loadedLessons = result.lessons;
+        const lessonsWithProg = [];
+        
+        for (const lesson of loadedLessons) {
+          const detailsRes = await window.api.getLessonWithBlocks(lesson.id);
+          const progRes = await window.api.getLessonProgress(lesson.id);
+          
+          if (detailsRes.success && progRes.success) {
+            const blocks = detailsRes.lesson.blocks;
+            const totalBlocks = blocks.length;
+            
+            const completedCount = progRes.progress.filter(p => p.status === 'completed').length;
+            const progressPct = totalBlocks > 0 ? Math.round((completedCount / totalBlocks) * 100) : 0;
+            
+            lessonsWithProg.push({
+              ...lesson,
+              totalBlocks,
+              completedCount,
+              progressPct
+            });
+          } else {
+            lessonsWithProg.push({
+              ...lesson,
+              totalBlocks: 0,
+              completedCount: 0,
+              progressPct: 0
+            });
+          }
+        }
+        lessons = lessonsWithProg;
       } else {
         error = result.error || 'Failed to load lessons';
       }
@@ -40,8 +69,25 @@
 
 <div class="lesson-list" use:listMounted>
   <header class="lesson-list__header">
-    <h1 class="lesson-list__title">Learning Tracks</h1>
-    <p class="lesson-list__sub">Master AI concepts through interactive lessons</p>
+    <div class="lesson-list__title-wrap">
+      <h1 class="lesson-list__title">Learning Tracks</h1>
+      <p class="lesson-list__sub">Master AI concepts through interactive lessons</p>
+    </div>
+    
+    {#if !loading && !error && lessons.length > 0}
+      {@const completedLessons = lessons.filter(l => l.progressPct === 100).length}
+      {@const overallPct = Math.round(lessons.reduce((acc, curr) => acc + curr.progressPct, 0) / lessons.length)}
+      <div class="dashboard-stats">
+        <div class="stat-card">
+          <span class="stat-card__val">{completedLessons}/{lessons.length}</span>
+          <span class="stat-card__lbl">Completed Tracks</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__val">{overallPct}%</span>
+          <span class="stat-card__lbl">Overall Progress</span>
+        </div>
+      </div>
+    {/if}
   </header>
 
   {#if loading}
@@ -77,16 +123,33 @@
           <div class="lesson-card__body">
             <div class="lesson-card__top">
               <div class="lesson-card__icon">📖</div>
-              {#if lesson.difficulty}
-                {@const label = DIFFICULTY_LABELS[lesson.difficulty] || 'Beginner'}
-                <span class="badge {DIFFICULTY_COLORS[label]}">{label}</span>
-              {/if}
+              <div class="lesson-card__badges">
+                {#if lesson.difficulty}
+                  {@const label = DIFFICULTY_LABELS[lesson.difficulty] || 'Beginner'}
+                  <span class="badge {DIFFICULTY_COLORS[label]}">{label}</span>
+                {/if}
+                {#if lesson.progressPct > 0}
+                  <span class="badge badge--progress" class:badge--completed={lesson.progressPct === 100}>
+                    {lesson.progressPct}% Done
+                  </span>
+                {/if}
+              </div>
             </div>
             <h3 class="lesson-card__title">{lesson.title}</h3>
             <p class="lesson-card__desc">{lesson.description}</p>
+            
+            {#if lesson.progressPct > 0}
+              <div class="card-progress">
+                <div class="card-progress__bar">
+                  <div class="card-progress__fill" style="width: {lesson.progressPct}%"></div>
+                </div>
+              </div>
+            {/if}
           </div>
           <div class="lesson-card__footer">
-            <span class="lesson-card__cta">Start lesson →</span>
+            <span class="lesson-card__cta">
+              {lesson.progressPct === 100 ? 'Review Track ↺' : lesson.progressPct > 0 ? 'Continue Track →' : 'Start lesson →'}
+            </span>
           </div>
         </button>
       {/each}
@@ -271,5 +334,87 @@
     font-weight: 600;
     cursor: pointer;
     font-family: inherit;
+  }
+
+  /* Dashboard Stats */
+  .lesson-list__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    gap: 20px;
+  }
+  
+  .dashboard-stats {
+    display: flex;
+    gap: 16px;
+  }
+  
+  .stat-card {
+    background: var(--clr-surface);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--r-md);
+    padding: 12px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 140px;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .stat-card__val {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #c4b5fd;
+    background: var(--grad-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .stat-card__lbl {
+    font-size: 0.72rem;
+    color: var(--clr-text-muted);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+  }
+
+  .lesson-card__badges {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .badge--progress {
+    background: rgba(124, 58, 237, 0.1);
+    color: #c4b5fd;
+    border: 1px solid rgba(124, 58, 237, 0.3);
+  }
+
+  .badge--completed {
+    background: rgba(16, 185, 129, 0.15);
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+
+  /* Card Progress */
+  .card-progress {
+    margin-top: 14px;
+  }
+
+  .card-progress__bar {
+    height: 4px;
+    background: var(--clr-surface2);
+    border-radius: var(--r-full);
+    overflow: hidden;
+  }
+
+  .card-progress__fill {
+    height: 100%;
+    background: var(--grad-primary);
+    border-radius: var(--r-full);
+    transition: width 300ms ease;
   }
 </style>
