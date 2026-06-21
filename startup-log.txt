@@ -1,17 +1,17 @@
-=== Note-Me startup log — 2026-06-21T13:35:53.930Z ===
-[2026-06-21T13:35:54.582Z] [WINDOW] Creating BrowserWindow
-[2026-06-21T13:35:54.787Z] [RENDERER-SERVER] dist path: /home/swapo/projects/note-me/dist/renderer
-[2026-06-21T13:35:54.830Z] [RENDERER-SERVER] Listening on http://127.0.0.1:5174
-[2026-06-21T13:35:54.831Z] [WINDOW] Production mode — loading http://127.0.0.1:5174
-[2026-06-21T13:35:54.882Z] [RENDERER-SERVER] 200 /index.html (text/html, 359 bytes)
-[2026-06-21T13:35:54.936Z] [RENDERER-SERVER] 200 /assets/index-CuFbKu0z.js (application/javascript, 64389 bytes)
-[2026-06-21T13:35:54.937Z] [RENDERER-SERVER] 200 /assets/index-Dvxnnd5X.css (text/css, 45751 bytes)
-[2026-06-21T13:35:55.051Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte script tag is executing! (http://127.0.0.1:5174/assets/index-CuFbKu0z.js:8)
-[2026-06-21T13:35:55.053Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte script tag is executing! (http://127.0.0.1:5174/assets/index-CuFbKu0z.js:1)
-[2026-06-21T13:35:55.061Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte DOM element mounted! Loading lessons... (http://127.0.0.1:5174/assets/index-CuFbKu0z.js:1)
-[2026-06-21T13:35:55.064Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte DOM element mounted! Loading documents... (http://127.0.0.1:5174/assets/index-CuFbKu0z.js:8)
-[2026-06-21T13:35:55.289Z] [WINDOW] did-finish-load fired
-[2026-06-21T13:35:55.370Z] [RENDERER-CONSOLE] [Level 2] %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+=== Note-Me startup log — 2026-06-21T13:37:13.584Z ===
+[2026-06-21T13:37:14.107Z] [WINDOW] Creating BrowserWindow
+[2026-06-21T13:37:14.204Z] [RENDERER-SERVER] dist path: /home/swapo/projects/note-me/dist/renderer
+[2026-06-21T13:37:14.226Z] [RENDERER-SERVER] Listening on http://127.0.0.1:5174
+[2026-06-21T13:37:14.226Z] [WINDOW] Production mode — loading http://127.0.0.1:5174
+[2026-06-21T13:37:14.283Z] [RENDERER-SERVER] 200 /index.html (text/html, 359 bytes)
+[2026-06-21T13:37:14.332Z] [RENDERER-SERVER] 200 /assets/index-DVAfJjzt.js (application/javascript, 64979 bytes)
+[2026-06-21T13:37:14.334Z] [RENDERER-SERVER] 200 /assets/index-Dvxnnd5X.css (text/css, 45751 bytes)
+[2026-06-21T13:37:14.422Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte script tag is executing! (http://127.0.0.1:5174/assets/index-DVAfJjzt.js:8)
+[2026-06-21T13:37:14.423Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte script tag is executing! (http://127.0.0.1:5174/assets/index-DVAfJjzt.js:1)
+[2026-06-21T13:37:14.427Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte DOM element mounted! Loading lessons... (http://127.0.0.1:5174/assets/index-DVAfJjzt.js:1)
+[2026-06-21T13:37:14.429Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte DOM element mounted! Loading documents... (http://127.0.0.1:5174/assets/index-DVAfJjzt.js:8)
+[2026-06-21T13:37:14.667Z] [WINDOW] did-finish-load fired
+[2026-06-21T13:37:14.774Z] [RENDERER-CONSOLE] [Level 2] %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
   Policy set or a policy with "unsafe-eval" enabled. This exposes users of
   this app to unnecessary security risks.
 
@@ -19,13 +19,12 @@ For more information and help, consult
 https://electronjs.org/docs/tutorial/security.
 This warning will not show up
 once the app is packaged. (node:electron/js2c/sandbox_bundle:2)
-[2026-06-21T13:35:55.443Z] [PROBE] fetch http://127.0.0.1:3001/api/tools => {"ok":true,"status":200,"count":15,"raw":"[{\"enabled\":true,\"icon_path\":\"/azureai-color.svg\",\"id\":\"azureai\",\"name\":\"Azure AI Foundry\",\"url\":\"https://ai.azure.com\"},{\"enabled\":true,\"icon_path\":\"/openai-color.svg\",\"id\":\"chatgpt\",\"name\":\"ChatGPT\""}
-[2026-06-21T13:35:55.449Z] [PROBE] window APIs: {"hasApi":true,"hasElectronAPI":true,"apiKeys":["createDocument","getDocuments","getDocumentWithBlocks","updateDocumentTitle","deleteDocument","createBlock","updateBlock","deleteBlock","getLessons","getLessonWithBlocks","updateProgress","getLessonProgress","getFrameworks","enhancePrompt"],"electronAPIKeys":["platform","createTab","switchTab","closeTab","updateLayoutMetrics","onTabCreated","onTabSwitched","onTabClosed"]}
-[2026-06-21T13:35:55.452Z] [PROBE] window.api.getLessons() => {"ok":true,"success":true,"count":1,"first":"Prompt Engineering 101"}
-[2026-06-21T13:35:55.454Z] [PROBE] document.body.innerHTML => 
+[2026-06-21T13:37:14.868Z] [PROBE] fetch http://127.0.0.1:3001/api/tools => {"ok":true,"status":200,"count":15,"raw":"[{\"enabled\":true,\"icon_path\":\"/azureai-color.svg\",\"id\":\"azureai\",\"name\":\"Azure AI Foundry\",\"url\":\"https://ai.azure.com\"},{\"enabled\":true,\"icon_path\":\"/openai-color.svg\",\"id\":\"chatgpt\",\"name\":\"ChatGPT\""}
+[2026-06-21T13:37:14.871Z] [PROBE] window APIs: {"hasApi":true,"hasElectronAPI":true,"apiKeys":["createDocument","getDocuments","getDocumentWithBlocks","updateDocumentTitle","deleteDocument","createBlock","updateBlock","deleteBlock","getLessons","getLessonWithBlocks","updateProgress","getLessonProgress","getFrameworks","enhancePrompt"],"electronAPIKeys":["platform","createTab","switchTab","closeTab","updateLayoutMetrics","onTabCreated","onTabSwitched","onTabClosed"]}
+[2026-06-21T13:37:14.875Z] [PROBE] window.api.getLessons() => {"ok":true,"success":true,"count":1,"first":"Prompt Engineering 101"}
+[2026-06-21T13:37:14.878Z] [PROBE] document.body.innerHTML => 
   <div id="app"><div class="app-shell svelte-1uqstex"><nav class="nav svelte-j06usk"><div class="nav__logo svelte-j06usk"><div class="nav__logo-icon svelte-j06usk">🎓</div> <div><div class="nav__logo-name svelte-j06usk">Note-Me</div> <div class="nav__logo-tagline svelte-j06usk">Learn AI · Build AI</div></div></div> <div class="nav__divider svelte-j06usk"></div> <ul class="nav__list svelte-j06usk"><li><button class="nav__item svelte-j06usk nav__item--active" aria-current="page"><span class="nav__item-icon svelte-j06usk">📚</span> <span class="nav__item-label svelte-j06usk">Learning Tracks</span> <span class="nav__item-indicator svelte-j06usk"></span></button> </li><li><button class="nav__item svelte-j06usk"><span class="nav__item-icon svelte-j06usk">📝</span> <span class="nav__item-label svelte-j06usk">My Notes</span> </button> </li><li><button class="nav__item svelte-j06usk"><span class="nav__item-icon svelte-j06usk">🤖</span> <span class="nav__item-label svelte-j06usk">AI Tools</span> </button> </li><li><button class="nav__item svelte-j06usk"><span class="nav__item-icon svelte-j06usk">🚀</span> <span class="nav__item-label svelte-j06usk">Prompt Enhancer</span> </button> </li></ul> <div class="nav__footer svelte-j06usk"><div class="nav__status svelte-j06usk"><span class="nav__status-dot svelte-j06usk"></span> <span>Ready</span></div></div></nav> <main class="main-content svelte-1uqstex"><div class="page-enter"><div class="lesson-list svelte-1qqpcnk"><header class="lesson-list__header svelte-1qqpcnk"><h1 class="lesson-list__title svelte-1qqpcnk">Learning Tracks</h1> <p class="lesson-list__sub svelte-1qqpcnk">Master AI concepts through interactive lessons</p></header> <div class="cards-grid svelte-1qqpcnk"><button class="lesson-card svelte-1qqpcnk" style="animation-delay: 0ms;"><div class="lesson-card__accent svelte-1qqpcnk"></div> <div class="lesson-card__body svelte-1qqpcnk"><div class="lesson-card__top svelte-1qqpcnk"><div class="lesson-card__icon svelte-1qqpcnk">📖</div> </div> <h3 class="lesson-card__title svelte-1qqpcnk">Prompt Engineering 101</h3> <p class="lesson-card__desc svelte-1qqpcnk">Learn how to communicate effectively with AI systems. Master the art of crafting prompts that get you the results you want.</p></div> <div class="lesson-card__footer svelte-1qqpcnk"><span class="lesson-card__cta svelte-1qqpcnk">Start lesson →</span></div> </button></div></div></div></main> </div></div>
 
 
 
-[2026-06-21T13:36:08.546Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte script tag is executing! (http://127.0.0.1:5174/assets/index-CuFbKu0z.js:1)
-[2026-06-21T13:36:08.548Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte DOM element mounted! Loading lessons... (http://127.0.0.1:5174/assets/index-CuFbKu0z.js:1)
+[2026-06-21T13:37:16.888Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonView.svelte DOM element mounted! Loading lesson and progress... (http://127.0.0.1:5174/assets/index-DVAfJjzt.js:4)
