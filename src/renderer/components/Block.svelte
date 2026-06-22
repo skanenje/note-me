@@ -1,4 +1,11 @@
-<script>
+  import Prism from 'prismjs';
+  import 'prismjs/themes/prism-tomorrow.css'; // dark theme
+  import 'prismjs/components/prism-javascript';
+  import 'prismjs/components/prism-css';
+  import 'prismjs/components/prism-json';
+  import 'prismjs/components/prism-bash';
+  import 'prismjs/components/prism-markdown';
+
   export let block;
   export let onDelete;
   export let onUpdate;
@@ -6,6 +13,9 @@
   let editing = false;
   let editContent = block.content;
   let textareaEl;
+
+  $: wordCount = block.content.split(/\s+/).filter(Boolean).length;
+  $: highlightedCode = block.type === 'code' ? Prism.highlight(block.content, Prism.languages.javascript, 'javascript') : '';
 
   const BLOCK_ICONS = {
     paragraph: '¶',
@@ -35,6 +45,7 @@
 <div class="block" class:block--editing={editing}>
   <div class="block__gutter">
     <span class="block__type-badge">{BLOCK_ICONS[block.type] ?? '•'}</span>
+    <span class="block__word-count">{wordCount}w</span>
   </div>
 
   <div class="block__body">
@@ -61,7 +72,7 @@
           {/each}
         </ul>
       {:else if block.type === 'code'}
-        <pre class="block__code" on:dblclick={startEdit}><code>{block.content}</code></pre>
+        <pre class="block__code language-javascript" on:dblclick={startEdit}><code class="language-javascript">{@html highlightedCode || block.content}</code></pre>
       {:else}
         <p class="block__paragraph" on:dblclick={startEdit}>{block.content}</p>
       {/if}
@@ -106,7 +117,7 @@
   }
 
   .block__type-badge {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     width: 22px;
@@ -118,6 +129,17 @@
     font-weight: 700;
     color: var(--clr-text-muted);
     font-family: monospace;
+    margin-bottom: 4px;
+  }
+
+  .block__word-count {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    font-size: 0.55rem;
+    color: var(--clr-text-muted);
+    opacity: 0.5;
   }
 
   .block__body {
@@ -155,10 +177,10 @@
     padding: 12px 16px;
     font-family: 'Fira Code', 'Cascadia Code', monospace;
     font-size: 0.85rem;
-    color: #7dd3fc;
     overflow-x: auto;
     cursor: text;
     line-height: 1.6;
+    margin: 0;
   }
 
   .block__editor {

@@ -44,7 +44,8 @@
         try {
             await loadTools();
         } catch (err) {
-            loadError = 'Could not connect to the AI tools server. Make sure the backend is running.';
+            loadError = `Could not load AI tools: ${err.message}`;
+
         } finally {
             loadingTools = false;
         }

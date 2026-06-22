@@ -1,6 +1,5 @@
 const { BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-const http = require('http');
 const fs = require('fs');
 const url = require('url');
 
@@ -133,67 +132,9 @@ async function createWindow() {
     log('[WINDOW] renderer crashed');
   });
 
-  // ── After page is fully loaded, probe the backend directly from the renderer ──
-  mainWindow.webContents.on('did-finish-load', async () => {
-    log('[WINDOW] did-finish-load fired');
-
-    try {
-      // Run a fetch directly in the renderer context and send the result back
-      const result = await mainWindow.webContents.executeJavaScript(`
-        (async () => {
-          try {
-            const r = await fetch('http://127.0.0.1:3001/api/tools');
-            const data = await r.json();
-            return { ok: true, status: r.status, count: Array.isArray(data) ? data.length : -1, raw: JSON.stringify(data).slice(0, 200) };
-          } catch (e) {
-            return { ok: false, error: e.message };
-          }
-        })()
-      `);
-      log(`[PROBE] fetch http://127.0.0.1:3001/api/tools => ${JSON.stringify(result)}`);
-    } catch (e) {
-      log(`[PROBE] executeJavaScript failed: ${e.message}`);
-    }
-
-    // Also probe what window.api and window.electronAPI look like
-    try {
-      const apis = await mainWindow.webContents.executeJavaScript(`
-        JSON.stringify({
-          hasApi: typeof window.api !== 'undefined',
-          hasElectronAPI: typeof window.electronAPI !== 'undefined',
-          apiKeys: window.api ? Object.keys(window.api) : [],
-          electronAPIKeys: window.electronAPI ? Object.keys(window.electronAPI) : []
-        })
-      `);
-      log(`[PROBE] window APIs: ${apis}`);
-    } catch (e) {
-      log(`[PROBE] API probe failed: ${e.message}`);
-    }
-
-    // Probe database lessons via window.api
-    try {
-      const dbLessons = await mainWindow.webContents.executeJavaScript(`
-        (async () => {
-          try {
-            const res = await window.api.getLessons();
-            return { ok: true, success: res.success, count: res.lessons ? res.lessons.length : -1, first: res.lessons && res.lessons[0] ? res.lessons[0].title : null, error: res.error };
-          } catch (e) {
-            return { ok: false, error: e.message };
-          }
-        })()
-      `);
-      log(`[PROBE] window.api.getLessons() => ${JSON.stringify(dbLessons)}`);
-    } catch (e) {
-      log(`[PROBE] getLessons probe failed: ${e.message}`);
-    }
-
-    // Probe the rendered HTML to see if Svelte successfully mounted
-    try {
-      const html = await mainWindow.webContents.executeJavaScript('document.body.innerHTML');
-      log(`[PROBE] document.body.innerHTML => ${html}`);
-    } catch (e) {
-      log(`[PROBE] HTML probe failed: ${e.message}`);
-    }
+  // ── Log when the page is fully loaded ───────────────────────────────────────
+  mainWindow.webContents.on('did-finish-load', () => {
+    log('[WINDOW] did-finish-load — renderer ready');
   });
 
   if (process.env.NODE_ENV === 'development') {

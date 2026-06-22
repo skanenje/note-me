@@ -13,6 +13,11 @@
   let showInput = false;
   let deletingId = null;
   let inputEl;
+  let searchQuery = "";
+
+  $: filteredDocs = $documents.filter(doc => 
+    doc.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   async function handleCreate() {
     if (!newTitle.trim()) return;
@@ -58,6 +63,16 @@
   <!-- Header -->
   <div class="sidebar__header">
     <span class="sidebar__title">My Notes</span>
+    <span class="sidebar__count">{$documents.length}</span>
+  </div>
+
+  <div class="sidebar__search">
+    <input 
+      type="text" 
+      bind:value={searchQuery} 
+      placeholder="Search notes..." 
+      class="search-input"
+    />
   </div>
 
   <!-- New Page -->
@@ -90,14 +105,13 @@
       {#each [1,2,3] as _}
         <div class="doc-skeleton skeleton"></div>
       {/each}
-    {:else if $documents.length === 0}
+    {:else if filteredDocs.length === 0}
       <div class="doc-list__empty">
         <span class="doc-list__empty-icon">📄</span>
-        <p>No pages yet</p>
-        <p>Create your first page above</p>
+        <p>No matches found</p>
       </div>
     {:else}
-      {#each $documents as doc (doc.id)}
+      {#each filteredDocs as doc (doc.id)}
         <button
           class="doc-item"
           class:doc-item--active={$currentDocument?.id === doc.id}
@@ -131,6 +145,9 @@
   }
 
   .sidebar__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 4px 8px 12px;
   }
 
@@ -140,6 +157,37 @@
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--clr-text-muted);
+  }
+
+  .sidebar__count {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--clr-text-muted);
+    background: var(--clr-surface2);
+    padding: 2px 6px;
+    border-radius: var(--r-full);
+  }
+
+  .sidebar__search {
+    margin-bottom: 12px;
+    padding: 0 4px;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 6px 10px;
+    background: var(--clr-bg);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--r-md);
+    color: var(--clr-text-primary);
+    font-size: 0.8rem;
+    outline: none;
+    transition: all var(--t-fast);
+  }
+
+  .search-input:focus {
+    border-color: var(--clr-accent);
+    box-shadow: 0 0 0 2px var(--clr-accent-glow);
   }
 
   .new-page-btn {

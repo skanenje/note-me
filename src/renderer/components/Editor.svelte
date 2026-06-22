@@ -84,6 +84,37 @@
       toast.error("Error: " + err.message);
     }
   }
+
+  // Calculate live word count and reading time
+  $: wordCount = $currentDocument?.blocks.reduce((acc, block) => acc + block.content.split(/\s+/).filter(Boolean).length, 0) || 0;
+  $: readingTime = Math.max(1, Math.ceil(wordCount / 200));
+
+  function handleSlashCommand(e) {
+    if (blockContent === "/p") { blockType = "paragraph"; blockContent = ""; e.preventDefault(); }
+    if (blockContent === "/h") { blockType = "heading"; blockContent = ""; e.preventDefault(); }
+    if (blockContent === "/l") { blockType = "list"; blockContent = ""; e.preventDefault(); }
+    if (blockContent === "/c") { blockType = "code"; blockContent = ""; e.preventDefault(); }
+  }
+
+  function exportMarkdown() {
+    if (!$currentDocument) return;
+    let md = `# ${$currentDocument.title}\n\n`;
+    $currentDocument.blocks.forEach(b => {
+      if (b.type === 'heading') md += `### ${b.content}\n\n`;
+      else if (b.type === 'list') md += `${b.content.split('\\n').map(i => '- ' + i.replace(/^[-*•]\\s*/, '')).join('\\n')}\n\n`;
+      else if (b.type === 'code') md += `\`\`\`\n${b.content}\n\`\`\`\n\n`;
+      else md += `${b.content}\n\n`;
+    });
+
+    const blob = new Blob([md], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${$currentDocument.title.replace(/\\s+/g, '_').toLowerCase()}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Exported to Markdown");
+  }
 </script>
 
 <div class="editor">
@@ -107,8 +138,14 @@
           class="editor__title"
           data-placeholder="Untitled"
         >{$currentDocument.title}</h1>
-        <div class="editor__meta">
-          Last edited {new Date($currentDocument.updated_at).toLocaleString()}
+          <div class="editor__meta-actions">
+            <span>Last edited {new Date($currentDocument.updated_at).toLocaleString()}</span>
+            <span class="editor__meta-divider">•</span>
+            <span>{wordCount} words</span>
+            <span class="editor__meta-divider">•</span>
+            <span>{readingTime} min read</span>
+            <button class="editor__export-btn" on:click={exportMarkdown} title="Export as Markdown">⬇️ Export</button>
+          </div>
         </div>
       </div>
 
@@ -145,6 +182,7 @@
           placeholder={blockType === 'code' ? '// Write your code here...' : 'Type your content here...'}
           class="add-block__textarea"
           class:add-block__textarea--code={blockType === 'code'}
+          on:input={handleSlashCommand}
           on:keydown={(e) => {
             if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
               e.preventDefault();
@@ -153,7 +191,7 @@
           }}
         ></textarea>
         <div class="add-block__footer">
-          <span class="add-block__hint">Ctrl+Enter to add</span>
+          <span class="add-block__hint">Ctrl+Enter to add · Type /h, /p, /l, /c to quick-switch block type</span>
           <button
             class="add-block__btn"
             on:click={handleCreateBlock}
@@ -237,10 +275,41 @@
   }
 
   .editor__meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     font-size: 0.75rem;
     color: var(--clr-text-muted);
     padding: 6px 6px 0;
     letter-spacing: 0.01em;
+  }
+
+  .editor__meta-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .editor__meta-divider {
+    opacity: 0.3;
+  }
+
+  .editor__export-btn {
+    background: var(--clr-surface2);
+    border: 1px solid var(--clr-border);
+    color: var(--clr-text-secondary);
+    border-radius: var(--r-sm);
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all var(--t-fast);
+    margin-left: 8px;
+  }
+
+  .editor__export-btn:hover {
+    background: var(--clr-surface);
+    color: var(--clr-text-primary);
+    border-color: var(--clr-accent);
   }
 
   .editor__blocks {

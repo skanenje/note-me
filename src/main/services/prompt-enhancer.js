@@ -1,13 +1,6 @@
 // src/main/services/prompt-enhancer.js
-// Provides listFrameworks() and enhancePrompt() for the IPC handler.
-// When a Python service is running on port 8001 we forward to it;
-// otherwise we fall back to built-in logic so the feature never hard-fails.
+// Pure Node.js prompt enhancement logic — no external Python or Rust server required.
 
-const http = require('http');
-
-const PYTHON_SERVICE_URL = 'http://127.0.0.1:8001';
-
-// ── Built-in frameworks (always available as fallback) ──────────────────────
 const BUILT_IN_FRAMEWORKS = [
   {
     id: 'cot',
@@ -29,53 +22,26 @@ const BUILT_IN_FRAMEWORKS = [
     name: 'Few-Shot',
     description: 'Adds concrete examples to anchor the model behaviour',
   },
+  {
+    id: 'star',
+    name: 'STAR Method',
+    description: 'Situation-Task-Action-Result structured prompting',
+  },
+  {
+    id: 'tag',
+    name: 'TAG Framework',
+    description: 'Task-Action-Goal for goal-oriented AI instructions',
+  },
 ];
-
-// ── Helpers ────────────────────────────────────────────────────────────────
-
-/** Fire a JSON request to the Python service, resolve with parsed body. */
-function callPythonService(path, method = 'GET', body = null) {
-  return new Promise((resolve, reject) => {
-    const payload = body ? JSON.stringify(body) : null;
-    const options = {
-      hostname: '127.0.0.1',
-      port: 8001,
-      path,
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(payload ? { 'Content-Length': Buffer.byteLength(payload) } : {}),
-      },
-      timeout: 4000,
-    };
-
-    const req = http.request(options, (res) => {
-      let data = '';
-      res.on('data', (chunk) => (data += chunk));
-      res.on('end', () => {
-        try {
-          resolve(JSON.parse(data));
-        } catch {
-          reject(new Error('Invalid JSON from Python service'));
-        }
-      });
-    });
-
-    req.on('error', reject);
-    req.on('timeout', () => { req.destroy(); reject(new Error('Python service timeout')); });
-
-    if (payload) req.write(payload);
-    req.end();
-  });
-}
 
 /** Score a prompt on several dimensions (0–10). */
 function scorePrompt(text) {
   const words = text.trim().split(/\s+/).length;
-  const hasPurpose = /\b(explain|describe|create|generate|write|build|analyse|analyze|summarize|list|compare)\b/i.test(text);
+  const hasPurpose = /\b(explain|describe|create|generate|write|build|analyse|analyze|summarize|list|compare|help|show|give)\b/i.test(text);
   const hasContext = words > 20;
-  const hasFormat  = /\b(format|output|return|respond|json|markdown|list|table|step)\b/i.test(text);
-  const hasRole    = /\b(you are|act as|as an?|imagine|pretend)\b/i.test(text);
+  const hasFormat  = /\b(format|output|return|respond|json|markdown|list|table|step|bullet)\b/i.test(text);
+  const hasRole    = /\b(you are|act as|as an?|imagine|pretend|expert)\b/i.test(text);
+  const hasExample = /\b(example|for instance|such as|like this)\b/i.test(text);
 
   const clarity       = Math.min(10, 3 + (hasPurpose ? 3 : 0) + Math.min(4, words / 10));
   const specificity   = Math.min(10, 2 + (hasContext ? 3 : 0) + Math.min(5, words / 8));
@@ -92,8 +58,8 @@ function scorePrompt(text) {
   };
 }
 
-/** Built-in enhancement logic per framework. */
-function builtInEnhance(promptText, frameworkId, explain) {
+/** Enhancement logic per framework. */
+function enhance(promptText, frameworkId, explain) {
   const fw = BUILT_IN_FRAMEWORKS.find((f) => f.id === frameworkId) || BUILT_IN_FRAMEWORKS[0];
   let enhanced = promptText.trim();
   const explanations = [];
@@ -124,6 +90,18 @@ function builtInEnhance(promptText, frameworkId, explain) {
       explanations.push('Prefixed the original request with example context.');
       break;
 
+    case 'star':
+      enhanced = `Situation: [describe the current context or problem]\nTask: ${enhanced}\nAction: Please provide specific, actionable steps.\nResult: The expected outcome should be clear and measurable.`;
+      explanations.push('Applied STAR framework: Situation, Task, Action, Result.');
+      explanations.push('This structured format helps the model understand context and expected deliverables.');
+      break;
+
+    case 'tag':
+      enhanced = `Task: ${enhanced}\nAction: Provide a detailed, step-by-step response.\nGoal: The final output should be practical, correct, and immediately usable.`;
+      explanations.push('Applied TAG framework: Task, Action, Goal.');
+      explanations.push('Clear goal definition improves model output relevance.');
+      break;
+
     default:
       enhanced = `${enhanced}\n\nPlease provide a detailed, accurate, and well-structured response.`;
       explanations.push('Added a general quality instruction to improve response quality.');
@@ -139,29 +117,13 @@ function builtInEnhance(promptText, frameworkId, explain) {
 
 // ── Public API ─────────────────────────────────────────────────────────────
 
-async function listFrameworks() {
-  try {
-    const data = await callPythonService('/frameworks');
-    if (Array.isArray(data)) return data;
-    if (data && Array.isArray(data.frameworks)) return data.frameworks;
-  } catch (err) {
-    console.log('[PROMPT_ENHANCER] Python service unavailable, using built-in frameworks:', err.message);
-  }
+function listFrameworks() {
   return BUILT_IN_FRAMEWORKS;
 }
 
-async function enhancePrompt(request) {
+function enhancePrompt(request) {
   const { prompt, framework_id, explain = false } = request;
-
-  try {
-    const data = await callPythonService('/enhance', 'POST', { prompt, framework_id, explain });
-    if (data && data.enhanced_prompt) return data;
-  } catch (err) {
-    console.log('[PROMPT_ENHANCER] Python service unavailable, using built-in enhancement:', err.message);
-  }
-
-  // Fallback to built-in logic
-  return builtInEnhance(prompt, framework_id, explain);
+  return enhance(prompt, framework_id, explain);
 }
 
 module.exports = { listFrameworks, enhancePrompt };

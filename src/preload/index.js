@@ -19,9 +19,16 @@ contextBridge.exposeInMainWorld('api', {
   updateProgress: (data) => ipcRenderer.invoke('lessons:update-progress', data),
   getLessonProgress: (lessonId) => ipcRenderer.invoke('lessons:get-progress', lessonId),
 
-  // Prompt Enhancer
+  // Prompt Enhancer (pure Node.js — no external server needed)
   getFrameworks: () => ipcRenderer.invoke('prompt-enhancer:get-frameworks'),
   enhancePrompt: (data) => ipcRenderer.invoke('prompt-enhancer:enhance', data),
+
+  // AI Tools — IPC-backed, no Rust backend required
+  getTools: () => ipcRenderer.invoke('tools:get-all'),
+  getSessions: () => ipcRenderer.invoke('tools:get-sessions'),
+  createSession: (toolId) => ipcRenderer.invoke('tools:create-session', { tool_id: toolId }),
+  updateSessionActivity: (sessionId) => ipcRenderer.invoke('tools:update-session-activity', sessionId),
+  deleteSession: (sessionId) => ipcRenderer.invoke('tools:delete-session', sessionId),
 });
 
 // Separate API for Electron-specific features (tab management)

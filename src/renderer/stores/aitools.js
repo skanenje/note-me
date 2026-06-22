@@ -1,42 +1,40 @@
+// src/renderer/stores/aitools.js
+// All data now comes via Electron IPC (window.api) — no Rust backend required.
 import { writable } from 'svelte/store';
 
 export const tools = writable([]);
 export const openTabs = writable([]);
 export const activeTabId = writable(null);
 
-const API_BASE = 'http://127.0.0.1:3001/api';
-
+/** Load tools list from the Node.js DB via IPC */
 export async function loadTools() {
-    console.log('[LOG] loadTools called');
-    // Let errors propagate so the component can show an error state
-    const response = await fetch(`${API_BASE}/tools`);
-    if (!response.ok) {
-        throw new Error(`Server returned ${response.status} ${response.statusText}`);
+    console.log('[AITOOLS] loadTools called');
+    const result = await window.api.getTools();
+    if (!result.success) {
+        throw new Error(result.error || 'Failed to load tools');
     }
-    const toolsData = await response.json();
-    console.log('[LOG] loadTools success:', toolsData.length, 'tools');
-    tools.set(toolsData);
-    return toolsData;
+    console.log('[AITOOLS] loadTools success:', result.tools.length, 'tools');
+    tools.set(result.tools);
+    return result.tools;
 }
 
+/** Create a new BrowserView tab for a given tool */
 export async function createNewTab(tool) {
-    console.log('[LOG] createNewTab called:', tool.id);
-    const response = await fetch(`${API_BASE}/sessions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tool_id: tool.id }),
-    });
-    if (!response.ok) {
-        throw new Error(`Failed to create session: ${response.status}`);
+    console.log('[AITOOLS] createNewTab:', tool.id);
+
+    const result = await window.api.createSession(tool.id);
+    if (!result.success) {
+        throw new Error(result.error || 'Failed to create session');
     }
-    const session = await response.json();
-    console.log('[LOG] createNewTab success:', session.id);
+
+    const session = result.session;
+    console.log('[AITOOLS] createNewTab session:', session.id);
 
     const newTab = { session, tool };
     openTabs.update(tabs => [...tabs, newTab]);
     activeTabId.set(session.id);
 
-    // Tell Electron to create the browser view
+    // Tell Electron to create the BrowserView
     if (window.electronAPI) {
         window.electronAPI.createTab(session.id, tool.url);
     }
@@ -52,15 +50,24 @@ export function switchTab(sessionId) {
 }
 
 export function closeTab(sessionId) {
+    // Optimistically remove from store
+    openTabs.update(tabs => tabs.filter(t => t.session.id !== sessionId));
+
+    // Tell Electron to destroy the BrowserView
     if (window.electronAPI) {
         window.electronAPI.closeTab(sessionId);
     }
+
+    // Delete session from DB via IPC (fire-and-forget)
+    window.api.deleteSession(sessionId).catch(err =>
+        console.error('[AITOOLS] deleteSession failed:', err)
+    );
 }
 
 export async function updateSessionActivity(sessionId) {
     try {
-        await fetch(`${API_BASE}/sessions/${sessionId}/activity`, { method: 'PUT' });
-    } catch (error) {
-        console.error('[ERROR] Failed to update session activity:', error);
+        await window.api.updateSessionActivity(sessionId);
+    } catch (err) {
+        console.error('[AITOOLS] updateSessionActivity failed:', err);
     }
 }
