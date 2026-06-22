@@ -13,6 +13,15 @@
 
     let loadError = null;
     let loadingTools = true;
+    let isMac = false;
+
+    // We can compute 'recently used' based on last_active_at if we wanted, but for now we'll just show the tools.
+    // Actually, sessions have last_active_at. We'll use sessions to get recently used.
+    $: recentlyUsedTools = (() => {
+        if (!$openTabs || $openTabs.length === 0) return [];
+        const sorted = [...$openTabs].sort((a, b) => b.session.last_active_at - a.session.last_active_at);
+        return sorted.map(t => t.tool);
+    })();
 
     /** Root element of this component — used to measure layout for the BrowserView */
     let containerEl;
@@ -39,6 +48,7 @@
     }
 
     onMount(async () => {
+        isMac = window.navigator.platform.toUpperCase().indexOf('MAC') >= 0;
         loadingTools = true;
         loadError = null;
         try {
@@ -75,8 +85,24 @@
             });
         }
 
+        const handleKeyDown = (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                const num = parseInt(e.key, 10);
+                if (num >= 1 && num <= 9) {
+                    const tabs = get(openTabs);
+                    const index = num - 1;
+                    if (tabs[index]) {
+                        e.preventDefault();
+                        handleTabClick(tabs[index].session.id);
+                    }
+                }
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+
         return () => {
             window.removeEventListener('resize', sendLayoutMetrics);
+            window.removeEventListener('keydown', handleKeyDown);
         };
     });
 
@@ -120,7 +146,7 @@
 
         <!-- Tabs -->
         <div class="tabs">
-            {#each $openTabs as tab (tab.session.id)}
+            {#each $openTabs as tab, i (tab.session.id)}
                 <button
                     class="tab"
                     class:tab--active={$activeTabId === tab.session.id}
@@ -129,6 +155,7 @@
                 >
                     <img src={tab.tool.icon_path} alt={tab.tool.name} />
                     <span>{tab.tool.name}</span>
+                    <span class="tab__shortcut">{isMac ? '⌘' : 'Ctrl+'}{i + 1}</span>
                     <button
                         class="tab__close"
                         on:click|stopPropagation={() => handleTabClose(tab.session.id)}
@@ -151,9 +178,41 @@
                         Retry Connection
                     </button>
                 {:else}
-                    <div class="empty-state__icon">&#129302;</div>
-                    <h2 class="empty-state__title">AI Tools Browser</h2>
-                    <p class="empty-state__desc">Click any tool bookmark above to open a session</p>
+                    <div class="hero">
+                        <div class="hero__header">
+                            <h2 class="hero__title">AI Tools</h2>
+                            <p class="hero__subtitle">Select a tool to launch a new browser session</p>
+                        </div>
+
+                        {#if recentlyUsedTools.length > 0}
+                            <div class="recently-used">
+                                <h3 class="recently-used__title">Recently Used</h3>
+                                <div class="recently-used__list">
+                                    {#each recentlyUsedTools.slice(0, 5) as tool}
+                                        <button class="recently-used__item" on:click={() => handleToolClick(tool)}>
+                                            <img src={tool.icon_path} alt={tool.name} />
+                                            <span>{tool.name}</span>
+                                        </button>
+                                    {/each}
+                                </div>
+                            </div>
+                        {/if}
+
+                        <h3 class="hero__section-title">All Tools</h3>
+                        <div class="featured-grid">
+                            {#each $tools as tool}
+                                <button class="featured-tile" on:click={() => handleToolClick(tool)}>
+                                    <div class="featured-tile__icon-wrap">
+                                        <img src={tool.icon_path} alt={tool.name} class="featured-tile__icon" />
+                                    </div>
+                                    <div class="featured-tile__info">
+                                        <h3 class="featured-tile__name">{tool.name}</h3>
+                                        <p class="featured-tile__desc">{tool.description || 'Launch this AI tool'}</p>
+                                    </div>
+                                </button>
+                            {/each}
+                        </div>
+                    </div>
                 {/if}
             </div>
         {/if}
@@ -267,6 +326,15 @@
         text-overflow: ellipsis;
     }
 
+    .tab__shortcut {
+        font-size: 0.65rem;
+        color: var(--clr-text-muted);
+        background: var(--clr-bg);
+        padding: 2px 4px;
+        border-radius: 4px;
+        border: 1px solid var(--clr-border);
+    }
+
     .tab__close {
         width: 18px;
         height: 18px;
@@ -297,12 +365,148 @@
     }
 
     .empty-state {
-        text-align: center;
+        text-align: left;
         display: flex;
         flex-direction: column;
-        align-items: center;
-        gap: 12px;
+        width: 100%;
+        height: 100%;
+        overflow-y: auto;
         padding: 40px;
+    }
+
+    .hero {
+        max-width: 1000px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .hero__header {
+        margin-bottom: 32px;
+        text-align: center;
+    }
+
+    .hero__title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--clr-text-primary);
+        margin-bottom: 8px;
+    }
+
+    .hero__subtitle {
+        font-size: 1rem;
+        color: var(--clr-text-muted);
+    }
+
+    .hero__section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--clr-text-secondary);
+        margin-bottom: 16px;
+    }
+
+    .recently-used {
+        margin-bottom: 40px;
+    }
+
+    .recently-used__title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--clr-text-secondary);
+        margin-bottom: 16px;
+    }
+
+    .recently-used__list {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        padding-bottom: 8px;
+    }
+
+    .recently-used__item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--clr-surface);
+        border: 1px solid var(--clr-border);
+        border-radius: var(--r-md);
+        padding: 10px 16px;
+        color: var(--clr-text-primary);
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all var(--t-fast);
+        flex-shrink: 0;
+    }
+
+    .recently-used__item:hover {
+        background: var(--clr-surface2);
+        border-color: var(--clr-accent);
+        transform: translateY(-2px);
+    }
+
+    .recently-used__item img {
+        width: 20px;
+        height: 20px;
+    }
+
+    .featured-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 16px;
+    }
+
+    .featured-tile {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        background: var(--clr-surface);
+        border: 1px solid var(--clr-border);
+        border-radius: var(--r-lg);
+        padding: 20px;
+        text-align: left;
+        cursor: pointer;
+        transition: all var(--t-fast);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .featured-tile:hover {
+        background: var(--clr-surface2);
+        border-color: var(--clr-accent);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+
+    .featured-tile__icon-wrap {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--r-md);
+        background: var(--clr-bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        border: 1px solid var(--clr-border);
+    }
+
+    .featured-tile__icon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .featured-tile__info {
+        flex: 1;
+    }
+
+    .featured-tile__name {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--clr-text-primary);
+        margin-bottom: 4px;
+    }
+
+    .featured-tile__desc {
+        font-size: 0.85rem;
+        color: var(--clr-text-secondary);
+        line-height: 1.4;
     }
 
     .empty-state__icon { font-size: 4rem; opacity: 0.3; }

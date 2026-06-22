@@ -23,7 +23,7 @@ app.whenReady().then(async () => {
   registerDocumentHandlers(dbManager);
   registerBlockHandlers(dbManager);
   registerLessonHandlers(dbManager);
-  registerPromptEnhancerHandlers();
+  registerPromptEnhancerHandlers(dbManager);
   registerAIToolsHandlers(dbManager);
 
   // Create the main window — no backend poll delay needed

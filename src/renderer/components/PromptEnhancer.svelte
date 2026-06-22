@@ -12,9 +12,12 @@
     let explanations = [];
     let error = null;
     let copied = false;
+    let history = [];
+    let showHistory = false;
 
     onMount(async () => {
         await loadFrameworks();
+        await loadHistory();
     });
 
     async function loadFrameworks() {
@@ -36,6 +39,40 @@
             error = `Error loading frameworks: ${err.message}`;
             console.error(err);
         }
+    }
+
+    async function loadHistory() {
+        try {
+            const result = await window.api.getPromptHistory(20);
+            if (result.success) {
+                history = result.history || [];
+            }
+        } catch (err) {
+            console.error("Failed to load prompt history:", err);
+        }
+    }
+
+    async function deleteHistoryItem(id, e) {
+        if (e) e.stopPropagation();
+        try {
+            const result = await window.api.deletePromptHistory(id);
+            if (result.success) {
+                history = history.filter(h => h.id !== id);
+                toast.success("History item deleted");
+            }
+        } catch (err) {
+            console.error("Failed to delete history item:", err);
+            toast.error("Failed to delete item");
+        }
+    }
+
+    function loadFromHistory(item) {
+        prompt = item.original;
+        enhancedPrompt = item.enhanced;
+        selectedFramework = item.framework;
+        qualityMetrics = item.score ? { overall: item.score } : null;
+        explanations = []; // We don't save explanations currently
+        showHistory = false;
     }
 
     async function handleEnhance() {
@@ -69,6 +106,7 @@
                 qualityMetrics  = data.quality;
                 explanations    = data.explain ?? [];
                 toast.success("Prompt enhanced!");
+                await loadHistory(); // refresh history
             } else {
                 error = `Enhancement failed: ${result.error}`;
                 toast.error(error);
@@ -107,6 +145,19 @@
         if (val >= 5)   return '#f59e0b';
         return '#ef4444';
     }
+
+    function letterGrade(val) {
+        if (!val) return '';
+        if (val >= 9) return 'A';
+        if (val >= 8) return 'B';
+        if (val >= 7) return 'C';
+        if (val >= 6) return 'D';
+        return 'F';
+    }
+
+    function formatDate(ms) {
+        return new Date(ms).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
 </script>
 
 <div class="pe">
@@ -116,6 +167,9 @@
             <h1 class="pe__title">Prompt Enhancer</h1>
             <p class="pe__subtitle">Transform your prompts with AI-powered learning frameworks</p>
         </div>
+        <button class="pe__history-toggle" on:click={() => showHistory = !showHistory}>
+            ⏱️ History ({history.length})
+        </button>
     </div>
 
     {#if error && !enhancedPrompt}
@@ -124,7 +178,37 @@
         </div>
     {/if}
 
-    <div class="pe__layout">
+    <div class="pe__layout" class:pe__layout--with-history={showHistory}>
+        
+        {#if showHistory}
+        <div class="pe__history-sidebar">
+            <h3 class="pe__history-title">Recent Enhancements</h3>
+            {#if history.length === 0}
+                <p class="pe__history-empty">No history yet.</p>
+            {:else}
+                <div class="pe__history-list">
+                    {#each history as item}
+                        <div 
+                            class="pe__history-item" 
+                            role="button" 
+                            tabindex="0" 
+                            on:click={() => loadFromHistory(item)}
+                            on:keydown={(e) => e.key === 'Enter' && loadFromHistory(item)}
+                        >
+                            <div class="pe__history-item-header">
+                                <span class="pe__history-fw">{frameworks.find(f => f.id === item.framework)?.name || item.framework}</span>
+                                <span class="pe__history-score" style="color:{scoreColor(item.score)}">{letterGrade(item.score)}</span>
+                                <button class="pe__history-del" on:click={(e) => deleteHistoryItem(item.id, e)}>×</button>
+                            </div>
+                            <p class="pe__history-preview">{item.original}</p>
+                            <span class="pe__history-date">{formatDate(item.created_at)}</span>
+                        </div>
+                    {/each}
+                </div>
+            {/if}
+        </div>
+        {/if}
+
         <!-- Left: Input Panel -->
         <div class="pe__panel">
             <div class="pe__card">
@@ -223,7 +307,9 @@
                                     <div class="pe__metric">
                                         <div class="pe__metric-row">
                                             <span class="pe__metric-label">{m.label}</span>
-                                            <span class="pe__metric-val" style="color:{scoreColor(qualityMetrics[m.key])}">{qualityMetrics[m.key]?.toFixed(1)}</span>
+                                            <span class="pe__metric-val" style="color:{scoreColor(qualityMetrics[m.key])}">
+                                                {qualityMetrics[m.key]?.toFixed(1)} <span class="pe__grade">({letterGrade(qualityMetrics[m.key])})</span>
+                                            </span>
                                         </div>
                                         <div class="pe__bar">
                                             <div
@@ -276,6 +362,26 @@
         border-bottom: 1px solid var(--clr-border);
         padding: 20px 32px;
         flex-shrink: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .pe__history-toggle {
+        background: var(--clr-surface2);
+        border: 1px solid var(--clr-border);
+        border-radius: var(--r-md);
+        padding: 8px 16px;
+        color: var(--clr-text-secondary);
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all var(--t-fast);
+    }
+
+    .pe__history-toggle:hover {
+        background: var(--clr-surface);
+        border-color: var(--clr-accent);
+        color: var(--clr-text-primary);
     }
 
     .pe__title {
@@ -315,6 +421,106 @@
         padding: 20px 32px;
         flex: 1;
         overflow-y: auto;
+        transition: all var(--t-fast);
+    }
+
+    .pe__layout--with-history {
+        grid-template-columns: 250px 1fr 1fr;
+    }
+
+    .pe__history-sidebar {
+        background: var(--clr-surface);
+        border: 1px solid var(--clr-border);
+        border-radius: var(--r-lg);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .pe__history-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--clr-text-muted);
+        padding: 16px;
+        border-bottom: 1px solid var(--clr-border);
+    }
+
+    .pe__history-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 8px;
+    }
+
+    .pe__history-empty {
+        padding: 16px;
+        color: var(--clr-text-muted);
+        font-size: 0.85rem;
+        text-align: center;
+    }
+
+    .pe__history-item {
+        padding: 12px;
+        border-radius: var(--r-md);
+        cursor: pointer;
+        transition: background var(--t-fast);
+        border: 1px solid transparent;
+        margin-bottom: 4px;
+    }
+
+    .pe__history-item:hover {
+        background: var(--clr-surface2);
+        border-color: var(--clr-border);
+    }
+
+    .pe__history-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+    }
+
+    .pe__history-fw {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--clr-accent);
+        background: rgba(124, 58, 237, 0.1);
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+
+    .pe__history-score {
+        font-weight: 800;
+        font-size: 0.8rem;
+    }
+
+    .pe__history-del {
+        background: transparent;
+        border: none;
+        color: var(--clr-text-muted);
+        cursor: pointer;
+        font-size: 1.1rem;
+        padding: 0 4px;
+        border-radius: 4px;
+    }
+    
+    .pe__history-del:hover {
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.1);
+    }
+
+    .pe__history-preview {
+        font-size: 0.8rem;
+        color: var(--clr-text-secondary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 6px;
+    }
+
+    .pe__history-date {
+        font-size: 0.7rem;
+        color: var(--clr-text-muted);
     }
 
     .pe__panel {
@@ -559,6 +765,12 @@
     .pe__metric-val {
         font-size: 0.85rem;
         font-weight: 700;
+    }
+    
+    .pe__grade {
+        font-weight: 800;
+        opacity: 0.8;
+        font-size: 0.9rem;
     }
 
     .pe__bar {

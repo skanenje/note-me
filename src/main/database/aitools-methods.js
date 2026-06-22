@@ -7,7 +7,7 @@ module.exports = {
   /** Return all enabled tools ordered by name */
   getAllTools() {
     const stmt = this.db.prepare(`
-      SELECT id, name, url, icon_path, enabled
+      SELECT id, name, url, icon_path, description, enabled
       FROM tools
       WHERE enabled = 1
       ORDER BY name ASC

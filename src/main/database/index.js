@@ -4,8 +4,10 @@ const { app } = require('electron');
 const { v4: uuidv4 } = require('uuid');
 const initSchema = require('./schema');
 const initAIToolsSchema = require('./aitools-schema');
+const initPromptSchema = require('./prompt-schema');
 const lmsMethods = require('./lms-methods');
 const aitoolsMethods = require('./aitools-methods');
+const promptMethods = require('./prompt-methods');
 
 class DatabaseManager {
   constructor() {
@@ -19,10 +21,12 @@ class DatabaseManager {
     
     initSchema(this.db);
     initAIToolsSchema(this.db);
+    initPromptSchema(this.db);
     
-    // Bind LMS methods and AI tools methods to this instance
+    // Bind methods to this instance
     Object.assign(this, lmsMethods);
     Object.assign(this, aitoolsMethods);
+    Object.assign(this, promptMethods);
     
     console.log('Schema initialized');
   }

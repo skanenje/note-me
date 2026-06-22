@@ -7,10 +7,10 @@
   "type": "commonjs",
   "main": "src/main/index.js",
   "scripts": {
-    "dev": "npm run build-backend && concurrently \"vite\" \"wait-on http://localhost:5173 && NODE_ENV=development electron . --disable-gpu\"",
-    "start": "npm run build-backend && npm run build && NODE_ENV=production electron . --disable-gpu",
+    "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && NODE_ENV=development electron . --disable-gpu\"",
     "build": "vite build",
-    "build-backend": "cd backend && cargo build --release",
+    "preview": "vite preview",
+    "start": "NODE_ENV=production electron .",
     "package": "electron-builder"
   },
   "devDependencies": {
@@ -27,6 +27,7 @@
   "dependencies": {
     "better-sqlite3": "^12.6.0",
     "node-fetch": "^2.7.0",
+    "prismjs": "^1.30.0",
     "uuid": "^13.0.0",
     "wait-on": "^9.0.3"
   }

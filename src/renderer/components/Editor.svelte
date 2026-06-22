@@ -147,7 +147,6 @@
             <button class="editor__export-btn" on:click={exportMarkdown} title="Export as Markdown">⬇️ Export</button>
           </div>
         </div>
-      </div>
 
       <!-- Blocks -->
       <div class="editor__blocks">

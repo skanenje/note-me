@@ -22,6 +22,8 @@ contextBridge.exposeInMainWorld('api', {
   // Prompt Enhancer (pure Node.js — no external server needed)
   getFrameworks: () => ipcRenderer.invoke('prompt-enhancer:get-frameworks'),
   enhancePrompt: (data) => ipcRenderer.invoke('prompt-enhancer:enhance', data),
+  getPromptHistory: (limit) => ipcRenderer.invoke('prompt-enhancer:get-history', limit),
+  deletePromptHistory: (id) => ipcRenderer.invoke('prompt-enhancer:delete-history', id),
 
   // AI Tools — IPC-backed, no Rust backend required
   getTools: () => ipcRenderer.invoke('tools:get-all'),

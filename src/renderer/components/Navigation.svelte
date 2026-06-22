@@ -1,13 +1,22 @@
 <script>
+  import { onMount } from 'svelte';
+  import { openTabs } from '../stores/aitools.js';
+  import { documents, loadDocuments } from '../stores/documents.js';
+
   export let currentView = "lessons";
   export let onNavigate;
 
   const navItems = [
     { id: 'lessons',         label: 'Learning Tracks',  icon: '📚' },
-    { id: 'documents',       label: 'My Notes',          icon: '📝' },
-    { id: 'aitools',         label: 'AI Tools',          icon: '🤖' },
-    { id: 'prompt-enhancer', label: 'Prompt Enhancer',   icon: '🚀' },
+    { id: 'documents',       label: 'My Notes',         icon: '📝', badgeStore: documents },
+    { id: 'aitools',         label: 'AI Tools',         icon: '🤖', badgeStore: openTabs },
+    { id: 'prompt-enhancer', label: 'Prompt Enhancer',  icon: '🚀' },
   ];
+
+  onMount(() => {
+    // Load documents to ensure count is accurate on startup
+    loadDocuments();
+  });
 </script>
 
 <nav class="nav">
@@ -35,6 +44,9 @@
         >
           <span class="nav__item-icon">{item.icon}</span>
           <span class="nav__item-label">{item.label}</span>
+          {#if item.badgeStore && $badgeStore?.length > 0}
+            <span class="nav__item-badge">{$badgeStore.length}</span>
+          {/if}
           {#if currentView === item.id}
             <span class="nav__item-indicator"></span>
           {/if}
@@ -167,6 +179,23 @@
     background: var(--clr-accent);
     box-shadow: 0 0 8px var(--clr-accent-glow);
     flex-shrink: 0;
+  }
+
+  .nav__item-badge {
+    background: var(--clr-surface);
+    color: var(--clr-text-secondary);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 12px;
+    border: 1px solid var(--clr-border);
+    margin-left: auto;
+  }
+
+  .nav__item--active .nav__item-badge {
+    background: rgba(124, 58, 237, 0.2);
+    border-color: rgba(124, 58, 237, 0.4);
+    color: #c4b5fd;
   }
 
   /* Footer */
