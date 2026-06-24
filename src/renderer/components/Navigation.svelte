@@ -7,10 +7,10 @@
   export let onNavigate;
 
   const navItems = [
-    { id: 'lessons',         label: 'Learning Tracks',  icon: '📚' },
-    { id: 'documents',       label: 'My Notes',         icon: '📝', badgeStore: documents },
-    { id: 'aitools',         label: 'AI Tools',         icon: '🤖', badgeStore: openTabs },
-    { id: 'prompt-enhancer', label: 'Prompt Enhancer',  icon: '🚀' },
+    { id: 'lessons',         label: 'Learning Tracks',  iconSvg: '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />' },
+    { id: 'documents',       label: 'My Notes',         iconSvg: '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />', badgeStore: documents },
+    { id: 'aitools',         label: 'AI Tools',         iconSvg: '<path stroke-linecap="round" stroke-linejoin="round" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />', badgeStore: openTabs },
+    { id: 'prompt-enhancer', label: 'Prompt Enhancer',  iconSvg: '<path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />' },
   ];
 
   onMount(() => {
@@ -42,10 +42,16 @@
           on:click={() => onNavigate(item.id)}
           aria-current={currentView === item.id ? 'page' : undefined}
         >
-          <span class="nav__item-icon">{item.icon}</span>
+          <span class="nav__item-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" style="width: 20px; height: 20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              {@html item.iconSvg}
+            </svg>
+          </span>
           <span class="nav__item-label">{item.label}</span>
-          {#if item.badgeStore && $badgeStore?.length > 0}
-            <span class="nav__item-badge">{$badgeStore.length}</span>
+          {#if item.id === 'documents' && $documents?.length > 0}
+            <span class="nav__item-badge">{$documents.length}</span>
+          {:else if item.id === 'aitools' && $openTabs?.length > 0}
+            <span class="nav__item-badge">{$openTabs.length}</span>
           {/if}
           {#if currentView === item.id}
             <span class="nav__item-indicator"></span>

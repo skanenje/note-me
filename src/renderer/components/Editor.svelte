@@ -12,6 +12,7 @@
     { value: 'paragraph', label: '¶  Paragraph' },
     { value: 'heading',   label: 'H  Heading' },
     { value: 'list',      label: '≡  List' },
+    { value: 'todo',      label: '☑  To-Do' },
     { value: 'code',      label: '</> Code' },
   ];
 
@@ -93,6 +94,7 @@
     if (blockContent === "/p") { blockType = "paragraph"; blockContent = ""; e.preventDefault(); }
     if (blockContent === "/h") { blockType = "heading"; blockContent = ""; e.preventDefault(); }
     if (blockContent === "/l") { blockType = "list"; blockContent = ""; e.preventDefault(); }
+    if (blockContent === "/t") { blockType = "todo"; blockContent = ""; e.preventDefault(); }
     if (blockContent === "/c") { blockType = "code"; blockContent = ""; e.preventDefault(); }
   }
 
@@ -101,7 +103,13 @@
     let md = `# ${$currentDocument.title}\n\n`;
     $currentDocument.blocks.forEach(b => {
       if (b.type === 'heading') md += `### ${b.content}\n\n`;
-      else if (b.type === 'list') md += `${b.content.split('\\n').map(i => '- ' + i.replace(/^[-*•]\\s*/, '')).join('\\n')}\n\n`;
+      else if (b.type === 'list') md += `${b.content.split('\n').map(i => '- ' + i.replace(/^[-*•]\s*/, '')).join('\n')}\n\n`;
+      else if (b.type === 'todo') md += `${b.content.split('\n').map(i => {
+        const isChecked = i.match(/^\[[xX]\]\s/);
+        const hasPrefix = i.match(/^\[[ xX]\]\s/);
+        const text = hasPrefix ? i.substring(hasPrefix[0].length) : i;
+        return `- [${isChecked ? 'x' : ' '}] ${text}`;
+      }).join('\n')}\n\n`;
       else if (b.type === 'code') md += `\`\`\`\n${b.content}\n\`\`\`\n\n`;
       else md += `${b.content}\n\n`;
     });
@@ -190,7 +198,7 @@
           }}
         ></textarea>
         <div class="add-block__footer">
-          <span class="add-block__hint">Ctrl+Enter to add · Type /h, /p, /l, /c to quick-switch block type</span>
+          <span class="add-block__hint">Ctrl+Enter to add · Type /h, /p, /l, /t, /c to quick-switch block type</span>
           <button
             class="add-block__btn"
             on:click={handleCreateBlock}

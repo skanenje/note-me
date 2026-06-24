@@ -8,12 +8,21 @@
   import Editor from "./components/Editor.svelte";
   import AIToolsView from "./components/AIToolsView.svelte";
   import PromptEnhancer from "./components/PromptEnhancer.svelte";
+  import CommandPalette from "./components/CommandPalette.svelte";
   import Toast from "./components/Toast.svelte";
   import { loadDocuments } from "./stores/documents.js";
 
   let currentView = "lessons"; // 'lessons', 'documents', 'aitools', 'prompt-enhancer'
   let selectedLessonId = null;
   let transitioning = false;
+  let showCommandPalette = false;
+
+  function handleGlobalKeydown(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      showCommandPalette = !showCommandPalette;
+    }
+  }
 
   function appMounted(node) {
     console.log('[SVELTE] App.svelte DOM element mounted! Loading documents...');
@@ -37,6 +46,8 @@
     selectedLessonId = null;
   }
 </script>
+
+<svelte:window on:keydown={handleGlobalKeydown} />
 
 <div class="app-shell" use:appMounted>
   <Navigation {currentView} onNavigate={handleNavigate} />
@@ -72,6 +83,12 @@
     {/if}
   </main>
 
+  <CommandPalette 
+    show={showCommandPalette} 
+    onClose={() => showCommandPalette = false} 
+    onNavigate={handleNavigate} 
+    onSelectLesson={handleSelectLesson} 
+  />
   <Toast />
 </div>
 

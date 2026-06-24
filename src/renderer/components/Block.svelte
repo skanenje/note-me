@@ -1,3 +1,4 @@
+<script>
   import Prism from 'prismjs';
   import 'prismjs/themes/prism-tomorrow.css'; // dark theme
   import 'prismjs/components/prism-javascript';
@@ -21,6 +22,7 @@
     paragraph: '¶',
     heading:   'H',
     list:      '≡',
+    todo:      '☑',
     code:      '</>',
   };
 
@@ -39,6 +41,15 @@
   function cancelEdit() {
     editing = false;
     editContent = block.content;
+  }
+
+  async function toggleTodo(index, isChecked) {
+    const lines = block.content.split('\n').filter(Boolean);
+    let line = lines[index];
+    const hasPrefix = line.match(/^\[[ xX]\]\s/);
+    const text = hasPrefix ? line.substring(hasPrefix[0].length) : line;
+    lines[index] = `${isChecked ? '[x]' : '[ ]'} ${text}`;
+    await onUpdate?.(block.id, lines.join('\n'));
   }
 </script>
 
@@ -71,6 +82,18 @@
             <li>{item.replace(/^[-*•]\s*/, '')}</li>
           {/each}
         </ul>
+      {:else if block.type === 'todo'}
+        <div class="block__todo" on:dblclick={startEdit}>
+          {#each block.content.split('\n').filter(Boolean) as item, i}
+            {@const isChecked = item.match(/^\[[xX]\]\s/)}
+            {@const hasPrefix = item.match(/^\[[ xX]\]\s/)}
+            {@const text = hasPrefix ? item.substring(hasPrefix[0].length) : item}
+            <label class="block__todo-item" on:dblclick|stopPropagation>
+              <input type="checkbox" class="block__todo-cb" checked={!!isChecked} on:change={(e) => toggleTodo(i, e.target.checked)} />
+              <span class="block__todo-text" class:block__todo-text--checked={!!isChecked}>{text}</span>
+            </label>
+          {/each}
+        </div>
       {:else if block.type === 'code'}
         <pre class="block__code language-javascript" on:dblclick={startEdit}><code class="language-javascript">{@html highlightedCode || block.content}</code></pre>
       {:else}
@@ -168,6 +191,40 @@
     padding-left: 20px;
     line-height: 1.8;
     cursor: text;
+  }
+
+  .block__todo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    cursor: text;
+  }
+
+  .block__todo-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+  }
+
+  .block__todo-cb {
+    margin-top: 5px;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--clr-accent);
+    cursor: pointer;
+  }
+
+  .block__todo-text {
+    color: var(--clr-text-primary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    transition: color var(--t-fast);
+  }
+
+  .block__todo-text--checked {
+    text-decoration: line-through;
+    color: var(--clr-text-muted);
   }
 
   .block__code {

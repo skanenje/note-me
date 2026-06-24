@@ -64,23 +64,36 @@ module.exports = {
   
   // Progress Tracking
   updateProgress(lessonId, blockId, status) {
-    const id = uuidv4();
     const now = Date.now();
-    
-    const stmt = this.db.prepare(`
-      INSERT OR REPLACE INTO user_progress 
-      (id, lesson_id, block_id, status, last_interaction)
-      VALUES (?, ?, ?, ?, ?)
+    const checkStmt = this.db.prepare(`
+      SELECT id FROM user_progress WHERE lesson_id = ? AND block_id = ?
     `);
+    const existing = checkStmt.get(lessonId, blockId);
     
-    stmt.run(id, lessonId, blockId, status, now);
+    if (existing) {
+      const updateStmt = this.db.prepare(`
+        UPDATE user_progress 
+        SET status = ?, last_interaction = ? 
+        WHERE id = ?
+      `);
+      updateStmt.run(status, now, existing.id);
+    } else {
+      const id = uuidv4();
+      const insertStmt = this.db.prepare(`
+        INSERT INTO user_progress 
+        (id, lesson_id, block_id, status, last_interaction)
+        VALUES (?, ?, ?, ?, ?)
+      `);
+      insertStmt.run(id, lessonId, blockId, status, now);
+    }
   },
   
   getLessonProgress(lessonId) {
     const stmt = this.db.prepare(`
-      SELECT * FROM user_progress 
+      SELECT block_id, status, MAX(last_interaction) as last_interaction
+      FROM user_progress 
       WHERE lesson_id = ?
-      ORDER BY last_interaction DESC
+      GROUP BY block_id
     `);
     return stmt.all(lessonId);
   },

@@ -6,9 +6,11 @@
         openTabs,
         activeTabId,
         loadTools,
+        loadSessions,
         createNewTab,
         switchTab,
         closeTab,
+        toggleSessionPin,
     } from '../stores/aitools.js';
 
     let loadError = null;
@@ -53,6 +55,7 @@
         loadError = null;
         try {
             await loadTools();
+            await loadSessions();
         } catch (err) {
             loadError = `Could not load AI tools: ${err.message}`;
 
@@ -150,12 +153,23 @@
                 <button
                     class="tab"
                     class:tab--active={$activeTabId === tab.session.id}
+                    class:tab--pinned={tab.session.pinned}
                     on:click={() => handleTabClick(tab.session.id)}
                     aria-label="Switch to {tab.tool.name}"
                 >
                     <img src={tab.tool.icon_path} alt={tab.tool.name} />
                     <span>{tab.tool.name}</span>
-                    <span class="tab__shortcut">{isMac ? '⌘' : 'Ctrl+'}{i + 1}</span>
+                    {#if !tab.session.pinned}
+                        <span class="tab__shortcut">{isMac ? '⌘' : 'Ctrl+'}{i + 1}</span>
+                    {/if}
+                    <button
+                        class="tab__pin"
+                        class:tab__pin--active={tab.session.pinned}
+                        on:click|stopPropagation={() => toggleSessionPin(tab.session.id, !tab.session.pinned)}
+                        title={tab.session.pinned ? "Unpin tab" : "Pin tab"}
+                    >
+                        📌
+                    </button>
                     <button
                         class="tab__close"
                         on:click|stopPropagation={() => handleTabClose(tab.session.id)}
@@ -354,6 +368,36 @@
     .tab__close:hover {
         background: rgba(239, 68, 68, 0.2);
         color: #fca5a5;
+    }
+
+    .tab__pin {
+        border: none;
+        background: transparent;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        color: var(--clr-text-muted);
+        opacity: 0;
+        transition: opacity var(--t-fast);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2px;
+        filter: grayscale(1);
+    }
+
+    .tab:hover .tab__pin {
+        opacity: 0.5;
+    }
+
+    .tab__pin:hover {
+        opacity: 1 !important;
+        filter: grayscale(0);
+    }
+
+    .tab__pin--active {
+        opacity: 1;
+        filter: grayscale(0);
     }
 
     .browser-area {

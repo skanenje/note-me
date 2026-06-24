@@ -31,6 +31,7 @@ contextBridge.exposeInMainWorld('api', {
   createSession: (toolId) => ipcRenderer.invoke('tools:create-session', { tool_id: toolId }),
   updateSessionActivity: (sessionId) => ipcRenderer.invoke('tools:update-session-activity', sessionId),
   deleteSession: (sessionId) => ipcRenderer.invoke('tools:delete-session', sessionId),
+  setSessionPinned: (sessionId, pinned) => ipcRenderer.invoke('tools:set-session-pinned', { sessionId, pinned }),
 });
 
 // Separate API for Electron-specific features (tab management)

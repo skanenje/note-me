@@ -62,4 +62,15 @@ module.exports = function registerAIToolsHandlers(dbManager) {
       return { success: false, error: err.message };
     }
   });
+
+  // PUT /api/sessions/:id/pin → tools:set-session-pinned
+  ipcMain.handle('tools:set-session-pinned', async (_, { sessionId, pinned }) => {
+    try {
+      dbManager.setSessionPinned(sessionId, pinned);
+      return { success: true };
+    } catch (err) {
+      console.error('[AITOOLS_IPC] tools:set-session-pinned failed:', err);
+      return { success: false, error: err.message };
+    }
+  });
 };

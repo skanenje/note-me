@@ -1,6 +1,7 @@
 <script>
     import { onMount } from "svelte";
     import { toast } from "../stores/toast.js";
+    import { createDocument } from "../stores/documents.js";
 
     let frameworks = [];
     let selectedFramework = "";
@@ -128,6 +129,28 @@
             setTimeout(() => (copied = false), 2000);
         } catch {
             toast.error("Failed to copy");
+        }
+    }
+
+    let isSavingNote = false;
+    async function saveAsNote() {
+        if (!enhancedPrompt) return;
+        isSavingNote = true;
+        try {
+            const title = "Enhanced: " + (frameworks.find(f => f.id === selectedFramework)?.name || "Prompt");
+            const doc = await createDocument(title);
+            
+            await window.api.createBlock({
+                documentId: doc.id,
+                type: 'paragraph',
+                content: enhancedPrompt
+            });
+            
+            toast.success("Saved as new note!");
+        } catch (err) {
+            toast.error("Failed to save note: " + err.message);
+        } finally {
+            isSavingNote = false;
         }
     }
 
@@ -283,9 +306,14 @@
                 <div class="pe__card pe__card--output">
                     <div class="pe__output-header">
                         <h2 class="pe__card-title" style="margin:0">Enhanced Prompt</h2>
-                        <button class="pe__copy-btn" on:click={copyToClipboard}>
-                            {copied ? '✓ Copied!' : '📋 Copy'}
-                        </button>
+                        <div class="pe__output-actions">
+                            <button class="pe__copy-btn pe__copy-btn--secondary" on:click={saveAsNote} disabled={isSavingNote}>
+                                {isSavingNote ? 'Saving...' : '📝 Save as Note'}
+                            </button>
+                            <button class="pe__copy-btn" on:click={copyToClipboard}>
+                                {copied ? '✓ Copied!' : '📋 Copy'}
+                            </button>
+                        </div>
                     </div>
 
                     <div class="pe__output-content">
@@ -692,6 +720,11 @@
         margin-bottom: 16px;
     }
 
+    .pe__output-actions {
+        display: flex;
+        gap: 8px;
+    }
+
     .pe__copy-btn {
         padding: 6px 14px;
         background: rgba(16, 185, 129, 0.15);
@@ -705,9 +738,26 @@
         font-family: inherit;
     }
 
-    .pe__copy-btn:hover {
+    .pe__copy-btn:hover:not(:disabled) {
         background: rgba(16, 185, 129, 0.25);
         transform: translateY(-1px);
+    }
+
+    .pe__copy-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .pe__copy-btn--secondary {
+        background: var(--clr-surface2);
+        border-color: var(--clr-border);
+        color: var(--clr-text-secondary);
+    }
+
+    .pe__copy-btn--secondary:hover:not(:disabled) {
+        background: var(--clr-surface);
+        border-color: var(--clr-accent);
+        color: var(--clr-text-primary);
     }
 
     .pe__output-content {
