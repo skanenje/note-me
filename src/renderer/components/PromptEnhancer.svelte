@@ -384,6 +384,18 @@
                             </ul>
                         </div>
                     {/if}
+                {:else}
+                    <div class="flex-1 flex flex-col items-center justify-center text-on-surface-variant opacity-50">
+                        <span class="material-symbols-outlined text-7xl mb-4 bg-surface-container-highest p-4 rounded-full">auto_awesome</span>
+                        <p class="text-sm font-medium">Your enhanced prompt will appear here</p>
+                    </div>
+                {/if}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
     @keyframes slideUp {
         from { opacity: 0; transform: translateY(10px); }
         to   { opacity: 1; transform: translateY(0); }
