@@ -48,6 +48,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   closeTab: (sessionId) => {
     ipcRenderer.send('close-tab', sessionId);
   },
+  hideTabs: () => {
+    ipcRenderer.send('hide-tabs');
+  },
+  showTabs: () => {
+    ipcRenderer.send('show-tabs');
+  },
 
   // Layout: tell the main process where the BrowserView should be rendered
   updateLayoutMetrics: (sidebarWidth, toolbarHeight) => {

@@ -49,23 +49,31 @@
         window.electronAPI.updateLayoutMetrics(sidebarWidth, toolbarHeight);
     }
 
-    onMount(async () => {
+    onMount(() => {
         isMac = window.navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-        loadingTools = true;
-        loadError = null;
-        try {
-            await loadTools();
-            await loadSessions();
-        } catch (err) {
-            loadError = `Could not load AI tools: ${err.message}`;
+        
+        const init = async () => {
+            loadingTools = true;
+            loadError = null;
+            try {
+                await loadTools();
+                await loadSessions();
+            } catch (err) {
+                loadError = `Could not load AI tools: ${err.message}`;
+            } finally {
+                loadingTools = false;
+            }
 
-        } finally {
-            loadingTools = false;
-        }
+            // Wait for DOM to settle then send initial layout metrics
+            await tick();
+            sendLayoutMetrics();
 
-        // Wait for DOM to settle then send initial layout metrics
-        await tick();
-        sendLayoutMetrics();
+            if (window.electronAPI && window.electronAPI.showTabs) {
+                window.electronAPI.showTabs();
+            }
+        };
+
+        init();
 
         // Keep metrics in sync when window is resized
         window.addEventListener('resize', sendLayoutMetrics);
@@ -106,6 +114,9 @@
         return () => {
             window.removeEventListener('resize', sendLayoutMetrics);
             window.removeEventListener('keydown', handleKeyDown);
+            if (window.electronAPI && window.electronAPI.hideTabs) {
+                window.electronAPI.hideTabs();
+            }
         };
     });
 
