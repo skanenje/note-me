@@ -63,9 +63,15 @@ function createTab(sessionId, toolUrl) {
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
-            partition: `persist:session-${sessionId}`
+            partition: `persist:aitools`
         }
     });
+
+    const defaultUserAgent = view.webContents.getUserAgent();
+    const cleanUserAgent = defaultUserAgent
+        .replace(/note-me\/[\d\.]+ /, '')
+        .replace(/Electron\/[\d\.]+ /, '');
+    view.webContents.setUserAgent(cleanUserAgent);
 
     console.log(`[TABS] Created WebContentsView for session ${sessionId}, loading ${toolUrl}`);
 

@@ -131,11 +131,13 @@
         };
         window.addEventListener('keydown', handleKeyDown);
 
-        return () => {
-            window.removeEventListener('resize', sendLayoutMetrics);
-            window.removeEventListener('keydown', handleKeyDown);
-            if (window.electronAPI && window.electronAPI.hideTabs) {
-                window.electronAPI.hideTabs();
+        return {
+            destroy() {
+                window.removeEventListener('resize', sendLayoutMetrics);
+                window.removeEventListener('keydown', handleKeyDown);
+                if (window.electronAPI && window.electronAPI.hideTabs) {
+                    window.electronAPI.hideTabs();
+                }
             }
         };
     }
