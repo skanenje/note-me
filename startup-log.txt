@@ -1,14 +1,65 @@
-=== Note-Me startup log — 2026-06-25T08:29:22.824Z ===
-[2026-06-25T08:29:23.046Z] [WINDOW] Creating BrowserWindow
-[2026-06-25T08:29:23.195Z] [WINDOW] Development mode — loading http://localhost:5173
-[2026-06-25T08:29:24.467Z] [RENDERER-CONSOLE] [Level 0] [vite] connecting... (http://localhost:5173/@vite/client:733)
-[2026-06-25T08:29:24.488Z] [RENDERER-CONSOLE] [Level 0] [vite] connected. (http://localhost:5173/@vite/client:827)
-[2026-06-25T08:29:24.658Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte script tag is executing! (http://localhost:5173/App.svelte:611)
-[2026-06-25T08:29:24.660Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte script tag is executing! (http://localhost:5173/components/LessonList.svelte:895)
-[2026-06-25T08:29:24.665Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte DOM element mounted! Loading lessons... (http://localhost:5173/components/LessonList.svelte:914)
-[2026-06-25T08:29:24.667Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte DOM element mounted! Loading documents... (http://localhost:5173/App.svelte:625)
-[2026-06-25T08:29:24.763Z] [WINDOW] did-finish-load — renderer ready
-[2026-06-25T08:29:24.775Z] [RENDERER-CONSOLE] [Level 2] %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+=== Note-Me startup log — 2026-06-25T11:42:03.878Z ===
+[2026-06-25T11:42:04.007Z] [WINDOW] Creating BrowserWindow
+[2026-06-25T11:42:04.082Z] [WINDOW] Development mode — loading http://localhost:5173
+[2026-06-25T11:42:05.734Z] [RENDERER-CONSOLE] [Level 0] [vite] connecting... (http://localhost:5173/@vite/client:733)
+[2026-06-25T11:42:05.766Z] [RENDERER-CONSOLE] [Level 0] [vite] connected. (http://localhost:5173/@vite/client:827)
+[2026-06-25T11:42:05.851Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte script tag is executing! (http://localhost:5173/App.svelte:611)
+[2026-06-25T11:42:05.854Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte script tag is executing! (http://localhost:5173/components/LessonList.svelte:895)
+[2026-06-25T11:42:05.866Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte DOM element mounted! Loading lessons... (http://localhost:5173/components/LessonList.svelte:914)
+[2026-06-25T11:42:05.868Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte DOM element mounted! Loading documents... (http://localhost:5173/App.svelte:625)
+[2026-06-25T11:42:06.000Z] [WINDOW] did-finish-load — renderer ready
+[2026-06-25T11:42:06.004Z] [RENDERER-CONSOLE] [Level 2] %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged. (node:electron/js2c/sandbox_bundle:2)
+[2026-06-25T11:43:34.004Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /components/AIToolsView.svelte (http://localhost:5173/@vite/client:810)
+[2026-06-25T11:43:34.005Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /styles/global.css (http://localhost:5173/@vite/client:810)
+[2026-06-25T11:43:41.360Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /components/AIToolsView.svelte (http://localhost:5173/@vite/client:810)
+[2026-06-25T11:43:41.361Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /styles/global.css (http://localhost:5173/@vite/client:810)
+[2026-06-25T11:43:58.324Z] [RENDERER-CONSOLE] [Level 0] [vite] connecting... (http://localhost:5173/@vite/client:733)
+[2026-06-25T11:43:58.346Z] [RENDERER-CONSOLE] [Level 0] [vite] connected. (http://localhost:5173/@vite/client:827)
+[2026-06-25T11:43:58.453Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte script tag is executing! (http://localhost:5173/App.svelte?t=1782387821082:611)
+[2026-06-25T11:43:58.455Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte script tag is executing! (http://localhost:5173/components/LessonList.svelte:895)
+[2026-06-25T11:43:58.459Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte DOM element mounted! Loading lessons... (http://localhost:5173/components/LessonList.svelte:914)
+[2026-06-25T11:43:58.461Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte DOM element mounted! Loading documents... (http://localhost:5173/App.svelte?t=1782387821082:625)
+[2026-06-25T11:43:58.503Z] [WINDOW] did-finish-load — renderer ready
+[2026-06-25T11:43:58.520Z] [RENDERER-CONSOLE] [Level 2] %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged. (node:electron/js2c/sandbox_bundle:2)
+[2026-06-25T11:45:02.156Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /components/AIToolsView.svelte (http://localhost:5173/@vite/client:810)
+[2026-06-25T11:45:02.157Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /styles/global.css (http://localhost:5173/@vite/client:810)
+[2026-06-25T11:45:22.296Z] [RENDERER-CONSOLE] [Level 0] [vite] connecting... (http://localhost:5173/@vite/client:733)
+[2026-06-25T11:45:22.312Z] [RENDERER-CONSOLE] [Level 0] [vite] connected. (http://localhost:5173/@vite/client:827)
+[2026-06-25T11:45:22.420Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte script tag is executing! (http://localhost:5173/App.svelte?t=1782387901820:611)
+[2026-06-25T11:45:22.422Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte script tag is executing! (http://localhost:5173/components/LessonList.svelte:895)
+[2026-06-25T11:45:22.426Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte DOM element mounted! Loading lessons... (http://localhost:5173/components/LessonList.svelte:914)
+[2026-06-25T11:45:22.427Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte DOM element mounted! Loading documents... (http://localhost:5173/App.svelte?t=1782387901820:625)
+[2026-06-25T11:45:22.479Z] [WINDOW] did-finish-load — renderer ready
+[2026-06-25T11:45:22.485Z] [RENDERER-CONSOLE] [Level 2] %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+  this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged. (node:electron/js2c/sandbox_bundle:2)
+[2026-06-25T11:46:23.800Z] [RENDERER-CONSOLE] [Level 0] [vite] connecting... (http://localhost:5173/@vite/client:733)
+[2026-06-25T11:46:23.817Z] [RENDERER-CONSOLE] [Level 0] [vite] connected. (http://localhost:5173/@vite/client:827)
+[2026-06-25T11:46:23.919Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte script tag is executing! (http://localhost:5173/App.svelte?t=1782387901820:611)
+[2026-06-25T11:46:23.922Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte script tag is executing! (http://localhost:5173/components/LessonList.svelte:895)
+[2026-06-25T11:46:23.927Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte DOM element mounted! Loading lessons... (http://localhost:5173/components/LessonList.svelte:914)
+[2026-06-25T11:46:23.927Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte DOM element mounted! Loading documents... (http://localhost:5173/App.svelte?t=1782387901820:625)
+[2026-06-25T11:46:23.976Z] [WINDOW] did-finish-load — renderer ready
+[2026-06-25T11:46:23.986Z] [RENDERER-CONSOLE] [Level 2] %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
   Policy set or a policy with "unsafe-eval" enabled. This exposes users of
   this app to unnecessary security risks.
 

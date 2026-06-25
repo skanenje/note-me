@@ -6,12 +6,14 @@ const { ipcMain } = require('electron');
 module.exports = function registerAIToolsHandlers(dbManager) {
   // GET /api/tools → tools:get-all
   ipcMain.handle('tools:get-all', async () => {
+    const fs = require('fs');
+    fs.appendFileSync('/home/swapo/projects/note-me/ipc-debug.log', new Date().toISOString() + ' tools:get-all CALLED\n');
     try {
       const tools = dbManager.getAllTools();
-      console.log(`[AITOOLS_IPC] tools:get-all → ${tools.length} tools`);
+      fs.appendFileSync('/home/swapo/projects/note-me/ipc-debug.log', new Date().toISOString() + ' tools:get-all SUCCESS: ' + tools.length + '\n');
       return { success: true, tools };
     } catch (err) {
-      console.error('[AITOOLS_IPC] tools:get-all failed:', err);
+      fs.appendFileSync('/home/swapo/projects/note-me/ipc-debug.log', new Date().toISOString() + ' tools:get-all ERROR: ' + err.message + '\n');
       return { success: false, error: err.message, tools: [] };
     }
   });

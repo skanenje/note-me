@@ -19,11 +19,15 @@
 
     // We can compute 'recently used' based on last_active_at if we wanted, but for now we'll just show the tools.
     // Actually, sessions have last_active_at. We'll use sessions to get recently used.
-    $: recentlyUsedTools = (() => {
-        if (!$openTabs || $openTabs.length === 0) return [];
-        const sorted = [...$openTabs].sort((a, b) => b.session.last_active_at - a.session.last_active_at);
-        return sorted.map(t => t.tool);
-    })();
+    let recentlyUsedTools = [];
+    $: {
+        if (!$openTabs || $openTabs.length === 0) {
+            recentlyUsedTools = [];
+        } else {
+            const sorted = [...$openTabs].sort((a, b) => b.session.last_active_at - a.session.last_active_at);
+            recentlyUsedTools = sorted.map(t => t.tool);
+        }
+    }
 
     /** Root element of this component — used to measure layout for the BrowserView */
     let containerEl;
@@ -53,23 +57,39 @@
         isMac = window.navigator.platform.toUpperCase().indexOf('MAC') >= 0;
         
         const init = async () => {
-            loadingTools = true;
-            loadError = null;
             try {
-                await loadTools();
-                await loadSessions();
-            } catch (err) {
-                loadError = `Could not load AI tools: ${err.message}`;
-            } finally {
-                loadingTools = false;
-            }
+                loadingTools = true;
+                loadError = null;
+                try {
+                    const res = await window.api.getTools();
+                    if (res.success) {
+                        tools.set(res.tools);
+                    } else {
+                        loadError = res.error;
+                    }
+                    
+                    const ses = await window.api.getSessions();
+                    if (ses.success) {
+                        openTabs.set(ses.sessions.map(s => ({ session: s, tool: res.tools.find(t => t.id === s.tool_id) })).filter(t => t.tool));
+                    }
+                } catch (err) {
+                    loadError = `Could not load AI tools: ${err.message}`;
+                } finally {
+                    loadingTools = false;
+                }
 
-            // Wait for DOM to settle then send initial layout metrics
-            await tick();
-            sendLayoutMetrics();
+                // Wait for DOM to settle then send initial layout metrics
+                await tick();
+                sendLayoutMetrics();
 
-            if (window.electronAPI && window.electronAPI.showTabs) {
-                window.electronAPI.showTabs();
+                if (window.electronAPI && window.electronAPI.showTabs) {
+                    window.electronAPI.showTabs();
+                }
+            } catch (fatalErr) {
+                const pre = document.createElement('pre');
+                pre.style = "position:absolute;top:0;left:0;z-index:99999;background:red;color:white;padding:20px;";
+                pre.innerText = "FATAL SVELTE INIT ERROR: " + (fatalErr.stack || fatalErr.message);
+                document.body.appendChild(pre);
             }
         };
 
@@ -136,6 +156,14 @@
 </script>
 
 <div class="ai-tools" bind:this={containerEl}>
+    <pre style="position: absolute; top: 0; left: 0; right: 0; background: rgba(0,0,0,0.9); color: lime; z-index: 10000; padding: 20px;">
+DEBUG STATE 3:
+loadError: {loadError}
+loadingTools: {loadingTools}
+$tools.length: {$tools?.length}
+$openTabs.length: {$openTabs?.length}
+recentlyUsedTools.length: {recentlyUsedTools?.length}
+    </pre>
     <!-- Bookmarks toolbar -->
     <div class="toolbar" bind:this={toolbarEl}>
         <div class="bookmarks">
