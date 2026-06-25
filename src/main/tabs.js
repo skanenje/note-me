@@ -67,6 +67,28 @@ function createTab(sessionId, toolUrl) {
         }
     });
 
+    // Handle popups correctly
+    view.webContents.setWindowOpenHandler(({ url }) => {
+        return {
+            action: 'allow',
+            overrideBrowserWindowOptions: {
+                webPreferences: {
+                    partition: 'persist:aitools'
+                }
+            }
+        };
+    });
+
+    view.webContents.on('did-create-window', (childWindow) => {
+        // Ensure child windows (like Google Auth popups) also have a clean User-Agent
+        const currentUA = childWindow.webContents.getUserAgent();
+        const cleanUA = currentUA
+            .replace(/note-me\/[\d\.]+ /, '')
+            .replace(/Electron\/[\d\.]+ /, '');
+        childWindow.webContents.setUserAgent(cleanUA);
+    });
+
+    // Clean user agent for the main view
     const defaultUserAgent = view.webContents.getUserAgent();
     const cleanUserAgent = defaultUserAgent
         .replace(/note-me\/[\d\.]+ /, '')
