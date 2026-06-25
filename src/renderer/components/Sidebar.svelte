@@ -59,281 +59,92 @@
   }
 </script>
 
-<aside class="sidebar">
+<aside class="w-80 h-full border-r border-outline-variant bg-surface-container-lowest flex flex-col shrink-0">
   <!-- Header -->
-  <div class="sidebar__header">
-    <span class="sidebar__title">My Notes</span>
-    <span class="sidebar__count">{$documents.length}</span>
-  </div>
-
-  <div class="sidebar__search">
-    <input 
-      type="text" 
-      bind:value={searchQuery} 
-      placeholder="Search notes..." 
-      class="search-input"
-    />
-  </div>
-
-  <!-- New Page -->
-  {#if !showInput}
-    <button class="new-page-btn" on:click={handleShowInput}>
-      <span class="new-page-btn__icon">+</span>
-      New Page
-    </button>
-  {:else}
-    <div class="new-page-input-wrap">
-      <input
-        bind:this={inputEl}
-        type="text"
-        bind:value={newTitle}
-        placeholder="Page title…"
-        class="new-page-input"
-        on:keydown={(e) => {
-          if (e.key === "Enter") handleCreate();
-          if (e.key === "Escape") { showInput = false; newTitle = ""; }
-        }}
-        on:blur={() => { if (!newTitle.trim()) { showInput = false; } }}
-      />
-      <div class="new-page-input-hint">Enter to save · Esc to cancel</div>
+  <div class="p-md border-b border-outline-variant">
+    <div class="flex justify-between items-center mb-sm">
+      <h3 class="font-h2 text-primary flex items-center gap-xs">
+        <span class="material-symbols-outlined text-[20px]">edit_note</span>
+        My Notes
+      </h3>
+      <span class="text-xs font-bold bg-surface-container-high px-2 py-0.5 rounded-full text-on-surface-variant">{$documents.length}</span>
     </div>
-  {/if}
+
+    <div class="relative group mt-sm">
+      <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px] pointer-events-none group-focus-within:text-primary transition-colors">search</span>
+      <input 
+        type="text" 
+        bind:value={searchQuery} 
+        placeholder="Search notes..." 
+        class="w-full bg-surface-container-low border border-outline-variant rounded-lg pl-8 pr-3 py-1.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-on-surface"
+      />
+    </div>
+
+    <!-- New Page -->
+    <div class="mt-sm">
+      {#if !showInput}
+        <button 
+          class="w-full flex items-center justify-center gap-sm border border-dashed border-outline-variant text-on-surface-variant rounded-lg px-3 py-1.5 text-sm hover:border-primary hover:text-primary hover:bg-primary-container hover:bg-opacity-10 transition-all"
+          on:click={handleShowInput}
+        >
+          <span class="material-symbols-outlined text-[18px]">add</span>
+          <span>New Page</span>
+        </button>
+      {:else}
+        <div class="flex flex-col gap-1">
+          <input
+            bind:this={inputEl}
+            type="text"
+            bind:value={newTitle}
+            placeholder="Page title…"
+            class="w-full bg-surface-container-high border border-primary rounded-lg px-3 py-1.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50"
+            on:keydown={(e) => {
+              if (e.key === "Enter") handleCreate();
+              if (e.key === "Escape") { showInput = false; newTitle = ""; }
+            }}
+            on:blur={() => { if (!newTitle.trim()) { showInput = false; } }}
+          />
+          <div class="text-[10px] text-on-surface-variant px-1">Enter to save · Esc to cancel</div>
+        </div>
+      {/if}
+    </div>
+  </div>
 
   <!-- Documents list -->
-  <div class="doc-list">
+  <div class="flex-1 overflow-y-auto p-sm flex flex-col gap-1 custom-scrollbar">
     {#if $documentsLoading}
       {#each [1,2,3] as _}
-        <div class="doc-skeleton skeleton"></div>
+        <div class="h-10 bg-surface-container-high animate-pulse rounded-lg opacity-50 mb-1"></div>
       {/each}
     {:else if filteredDocs.length === 0}
-      <div class="doc-list__empty">
-        <span class="doc-list__empty-icon">📄</span>
-        <p>No matches found</p>
+      <div class="flex flex-col items-center justify-center h-40 text-center opacity-60">
+        <span class="material-symbols-outlined text-3xl mb-2">description</span>
+        <p class="text-sm font-semibold">No matches found</p>
       </div>
     {:else}
       {#each filteredDocs as doc (doc.id)}
         <button
-          class="doc-item"
-          class:doc-item--active={$currentDocument?.id === doc.id}
+          class="flex items-center gap-sm px-3 py-2 rounded-lg text-left group transition-colors w-full"
+          class:bg-secondary-container={$currentDocument?.id === doc.id}
+          class:text-on-secondary-container={$currentDocument?.id === doc.id}
+          class:font-semibold={$currentDocument?.id === doc.id}
+          class:hover:bg-surface-container-high={$currentDocument?.id !== doc.id}
+          class:text-on-surface-variant={$currentDocument?.id !== doc.id}
           on:click={() => handleSelect(doc.id)}
         >
-          <span class="doc-item__icon">📄</span>
-          <span class="doc-item__title">{doc.title}</span>
+          <span class="material-symbols-outlined text-[18px] shrink-0">description</span>
+          <span class="text-sm truncate flex-1">{doc.title || 'Untitled'}</span>
+          
           <button
-            class="doc-item__delete"
+            class="material-symbols-outlined text-[16px] text-on-surface-variant opacity-0 group-hover:opacity-100 hover:text-error hover:bg-error-container rounded p-0.5 transition-all shrink-0"
             aria-label="Delete page"
             on:click={(e) => handleDelete(e, doc.id)}
             disabled={deletingId === doc.id}
           >
-            {deletingId === doc.id ? '…' : '🗑'}
+            {deletingId === doc.id ? 'pending' : 'delete'}
           </button>
         </button>
       {/each}
     {/if}
   </div>
 </aside>
-
-<style>
-  .sidebar {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    background: var(--clr-surface);
-    border-right: 1px solid var(--clr-border);
-    padding: 16px 10px;
-    overflow: hidden;
-  }
-
-  .sidebar__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 4px 8px 12px;
-  }
-
-  .sidebar__title {
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--clr-text-muted);
-  }
-
-  .sidebar__count {
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: var(--clr-text-muted);
-    background: var(--clr-surface2);
-    padding: 2px 6px;
-    border-radius: var(--r-full);
-  }
-
-  .sidebar__search {
-    margin-bottom: 12px;
-    padding: 0 4px;
-  }
-
-  .search-input {
-    width: 100%;
-    padding: 6px 10px;
-    background: var(--clr-bg);
-    border: 1px solid var(--clr-border);
-    border-radius: var(--r-md);
-    color: var(--clr-text-primary);
-    font-size: 0.8rem;
-    outline: none;
-    transition: all var(--t-fast);
-  }
-
-  .search-input:focus {
-    border-color: var(--clr-accent);
-    box-shadow: 0 0 0 2px var(--clr-accent-glow);
-  }
-
-  .new-page-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    padding: 8px 10px;
-    margin-bottom: 8px;
-    border-radius: var(--r-md);
-    border: 1px dashed var(--clr-border);
-    background: transparent;
-    color: var(--clr-text-muted);
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--t-fast);
-    font-family: inherit;
-  }
-
-  .new-page-btn:hover {
-    border-color: var(--clr-accent);
-    background: rgba(124, 58, 237, 0.08);
-    color: #c4b5fd;
-  }
-
-  .new-page-btn__icon {
-    font-size: 1rem;
-    font-weight: 300;
-    line-height: 1;
-  }
-
-  .new-page-input-wrap {
-    margin-bottom: 8px;
-  }
-
-  .new-page-input {
-    width: 100%;
-    padding: 8px 10px;
-    background: var(--clr-surface2);
-    border: 1px solid var(--clr-accent);
-    border-radius: var(--r-md);
-    color: var(--clr-text-primary);
-    font-size: 0.85rem;
-    box-shadow: 0 0 0 3px var(--clr-accent-glow);
-    outline: none;
-  }
-
-  .new-page-input-hint {
-    font-size: 0.7rem;
-    color: var(--clr-text-muted);
-    padding: 4px 4px 0;
-  }
-
-  .doc-list {
-    flex: 1;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-  }
-
-  .doc-skeleton {
-    height: 36px;
-    border-radius: var(--r-md);
-    margin-bottom: 2px;
-  }
-
-  .doc-list__empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 40px 12px;
-    text-align: center;
-  }
-
-  .doc-list__empty-icon { font-size: 2rem; opacity: 0.3; }
-  .doc-list__empty p:first-of-type {
-    font-size: 0.85rem;
-    color: var(--clr-text-secondary);
-    font-weight: 500;
-  }
-  .doc-list__empty p:last-of-type {
-    font-size: 0.75rem;
-    color: var(--clr-text-muted);
-  }
-
-  .doc-item {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    padding: 8px 10px;
-    border-radius: var(--r-md);
-    border: none;
-    background: transparent;
-    color: var(--clr-text-secondary);
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all var(--t-fast);
-    text-align: left;
-    font-family: inherit;
-  }
-
-  .doc-item:hover {
-    background: var(--clr-surface2);
-    color: var(--clr-text-primary);
-  }
-
-  .doc-item--active {
-    background: rgba(124, 58, 237, 0.12);
-    color: #c4b5fd;
-    font-weight: 500;
-  }
-
-  .doc-item__icon { font-size: 0.85rem; flex-shrink: 0; }
-
-  .doc-item__title {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .doc-item__delete {
-    background: transparent;
-    border: none;
-    font-size: 0.8rem;
-    cursor: pointer;
-    opacity: 0;
-    padding: 2px 4px;
-    border-radius: 4px;
-    transition: all var(--t-fast);
-    color: var(--clr-text-muted);
-    flex-shrink: 0;
-  }
-
-  .doc-item:hover .doc-item__delete {
-    opacity: 1;
-  }
-
-  .doc-item__delete:hover {
-    background: rgba(239, 68, 68, 0.2);
-    color: #fca5a5;
-  }
-</style>

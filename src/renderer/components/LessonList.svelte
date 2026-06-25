@@ -1,22 +1,14 @@
 <script>
-  console.log('[SVELTE] LessonList.svelte script tag is executing!');
   import { onMount } from 'svelte';
 
   export let onSelectLesson;
+  export let selectedLessonId = null; // Passed from parent if we want to highlight active
 
   let lessons = [];
   let loading = true;
   let error = null;
 
-  const DIFFICULTY_LABELS = { 1: 'Beginner', 2: 'Intermediate', 3: 'Advanced' };
-  const DIFFICULTY_COLORS = {
-    Beginner:     'badge--green',
-    Intermediate: 'badge--yellow',
-    Advanced:     'badge--red',
-  };
-
   function listMounted(node) {
-    console.log('[SVELTE] LessonList.svelte DOM element mounted! Loading lessons...');
     loadLessons();
   }
 
@@ -67,354 +59,77 @@
   }
 </script>
 
-<div class="lesson-list" use:listMounted>
-  <header class="lesson-list__header">
-    <div class="lesson-list__title-wrap">
-      <h1 class="lesson-list__title">Learning Tracks</h1>
-      <p class="lesson-list__sub">Master AI concepts through interactive lessons</p>
-    </div>
+<div class="w-80 h-full border-r border-outline-variant bg-surface-container-lowest flex flex-col" use:listMounted>
+  <div class="p-md border-b border-outline-variant">
+    <h3 class="font-h2 text-primary flex items-center gap-xs">
+      <span class="material-symbols-outlined text-[20px]">school</span>
+      Learning Tracks
+    </h3>
     
     {#if !loading && !error && lessons.length > 0}
-      {@const completedLessons = lessons.filter(l => l.progressPct === 100).length}
       {@const overallPct = Math.round(lessons.reduce((acc, curr) => acc + curr.progressPct, 0) / lessons.length)}
-      <div class="dashboard-stats">
-        <div class="stat-card">
-          <span class="stat-card__val">{completedLessons}/{lessons.length}</span>
-          <span class="stat-card__lbl">Completed Tracks</span>
+      <div class="mt-sm bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+        <div class="bg-primary h-full transition-all duration-500" style="width: {overallPct}%"></div>
+      </div>
+      <p class="text-[11px] text-on-surface-variant mt-xs">Overall Progress: {overallPct}%</p>
+    {/if}
+  </div>
+
+  <div class="flex-1 overflow-y-auto p-sm flex flex-col gap-sm custom-scrollbar">
+    {#if loading}
+      {#each [1,2,3,4] as _}
+        <div class="h-16 bg-surface-container-high animate-pulse rounded-lg opacity-50"></div>
+      {/each}
+    {:else if error}
+      <div class="p-md text-center">
+        <span class="material-symbols-outlined text-error mb-2 text-3xl">error_outline</span>
+        <p class="text-on-surface-variant text-sm mb-4">{error}</p>
+        <button on:click={loadLessons} class="bg-primary text-on-primary px-4 py-2 rounded-lg font-bold text-sm">Retry</button>
+      </div>
+    {:else if lessons.length === 0}
+      <div class="p-md text-center text-on-surface-variant opacity-60">
+        <span class="material-symbols-outlined text-3xl mb-2">inbox</span>
+        <p class="text-sm">No tracks available</p>
+      </div>
+    {:else}
+      <div class="flex flex-col gap-xs">
+        <div class="px-sm py-1 flex items-center justify-between group cursor-pointer">
+          <span class="text-[11px] font-bold text-on-surface-variant tracking-wider uppercase">Available Tracks</span>
         </div>
-        <div class="stat-card">
-          <span class="stat-card__val">{overallPct}%</span>
-          <span class="stat-card__lbl">Overall Progress</span>
+        <div class="flex flex-col gap-1">
+          {#each lessons as lesson (lesson.id)}
+            <button 
+              class="flex flex-col items-start gap-1 px-md py-sm rounded-lg text-left group transition-colors"
+              class:bg-primary-container={selectedLessonId === lesson.id}
+              class:text-on-primary-container={selectedLessonId === lesson.id}
+              class:border={selectedLessonId === lesson.id}
+              class:border-primary={selectedLessonId === lesson.id}
+              class:border-opacity-20={selectedLessonId === lesson.id}
+              class:hover:bg-surface-container-high={selectedLessonId !== lesson.id}
+              class:text-on-surface={selectedLessonId !== lesson.id}
+              on:click={() => onSelectLesson(lesson.id)}
+            >
+              <div class="flex items-center gap-sm w-full">
+                {#if lesson.progressPct === 100}
+                  <span class="material-symbols-outlined text-primary text-[18px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                {:else if lesson.progressPct > 0}
+                  <span class="material-symbols-outlined text-tertiary text-[18px]">timelapse</span>
+                {:else}
+                  <span class="material-symbols-outlined text-[18px]">play_circle</span>
+                {/if}
+                <span class="text-sm font-semibold truncate flex-1">{lesson.title}</span>
+              </div>
+              {#if lesson.progressPct > 0 && lesson.progressPct < 100}
+                <div class="w-full pl-[26px]">
+                  <div class="h-1 w-full bg-surface-container-highest rounded-full overflow-hidden mt-1">
+                    <div class="h-full bg-primary" style="width: {lesson.progressPct}%"></div>
+                  </div>
+                </div>
+              {/if}
+            </button>
+          {/each}
         </div>
       </div>
     {/if}
-  </header>
-
-  {#if loading}
-    <div class="cards-grid">
-      {#each [1,2,3,4] as _}
-        <div class="card-skeleton skeleton"></div>
-      {/each}
-    </div>
-
-  {:else if error}
-    <div class="lesson-list__error">
-      <span>⚠️</span>
-      <p>{error}</p>
-      <button on:click={loadLessons} class="retry-btn">Retry</button>
-    </div>
-
-  {:else if lessons.length === 0}
-    <div class="lesson-list__empty">
-      <div class="lesson-list__empty-icon">📚</div>
-      <h2>No lessons available</h2>
-      <p>Check back soon for new content</p>
-    </div>
-
-  {:else}
-    <div class="cards-grid">
-      {#each lessons as lesson, i (lesson.id)}
-        <button
-          class="lesson-card"
-          style="animation-delay: {i * 60}ms"
-          on:click={() => onSelectLesson(lesson.id)}
-        >
-          <div class="lesson-card__accent"></div>
-          <div class="lesson-card__body">
-            <div class="lesson-card__top">
-              <div class="lesson-card__icon">📖</div>
-              <div class="lesson-card__badges">
-                {#if lesson.difficulty}
-                  {@const label = DIFFICULTY_LABELS[lesson.difficulty] || 'Beginner'}
-                  <span class="badge {DIFFICULTY_COLORS[label]}">{label}</span>
-                {/if}
-                {#if lesson.progressPct > 0}
-                  <span class="badge badge--progress" class:badge--completed={lesson.progressPct === 100}>
-                    {lesson.progressPct}% Done
-                  </span>
-                {/if}
-              </div>
-            </div>
-            <h3 class="lesson-card__title">{lesson.title}</h3>
-            <p class="lesson-card__desc">{lesson.description}</p>
-            
-            {#if lesson.progressPct > 0}
-              <div class="card-progress">
-                <div class="card-progress__bar">
-                  <div class="card-progress__fill" style="width: {lesson.progressPct}%"></div>
-                </div>
-              </div>
-            {/if}
-          </div>
-          <div class="lesson-card__footer">
-            <span class="lesson-card__cta">
-              {lesson.progressPct === 100 ? 'Review Track ↺' : lesson.progressPct > 0 ? 'Continue Track →' : 'Start lesson →'}
-            </span>
-          </div>
-        </button>
-      {/each}
-    </div>
-  {/if}
+  </div>
 </div>
-
-<style>
-  .lesson-list {
-    padding: 40px 32px;
-    max-width: 1100px;
-    margin: 0 auto;
-  }
-
-  .lesson-list__header {
-    margin-bottom: 32px;
-  }
-
-  .lesson-list__title {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: var(--clr-text-primary);
-    background: var(--grad-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 6px;
-  }
-
-  .lesson-list__sub {
-    font-size: 0.95rem;
-    color: var(--clr-text-secondary);
-  }
-
-  .cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 16px;
-  }
-
-  .card-skeleton {
-    height: 200px;
-    border-radius: var(--r-lg);
-  }
-
-  /* Lesson card */
-  .lesson-card {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    background: var(--clr-surface);
-    border: 1px solid var(--clr-border);
-    border-radius: var(--r-lg);
-    overflow: hidden;
-    cursor: pointer;
-    text-align: left;
-    font-family: inherit;
-    transition: all var(--t-normal);
-    animation: slideUp 400ms cubic-bezier(0.4,0,0.2,1) both;
-  }
-
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  .lesson-card:hover {
-    border-color: var(--clr-accent);
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg), 0 0 30px var(--clr-accent-glow);
-  }
-
-  .lesson-card__accent {
-    height: 3px;
-    background: var(--grad-primary);
-    transition: height var(--t-fast);
-  }
-
-  .lesson-card:hover .lesson-card__accent {
-    height: 4px;
-  }
-
-  .lesson-card__body {
-    flex: 1;
-    padding: 20px;
-  }
-
-  .lesson-card__top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-  }
-
-  .lesson-card__icon {
-    font-size: 1.5rem;
-  }
-
-  .badge {
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 3px 10px;
-    border-radius: var(--r-full);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-
-  .badge--green  { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
-  .badge--yellow { background: rgba(245,158,11,0.15); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
-  .badge--red    { background: rgba(239,68,68,0.15);  color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
-
-  .lesson-card__title {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: var(--clr-text-primary);
-    margin-bottom: 8px;
-    line-height: 1.3;
-  }
-
-  .lesson-card__desc {
-    font-size: 0.875rem;
-    color: var(--clr-text-secondary);
-    line-height: 1.6;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .lesson-card__footer {
-    padding: 14px 20px;
-    border-top: 1px solid var(--clr-border);
-  }
-
-  .lesson-card__cta {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--clr-text-muted);
-    transition: color var(--t-fast);
-  }
-
-  .lesson-card:hover .lesson-card__cta {
-    color: #c4b5fd;
-  }
-
-  /* Error / Empty states */
-  .lesson-list__error,
-  .lesson-list__empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 80px 24px;
-    text-align: center;
-    gap: 12px;
-    color: var(--clr-text-secondary);
-  }
-
-  .lesson-list__empty-icon { font-size: 3.5rem; opacity: 0.25; }
-
-  .lesson-list__empty h2,
-  .lesson-list__error p {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--clr-text-secondary);
-  }
-
-  .lesson-list__empty p,
-  .lesson-list__error span {
-    font-size: 0.875rem;
-    color: var(--clr-text-muted);
-  }
-
-  .retry-btn {
-    margin-top: 8px;
-    padding: 8px 20px;
-    background: var(--grad-primary);
-    color: white;
-    border: none;
-    border-radius: var(--r-md);
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
-  }
-
-  /* Dashboard Stats */
-  .lesson-list__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 40px;
-    gap: 20px;
-  }
-  
-  .dashboard-stats {
-    display: flex;
-    gap: 16px;
-  }
-  
-  .stat-card {
-    background: var(--clr-surface);
-    border: 1px solid var(--clr-border);
-    border-radius: var(--r-md);
-    padding: 12px 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 140px;
-    box-shadow: var(--shadow-sm);
-  }
-  
-  .stat-card__val {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: #c4b5fd;
-    background: var(--grad-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  
-  .stat-card__lbl {
-    font-size: 0.72rem;
-    color: var(--clr-text-muted);
-    text-transform: uppercase;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    margin-top: 2px;
-  }
-
-  .lesson-card__badges {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-  }
-
-  .badge--progress {
-    background: rgba(124, 58, 237, 0.1);
-    color: #c4b5fd;
-    border: 1px solid rgba(124, 58, 237, 0.3);
-  }
-
-  .badge--completed {
-    background: rgba(16, 185, 129, 0.15);
-    color: #6ee7b7;
-    border: 1px solid rgba(16, 185, 129, 0.3);
-  }
-
-  /* Card Progress */
-  .card-progress {
-    margin-top: 14px;
-  }
-
-  .card-progress__bar {
-    height: 4px;
-    background: var(--clr-surface2);
-    border-radius: var(--r-full);
-    overflow: hidden;
-  }
-
-  .card-progress__fill {
-    height: 100%;
-    background: var(--grad-primary);
-    border-radius: var(--r-full);
-    transition: width 300ms ease;
-  }
-</style>

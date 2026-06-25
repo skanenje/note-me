@@ -36,9 +36,9 @@
   function getFilteredItems(q, docs, tls, lsns) {
     const term = q.toLowerCase().trim();
     
-    const mappedDocs = docs.map(d => ({ type: 'document', id: d.id, title: d.title, icon: '📝', description: 'My Notes' }));
-    const mappedTools = tls.map(t => ({ type: 'tool', id: t.id, url: t.url, title: t.name, icon: '🤖', description: t.description || 'AI Tool', toolObj: t }));
-    const mappedLessons = lsns.map(l => ({ type: 'lesson', id: l.id, title: l.title, icon: '📚', description: 'Learning Track' }));
+    const mappedDocs = docs.map(d => ({ type: 'document', id: d.id, title: d.title, icon: 'edit_note', description: 'My Notes' }));
+    const mappedTools = tls.map(t => ({ type: 'tool', id: t.id, url: t.url, title: t.name, icon: 'smart_toy', description: t.description || 'AI Tool', toolObj: t }));
+    const mappedLessons = lsns.map(l => ({ type: 'lesson', id: l.id, title: l.title, icon: 'school', description: 'Learning Track' }));
 
     const all = [...mappedDocs, ...mappedTools, ...mappedLessons];
     
@@ -106,183 +106,78 @@
 </script>
 
 {#if show}
-  <div class="cp-overlay" on:click={onClose}>
-    <div class="cp-modal" on:click|stopPropagation>
-      <div class="cp-header">
-        <span class="cp-search-icon">🔍</span>
+  <div class="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100] flex items-start justify-center pt-[15vh]" on:click={onClose}>
+    <div class="w-full max-w-2xl bg-surface border border-outline-variant rounded-xl shadow-2xl overflow-hidden flex flex-col" on:click|stopPropagation>
+      
+      <!-- Header / Search Input -->
+      <div class="flex items-center px-lg py-md border-b border-outline-variant gap-md">
+        <span class="material-symbols-outlined text-on-surface-variant text-[24px]">search</span>
         <input 
           bind:this={searchInput}
           bind:value={query}
           on:keydown={handleKeydown}
-          class="cp-input" 
+          class="flex-1 bg-transparent border-none text-h2 text-on-surface focus:outline-none placeholder:text-on-surface-variant/50" 
           placeholder="Search notes, tools, and tracks..." 
+          type="text"
         />
       </div>
 
-      <div class="cp-results">
+      <!-- Results List -->
+      <div class="max-h-[400px] overflow-y-auto p-sm flex flex-col gap-xs custom-scrollbar">
         {#if filteredItems.length === 0}
-          <div class="cp-empty">No results found for "{query}"</div>
+          <div class="p-8 text-center text-on-surface-variant">No results found for "{query}"</div>
         {:else}
           {#each filteredItems as item, i}
             <div 
               id="cp-item-{i}"
-              class="cp-item" 
-              class:selected={i === selectedIndex}
+              class="flex items-center gap-md p-md rounded-lg cursor-pointer transition-colors"
+              class:bg-primary={i === selectedIndex}
+              class:bg-opacity-10={i === selectedIndex}
+              class:hover:bg-surface-container-high={i !== selectedIndex}
               on:mouseenter={() => selectedIndex = i}
               on:click={() => executeItem(item)}
             >
-              <div class="cp-item-icon">{item.icon}</div>
-              <div class="cp-item-body">
-                <div class="cp-item-title">{item.title}</div>
-                <div class="cp-item-desc">{item.description}</div>
+              <span class="material-symbols-outlined text-[24px]" class:text-primary={i === selectedIndex} class:text-on-surface-variant={i !== selectedIndex}>
+                {item.icon}
+              </span>
+              
+              <div class="flex flex-col flex-1">
+                <span class="text-on-surface font-semibold">{item.title}</span>
+                <span class="text-on-surface-variant text-sm">{item.description}</span>
               </div>
-              <div class="cp-item-type">{item.type}</div>
+              
+              <span class="text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded"
+                    class:text-primary={i === selectedIndex}
+                    class:bg-primary={i === selectedIndex}
+                    class:bg-opacity-20={i === selectedIndex}
+                    class:text-on-surface-variant={i !== selectedIndex}
+                    class:bg-surface-container-highest={i !== selectedIndex}
+              >
+                {item.type}
+              </span>
             </div>
           {/each}
         {/if}
       </div>
-      <div class="cp-footer">
-        <span><kbd>↑</kbd> <kbd>↓</kbd> to navigate</span>
-        <span><kbd>↵</kbd> to select</span>
-        <span><kbd>ESC</kbd> to close</span>
+
+      <!-- Footer -->
+      <div class="bg-surface-container-low px-lg py-sm border-t border-outline-variant flex items-center justify-between text-xs text-on-surface-variant">
+        <div class="flex gap-lg">
+          <span class="flex items-center gap-xs">
+            <kbd class="bg-surface border border-outline-variant rounded px-1 font-mono text-[10px]">↑</kbd> 
+            <kbd class="bg-surface border border-outline-variant rounded px-1 font-mono text-[10px]">↓</kbd> 
+            to navigate
+          </span>
+          <span class="flex items-center gap-xs">
+            <kbd class="bg-surface border border-outline-variant rounded px-1 font-mono text-[10px]">↵</kbd> 
+            to select
+          </span>
+        </div>
+        <span class="flex items-center gap-xs">
+          <kbd class="bg-surface border border-outline-variant rounded px-1 font-mono text-[10px]">ESC</kbd> 
+          to close
+        </span>
       </div>
     </div>
   </div>
 {/if}
-
-<style>
-  .cp-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding-top: 15vh;
-    z-index: 9999;
-  }
-
-  .cp-modal {
-    width: 100%;
-    max-width: 600px;
-    background: var(--clr-surface);
-    border: 1px solid var(--clr-border);
-    border-radius: var(--r-lg);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--clr-border);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    animation: scaleIn 150ms cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  @keyframes scaleIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
-  }
-
-  .cp-header {
-    display: flex;
-    align-items: center;
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--clr-border);
-  }
-
-  .cp-search-icon {
-    font-size: 1.2rem;
-    color: var(--clr-text-muted);
-    margin-right: 12px;
-  }
-
-  .cp-input {
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: var(--clr-text-primary);
-    font-size: 1.2rem;
-    outline: none;
-  }
-
-  .cp-input::placeholder {
-    color: var(--clr-text-muted);
-  }
-
-  .cp-results {
-    max-height: 350px;
-    overflow-y: auto;
-    padding: 8px;
-  }
-
-  .cp-item {
-    display: flex;
-    align-items: center;
-    padding: 12px 16px;
-    border-radius: var(--r-md);
-    cursor: pointer;
-    gap: 16px;
-  }
-
-  .cp-item.selected {
-    background: rgba(124, 58, 237, 0.15);
-  }
-
-  .cp-item-icon {
-    font-size: 1.5rem;
-  }
-
-  .cp-item-body {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .cp-item-title {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--clr-text-primary);
-  }
-
-  .cp-item-desc {
-    font-size: 0.75rem;
-    color: var(--clr-text-muted);
-  }
-
-  .cp-item-type {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    font-weight: 700;
-    color: var(--clr-text-muted);
-    background: var(--clr-surface2);
-    padding: 4px 8px;
-    border-radius: var(--r-full);
-  }
-
-  .cp-empty {
-    padding: 32px;
-    text-align: center;
-    color: var(--clr-text-muted);
-  }
-
-  .cp-footer {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    padding: 12px;
-    background: var(--clr-surface2);
-    border-top: 1px solid var(--clr-border);
-    font-size: 0.75rem;
-    color: var(--clr-text-muted);
-  }
-
-  kbd {
-    background: var(--clr-bg);
-    border: 1px solid var(--clr-border);
-    border-radius: 4px;
-    padding: 2px 6px;
-    font-family: inherit;
-    font-weight: 600;
-  }
-</style>

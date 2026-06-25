@@ -49,38 +49,65 @@
 
 <svelte:window on:keydown={handleGlobalKeydown} />
 
-<div class="app-shell" use:appMounted>
+<div class="h-screen w-full flex bg-background text-on-surface font-body-md overflow-hidden" use:appMounted>
   <Navigation {currentView} onNavigate={handleNavigate} />
 
-  <main class="main-content" class:fading={transitioning}>
-    {#if currentView === "lessons"}
-      <div class="page-enter">
-        {#if selectedLessonId}
-          <div class="lesson-back-wrap">
-            <button class="back-btn" on:click={handleBackToLessons}>
-              <span class="back-icon">←</span>
-              Back to Lessons
-            </button>
-            <LessonView lessonId={selectedLessonId} />
+  <main class="ml-sidebar_width flex-1 flex flex-col h-screen overflow-hidden">
+    <!-- Top App Bar -->
+    <header class="flex justify-between items-center h-16 px-xl bg-surface border-b border-outline-variant sticky top-0 z-10 shrink-0">
+      <div class="flex items-center gap-lg">
+        <div class="flex items-center gap-md">
+          <a class="text-on-surface-variant hover:text-on-surface transition-colors" href="#">Dashboard</a>
+          <a class="text-primary font-bold border-b-2 border-primary pb-1" href="#">Workspace</a>
+          <a class="text-on-surface-variant hover:text-on-surface transition-colors" href="#">Shared</a>
+        </div>
+      </div>
+      <div class="flex items-center gap-md">
+        <div class="relative group">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none group-focus-within:text-primary transition-colors">search</span>
+          <input class="bg-surface-container-low border border-outline-variant rounded-lg pl-10 pr-md py-2 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-64 transition-all" placeholder="Search Workspace..." type="text"/>
+        </div>
+        <div class="flex items-center gap-sm">
+          <button class="p-2 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors">
+            <span class="material-symbols-outlined">notifications</span>
+          </button>
+          <button class="p-2 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors">
+            <span class="material-symbols-outlined">account_circle</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="flex-1 overflow-y-auto bg-surface-container-lowest" class:fading={transitioning}>
+      {#if currentView === "lessons"}
+        <div class="flex h-full page-enter">
+          <LessonList onSelectLesson={handleSelectLesson} {selectedLessonId} />
+          <div class="flex-1 flex flex-col h-full bg-background overflow-hidden relative">
+            {#if selectedLessonId}
+              <LessonView lessonId={selectedLessonId} />
+            {:else}
+              <div class="flex flex-col items-center justify-center h-full text-on-surface-variant opacity-60">
+                <span class="material-symbols-outlined text-6xl mb-4">school</span>
+                <p>Select a learning track to begin</p>
+              </div>
+            {/if}
           </div>
-        {:else}
-          <LessonList onSelectLesson={handleSelectLesson} />
-        {/if}
-      </div>
-    {:else if currentView === "documents"}
-      <div class="documents-layout page-enter">
-        <Sidebar />
-        <Editor />
-      </div>
-    {:else if currentView === "aitools"}
-      <div class="page-enter" style="height:100%">
-        <AIToolsView />
-      </div>
-    {:else if currentView === "prompt-enhancer"}
-      <div class="page-enter" style="height:100%">
-        <PromptEnhancer />
-      </div>
-    {/if}
+        </div>
+      {:else if currentView === "documents"}
+        <div class="documents-layout page-enter h-full">
+          <Sidebar />
+          <Editor />
+        </div>
+      {:else if currentView === "aitools"}
+        <div class="page-enter h-full">
+          <AIToolsView />
+        </div>
+      {:else if currentView === "prompt-enhancer"}
+        <div class="page-enter h-full">
+          <PromptEnhancer />
+        </div>
+      {/if}
+    </div>
   </main>
 
   <CommandPalette 
@@ -93,35 +120,12 @@
 </div>
 
 <style>
-  .app-shell {
-    display: grid;
-    grid-template-columns: 240px 1fr;
-    height: 100vh;
-    background: var(--clr-bg);
-    overflow: hidden;
-  }
-
-  .main-content {
-    overflow-y: auto;
-    background: var(--clr-bg);
-    background-image: var(--grad-glow);
-    transition: opacity 80ms ease;
-    position: relative;
-  }
-
-  .main-content.fading {
+  .fading {
     opacity: 0;
   }
 
   .documents-layout {
-    display: grid;
-    grid-template-columns: 260px 1fr;
-    height: 100%;
-  }
-
-  .lesson-back-wrap {
     display: flex;
-    flex-direction: column;
     height: 100%;
   }
 
