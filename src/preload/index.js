@@ -18,6 +18,7 @@ contextBridge.exposeInMainWorld('api', {
   getLessonWithBlocks: (lessonId) => ipcRenderer.invoke('lessons:get-with-blocks', lessonId),
   updateProgress: (data) => ipcRenderer.invoke('lessons:update-progress', data),
   getLessonProgress: (lessonId) => ipcRenderer.invoke('lessons:get-progress', lessonId),
+  executeCode: (data) => ipcRenderer.invoke('lessons:execute-code', data),
 
   // Prompt Enhancer (pure Node.js — no external server needed)
   getFrameworks: () => ipcRenderer.invoke('prompt-enhancer:get-frameworks'),

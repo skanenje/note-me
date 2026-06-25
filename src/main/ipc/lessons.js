@@ -40,4 +40,37 @@ module.exports = function registerLessonHandlers(dbManager) {
       return { success: false, error: error.message };
     }
   });
+
+  const vm = require('vm');
+  ipcMain.handle('lessons:execute-code', async (_, { code, language, blockId }) => {
+    try {
+      if (language !== 'javascript') {
+        return { success: false, error: 'Only JavaScript execution is supported.' };
+      }
+      
+      const logs = [];
+      const sandbox = {
+        console: {
+          log: (...args) => logs.push(args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ')),
+          error: (...args) => logs.push('ERROR: ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '))
+        },
+        setTimeout: setTimeout,
+        clearTimeout: clearTimeout,
+        Math: Math,
+        JSON: JSON
+      };
+      
+      vm.createContext(sandbox);
+      const result = vm.runInContext(code, sandbox, { timeout: 2000 });
+      
+      let output = logs.join('\n');
+      if (result !== undefined && logs.length === 0) {
+        output = typeof result === 'object' ? JSON.stringify(result) : String(result);
+      }
+      
+      return { success: true, output };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
 };
