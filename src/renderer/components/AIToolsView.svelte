@@ -53,7 +53,7 @@
         window.electronAPI.updateLayoutMetrics(sidebarWidth, toolbarHeight);
     }
 
-    onMount(() => {
+    function toolsMounted(node) {
         isMac = window.navigator.platform.toUpperCase().indexOf('MAC') >= 0;
         
         const init = async () => {
@@ -138,7 +138,7 @@
                 window.electronAPI.hideTabs();
             }
         };
-    });
+    }
 
     async function handleToolClick(tool) {
         try {
@@ -155,15 +155,7 @@
     function handleTabClose(sessionId) { closeTab(sessionId); }
 </script>
 
-<div class="ai-tools" bind:this={containerEl}>
-    <pre style="position: absolute; top: 0; left: 0; right: 0; background: rgba(0,0,0,0.9); color: lime; z-index: 10000; padding: 20px;">
-DEBUG STATE 3:
-loadError: {loadError}
-loadingTools: {loadingTools}
-$tools.length: {$tools?.length}
-$openTabs.length: {$openTabs?.length}
-recentlyUsedTools.length: {recentlyUsedTools?.length}
-    </pre>
+<div class="ai-tools" bind:this={containerEl} use:toolsMounted>
     <!-- Bookmarks toolbar -->
     <div class="toolbar" bind:this={toolbarEl}>
         <div class="bookmarks">

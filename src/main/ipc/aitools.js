@@ -4,6 +4,8 @@
 const { ipcMain } = require('electron');
 
 module.exports = function registerAIToolsHandlers(dbManager) {
+  const fs = require('fs');
+  fs.appendFileSync('/home/swapo/projects/note-me/ipc-debug.log', new Date().toISOString() + ' registerAIToolsHandlers CALLED\n');
   // GET /api/tools → tools:get-all
   ipcMain.handle('tools:get-all', async () => {
     const fs = require('fs');
