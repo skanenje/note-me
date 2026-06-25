@@ -1,5 +1,4 @@
 <script>
-    import { onMount } from "svelte";
     import { toast } from "../stores/toast.js";
     import { createDocument } from "../stores/documents.js";
 
@@ -15,20 +14,22 @@
     let copied = false;
     let history = [];
     let showHistory = false;
+    let isSavingNote = false;
 
-    onMount(async () => {
-        await loadFrameworks();
-        await loadHistory();
-    });
+    function enhancerMounted(node) {
+        loadFrameworks();
+        loadHistory();
+        return {
+            destroy() {}
+        };
+    }
 
     async function loadFrameworks() {
         error = null;
         try {
-            // FIX 1: Use window.api.getFrameworks() — not window.electronAPI.invoke()
             const result = await window.api.getFrameworks();
 
             if (result.success) {
-                // FIX 2: Response shape is { success, frameworks } — not result.data.frameworks
                 frameworks = result.frameworks ?? [];
                 if (frameworks.length > 0) {
                     selectedFramework = frameworks[0].id;
@@ -72,7 +73,7 @@
         enhancedPrompt = item.enhanced;
         selectedFramework = item.framework;
         qualityMetrics = item.score ? { overall: item.score } : null;
-        explanations = []; // We don't save explanations currently
+        explanations = []; 
         showHistory = false;
     }
 
@@ -93,7 +94,6 @@
         explanations = [];
 
         try {
-            // FIX 3: Use window.api.enhancePrompt() — not window.electronAPI.invoke()
             const result = await window.api.enhancePrompt({
                 prompt: prompt.trim(),
                 framework_id: selectedFramework,
@@ -101,13 +101,12 @@
             });
 
             if (result.success) {
-                // FIX 4: Response shape is { success, enhancement } — enhancement has the data
                 const data = result.enhancement;
                 enhancedPrompt  = data.enhanced_prompt;
                 qualityMetrics  = data.quality;
                 explanations    = data.explain ?? [];
                 toast.success("Prompt enhanced!");
-                await loadHistory(); // refresh history
+                await loadHistory();
             } else {
                 error = `Enhancement failed: ${result.error}`;
                 toast.error(error);
@@ -132,7 +131,6 @@
         }
     }
 
-    let isSavingNote = false;
     async function saveAsNote() {
         if (!enhancedPrompt) return;
         isSavingNote = true;
@@ -183,167 +181,187 @@
     }
 </script>
 
-<div class="pe">
+<div class="h-full flex flex-col bg-background text-on-surface" use:enhancerMounted>
     <!-- Header -->
-    <div class="pe__header">
-        <div class="pe__header-content">
-            <h1 class="pe__title">Prompt Enhancer</h1>
-            <p class="pe__subtitle">Transform your prompts with AI-powered learning frameworks</p>
+    <header class="px-8 py-5 border-b border-outline-variant bg-surface shrink-0 flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold flex items-center gap-2">
+                <span class="text-[28px]">✨</span>
+                Prompt Enhancer
+            </h1>
+            <p class="text-on-surface-variant mt-1 text-sm">Transform your prompts with AI-powered learning frameworks</p>
         </div>
-        <button class="pe__history-toggle" on:click={() => showHistory = !showHistory}>
-            ⏱️ History ({history.length})
+        <button 
+            class="flex items-center gap-2 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant rounded-lg px-4 py-2 text-sm font-semibold transition-colors text-on-surface" 
+            on:click={() => showHistory = !showHistory}
+        >
+            <span>⏱️</span>
+            History ({history.length})
         </button>
-    </div>
+    </header>
 
     {#if error && !enhancedPrompt}
-        <div class="pe__error">
-            <span>⚠</span> {error}
+        <div class="m-4 p-4 bg-error-container text-on-error-container rounded-lg border border-error flex items-center gap-2 shrink-0">
+            <span>⚠</span>
+            <span class="text-sm font-medium">{error}</span>
         </div>
     {/if}
 
-    <div class="pe__layout" class:pe__layout--with-history={showHistory}>
+    <!-- Main Grid -->
+    <div class="flex-1 flex overflow-hidden p-5 gap-5">
         
+        <!-- History Sidebar -->
         {#if showHistory}
-        <div class="pe__history-sidebar">
-            <h3 class="pe__history-title">Recent Enhancements</h3>
-            {#if history.length === 0}
-                <p class="pe__history-empty">No history yet.</p>
-            {:else}
-                <div class="pe__history-list">
-                    {#each history as item}
-                        <div 
-                            class="pe__history-item" 
-                            role="button" 
-                            tabindex="0" 
-                            on:click={() => loadFromHistory(item)}
-                            on:keydown={(e) => e.key === 'Enter' && loadFromHistory(item)}
-                        >
-                            <div class="pe__history-item-header">
-                                <span class="pe__history-fw">{frameworks.find(f => f.id === item.framework)?.name || item.framework}</span>
-                                <span class="pe__history-score" style="color:{scoreColor(item.score)}">{letterGrade(item.score)}</span>
-                                <button class="pe__history-del" on:click={(e) => deleteHistoryItem(item.id, e)}>×</button>
-                            </div>
-                            <p class="pe__history-preview">{item.original}</p>
-                            <span class="pe__history-date">{formatDate(item.created_at)}</span>
-                        </div>
-                    {/each}
+            <div class="w-64 bg-surface border border-outline-variant rounded-xl flex flex-col overflow-hidden shrink-0">
+                <div class="p-4 border-b border-outline-variant bg-surface-container-lowest">
+                    <h3 class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Recent Enhancements</h3>
                 </div>
-            {/if}
-        </div>
-        {/if}
-
-        <!-- Left: Input Panel -->
-        <div class="pe__panel">
-            <div class="pe__card">
-                <h2 class="pe__card-title">Your Prompt</h2>
-
-                <!-- Framework selector -->
-                <div class="pe__field">
-                    <label class="pe__label" for="fw-select">Learning Framework</label>
-                    {#if frameworks.length === 0}
-                        <div class="pe__fw-loading skeleton" style="height:40px; border-radius:8px;"></div>
+                <div class="flex-1 overflow-y-auto p-2">
+                    {#if history.length === 0}
+                        <div class="p-4 text-center text-sm text-on-surface-variant">No history yet.</div>
                     {:else}
-                        <select id="fw-select" class="pe__select" bind:value={selectedFramework}>
-                            {#each frameworks as fw (fw.id)}
-                                <option value={fw.id}>{fw.name} — {fw.description}</option>
-                            {/each}
-                        </select>
+                        {#each history as item}
+                            <div 
+                                role="button" 
+                                tabindex="0" 
+                                class="p-3 rounded-lg hover:bg-surface-container-high cursor-pointer transition-colors border border-transparent hover:border-outline-variant mb-1 group text-left" 
+                                on:click={() => loadFromHistory(item)}
+                                on:keydown={(e) => e.key === 'Enter' && loadFromHistory(item)}
+                            >
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded uppercase tracking-wider">
+                                        {frameworks.find(f => f.id === item.framework)?.name || item.framework}
+                                    </span>
+                                    <div class="flex items-center gap-1">
+                                        <span class="font-bold text-sm" style="color:{scoreColor(item.score)}">{letterGrade(item.score)}</span>
+                                        <button 
+                                            class="opacity-0 group-hover:opacity-100 text-[14px] text-on-surface-variant hover:text-error transition-all" 
+                                            on:click={(e) => deleteHistoryItem(item.id, e)}
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-on-surface-variant truncate mb-1 font-medium">{item.original}</p>
+                                <p class="text-[10px] text-on-surface-variant/60">{formatDate(item.created_at)}</p>
+                            </div>
+                        {/each}
                     {/if}
                 </div>
+            </div>
+        {/if}
 
-                <!-- Prompt textarea -->
-                <div class="pe__field">
-                    <label class="pe__label" for="prompt-input">Prompt Text</label>
-                    <textarea
-                        id="prompt-input"
-                        class="pe__textarea"
-                        bind:value={prompt}
-                        placeholder="Type or paste your prompt here…"
-                        rows="8"
-                        disabled={isLoading}
-                    ></textarea>
-                    <div class="pe__char-count">{prompt.length} characters · {prompt.trim().split(/\s+/).filter(Boolean).length} words</div>
+        <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-5 overflow-hidden">
+            <!-- Input Panel -->
+            <div class="bg-surface border border-outline-variant rounded-xl p-6 flex flex-col overflow-y-auto">
+                <h2 class="text-lg font-bold text-on-surface mb-4 flex items-center gap-2">
+                    <span class="text-primary">✎</span> Your Prompt
+                </h2>
+                
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Learning Framework</label>
+                    <select 
+                        bind:value={selectedFramework} 
+                        class="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-on-surface"
+                    >
+                        {#if frameworks.length === 0}
+                            <option value="">Loading frameworks...</option>
+                        {/if}
+                        {#each frameworks as fw (fw.id)}
+                            <option value={fw.id}>{fw.name} — {fw.description}</option>
+                        {/each}
+                    </select>
                 </div>
 
-                <!-- Explain toggle -->
-                <label class="pe__checkbox-row">
-                    <input
-                        type="checkbox"
-                        bind:checked={showExplanation}
+                <div class="mb-4 flex-1 flex flex-col">
+                    <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Prompt Text</label>
+                    <textarea 
+                        bind:value={prompt} 
+                        placeholder="Type or paste your prompt here…" 
+                        class="w-full flex-1 bg-surface-container-low border border-outline-variant rounded-lg p-3 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-on-surface resize-none leading-relaxed" 
                         disabled={isLoading}
-                        class="pe__checkbox"
+                    ></textarea>
+                    <div class="text-right text-[10px] font-medium text-on-surface-variant mt-2">
+                        {prompt.length} characters · {prompt.trim().split(/\s+/).filter(Boolean).length} words
+                    </div>
+                </div>
+
+                <label class="flex items-center gap-2 mb-6 cursor-pointer w-fit group">
+                    <input 
+                        type="checkbox" 
+                        bind:checked={showExplanation} 
+                        disabled={isLoading} 
+                        class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary bg-surface-container-lowest" 
                     />
-                    <span class="pe__checkbox-label">Include enhancement explanations</span>
+                    <span class="text-sm text-on-surface-variant group-hover:text-on-surface transition-colors">Include enhancement explanations</span>
                 </label>
 
-                <!-- Actions -->
-                <div class="pe__actions">
-                    <button
-                        class="pe__btn pe__btn--primary"
-                        on:click={handleEnhance}
-                        disabled={isLoading || !prompt.trim()}
+                <div class="flex gap-4 mt-auto pt-4 border-t border-outline-variant">
+                    <button 
+                        on:click={handleEnhance} 
+                        disabled={isLoading || !prompt.trim()} 
+                        class="flex-1 bg-primary text-on-primary font-bold rounded-lg py-3 px-6 transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md"
                     >
                         {#if isLoading}
-                            <span class="pe__spinner"></span> Enhancing…
+                            <span>⏳</span> Enhancing…
                         {:else}
-                            🚀 Enhance
+                            <span>🚀</span> Enhance
                         {/if}
                     </button>
-                    <button
-                        class="pe__btn pe__btn--ghost"
-                        on:click={clearAll}
-                        disabled={isLoading}
+                    <button 
+                        on:click={clearAll} 
+                        disabled={isLoading} 
+                        class="bg-surface-container-high text-on-surface font-bold rounded-lg py-3 px-6 hover:bg-surface-container-highest border border-outline-variant transition-colors disabled:opacity-50"
                     >
                         Clear
                     </button>
                 </div>
             </div>
-        </div>
 
-        <!-- Right: Output Panel -->
-        <div class="pe__panel">
-            {#if enhancedPrompt}
-                <div class="pe__card pe__card--output">
-                    <div class="pe__output-header">
-                        <h2 class="pe__card-title" style="margin:0">Enhanced Prompt</h2>
-                        <div class="pe__output-actions">
-                            <button class="pe__copy-btn pe__copy-btn--secondary" on:click={saveAsNote} disabled={isSavingNote}>
-                                {isSavingNote ? 'Saving...' : '📝 Save as Note'}
+            <!-- Output Panel -->
+            <div class="bg-surface border border-outline-variant rounded-xl p-6 flex flex-col overflow-y-auto relative transition-colors duration-300" class:border-primary={enhancedPrompt}>
+                {#if enhancedPrompt}
+                    <div class="flex justify-between items-center mb-4 sticky top-0 bg-surface z-10 pb-2 border-b border-outline-variant">
+                        <h2 class="text-lg font-bold text-on-surface flex items-center gap-2">
+                            <span class="text-success">✅</span> Enhanced
+                        </h2>
+                        <div class="flex gap-2">
+                            <button 
+                                on:click={saveAsNote} 
+                                disabled={isSavingNote} 
+                                class="flex items-center gap-1 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant rounded-full px-3 py-1 text-xs font-semibold transition-colors"
+                            >
+                                📝 {isSavingNote ? 'Saving...' : 'Save Note'}
                             </button>
-                            <button class="pe__copy-btn" on:click={copyToClipboard}>
-                                {copied ? '✓ Copied!' : '📋 Copy'}
+                            <button 
+                                on:click={copyToClipboard} 
+                                class="flex items-center gap-1 bg-success/10 hover:bg-success/20 border border-success/30 text-success rounded-full px-3 py-1 text-xs font-semibold transition-colors"
+                            >
+                                📋 {copied ? 'Copied!' : 'Copy'}
                             </button>
                         </div>
                     </div>
 
-                    <div class="pe__output-content">
-                        <p class="pe__enhanced-text">{enhancedPrompt}</p>
+                    <div class="bg-surface-container-lowest border border-outline-variant border-l-4 border-l-primary rounded-lg p-4 mb-6">
+                        <p class="text-sm text-on-surface whitespace-pre-wrap leading-relaxed">{enhancedPrompt}</p>
                     </div>
 
-                    <!-- Quality Metrics -->
                     {#if qualityMetrics}
-                        <div class="pe__metrics">
-                            <h3 class="pe__section-title">Quality Metrics</h3>
-                            <div class="pe__metrics-grid">
-                                {#each [
-                                    { label: 'Overall',         key: 'overall' },
-                                    { label: 'Clarity',         key: 'clarity' },
-                                    { label: 'Specificity',     key: 'specificity' },
-                                    { label: 'Context',         key: 'context_richness' },
-                                    { label: 'Actionability',   key: 'actionability' },
-                                ] as m}
-                                    <div class="pe__metric">
-                                        <div class="pe__metric-row">
-                                            <span class="pe__metric-label">{m.label}</span>
-                                            <span class="pe__metric-val" style="color:{scoreColor(qualityMetrics[m.key])}">
-                                                {qualityMetrics[m.key]?.toFixed(1)} <span class="pe__grade">({letterGrade(qualityMetrics[m.key])})</span>
+                        <div class="mb-6">
+                            <h3 class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-4 flex items-center gap-1">
+                                📊 Quality Metrics
+                            </h3>
+                            <div class="grid grid-cols-1 gap-3 bg-surface-container-lowest border border-outline-variant rounded-lg p-4">
+                                {#each [{label:'Overall Score',k:'overall'},{label:'Clarity',k:'clarity'},{label:'Specificity',k:'specificity'},{label:'Context Richness',k:'context_richness'},{label:'Actionability',k:'actionability'}] as m}
+                                    <div>
+                                        <div class="flex justify-between text-xs mb-1">
+                                            <span class="text-on-surface-variant font-medium">{m.label}</span>
+                                            <span class="font-bold" style="color:{scoreColor(qualityMetrics[m.k])}">
+                                                {qualityMetrics[m.k]?.toFixed(1)} <span class="opacity-70 text-[10px]">({letterGrade(qualityMetrics[m.k])})</span>
                                             </span>
                                         </div>
-                                        <div class="pe__bar">
-                                            <div
-                                                class="pe__bar-fill"
-                                                style="width:{(qualityMetrics[m.key]/10)*100}%; background:{scoreColor(qualityMetrics[m.key])}"
-                                            ></div>
+                                        <div class="h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+                                            <div class="h-full rounded-full transition-all duration-700 ease-out" style="width:{(qualityMetrics[m.k]/10)*100}%; background:{scoreColor(qualityMetrics[m.k])}"></div>
                                         </div>
                                     </div>
                                 {/each}
@@ -351,545 +369,21 @@
                         </div>
                     {/if}
 
-                    <!-- Explanations -->
                     {#if explanations.length > 0}
-                        <div class="pe__explanations">
-                            <h3 class="pe__section-title">Enhancement Details</h3>
-                            <ul class="pe__exp-list">
+                        <div>
+                            <h3 class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-4 flex items-center gap-1">
+                                ℹ Enhancement Details
+                            </h3>
+                            <ul class="flex flex-col gap-2">
                                 {#each explanations as exp}
-                                    <li class="pe__exp-item">
-                                        <span class="pe__exp-check">✓</span>
-                                        {exp}
+                                    <li class="flex items-start gap-2 text-sm text-on-surface-variant bg-surface-container-lowest p-3 rounded-lg border border-outline-variant">
+                                        <span class="text-success mt-0.5">✓</span>
+                                        <span class="leading-relaxed">{exp}</span>
                                     </li>
                                 {/each}
                             </ul>
                         </div>
                     {/if}
-                </div>
-            {:else}
-                <div class="pe__output-placeholder">
-                    <div class="pe__placeholder-icon">✨</div>
-                    <p class="pe__placeholder-text">Your enhanced prompt will appear here</p>
-                </div>
-            {/if}
-        </div>
-    </div>
-</div>
-
-<style>
-    .pe {
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        background: var(--clr-bg);
-        overflow: hidden;
-    }
-
-    .pe__header {
-        background: var(--clr-surface);
-        border-bottom: 1px solid var(--clr-border);
-        padding: 20px 32px;
-        flex-shrink: 0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .pe__history-toggle {
-        background: var(--clr-surface2);
-        border: 1px solid var(--clr-border);
-        border-radius: var(--r-md);
-        padding: 8px 16px;
-        color: var(--clr-text-secondary);
-        font-size: 0.85rem;
-        cursor: pointer;
-        transition: all var(--t-fast);
-    }
-
-    .pe__history-toggle:hover {
-        background: var(--clr-surface);
-        border-color: var(--clr-accent);
-        color: var(--clr-text-primary);
-    }
-
-    .pe__title {
-        font-size: 1.4rem;
-        font-weight: 800;
-        color: var(--clr-text-primary);
-        background: var(--grad-primary);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin-bottom: 4px;
-    }
-
-    .pe__subtitle {
-        font-size: 0.85rem;
-        color: var(--clr-text-secondary);
-    }
-
-    .pe__error {
-        margin: 12px 32px 0;
-        padding: 10px 16px;
-        background: rgba(239, 68, 68, 0.1);
-        border: 1px solid rgba(239, 68, 68, 0.3);
-        border-radius: var(--r-md);
-        color: #fca5a5;
-        font-size: 0.875rem;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        flex-shrink: 0;
-    }
-
-    .pe__layout {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-        padding: 20px 32px;
-        flex: 1;
-        overflow-y: auto;
-        transition: all var(--t-fast);
-    }
-
-    .pe__layout--with-history {
-        grid-template-columns: 250px 1fr 1fr;
-    }
-
-    .pe__history-sidebar {
-        background: var(--clr-surface);
-        border: 1px solid var(--clr-border);
-        border-radius: var(--r-lg);
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-    }
-
-    .pe__history-title {
-        font-size: 0.85rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        color: var(--clr-text-muted);
-        padding: 16px;
-        border-bottom: 1px solid var(--clr-border);
-    }
-
-    .pe__history-list {
-        flex: 1;
-        overflow-y: auto;
-        padding: 8px;
-    }
-
-    .pe__history-empty {
-        padding: 16px;
-        color: var(--clr-text-muted);
-        font-size: 0.85rem;
-        text-align: center;
-    }
-
-    .pe__history-item {
-        padding: 12px;
-        border-radius: var(--r-md);
-        cursor: pointer;
-        transition: background var(--t-fast);
-        border: 1px solid transparent;
-        margin-bottom: 4px;
-    }
-
-    .pe__history-item:hover {
-        background: var(--clr-surface2);
-        border-color: var(--clr-border);
-    }
-
-    .pe__history-item-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 6px;
-    }
-
-    .pe__history-fw {
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: var(--clr-accent);
-        background: rgba(124, 58, 237, 0.1);
-        padding: 2px 6px;
-        border-radius: 4px;
-    }
-
-    .pe__history-score {
-        font-weight: 800;
-        font-size: 0.8rem;
-    }
-
-    .pe__history-del {
-        background: transparent;
-        border: none;
-        color: var(--clr-text-muted);
-        cursor: pointer;
-        font-size: 1.1rem;
-        padding: 0 4px;
-        border-radius: 4px;
-    }
-    
-    .pe__history-del:hover {
-        color: #ef4444;
-        background: rgba(239, 68, 68, 0.1);
-    }
-
-    .pe__history-preview {
-        font-size: 0.8rem;
-        color: var(--clr-text-secondary);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        margin-bottom: 6px;
-    }
-
-    .pe__history-date {
-        font-size: 0.7rem;
-        color: var(--clr-text-muted);
-    }
-
-    .pe__panel {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .pe__card {
-        background: var(--clr-surface);
-        border: 1px solid var(--clr-border);
-        border-radius: var(--r-lg);
-        padding: 24px;
-        flex: 1;
-    }
-
-    .pe__card--output {
-        border-color: rgba(124, 58, 237, 0.3);
-        animation: slideUp 300ms ease forwards;
-    }
-
-    .pe__card-title {
-        font-size: 1rem;
-        font-weight: 700;
-        color: var(--clr-text-primary);
-        margin-bottom: 20px;
-    }
-
-    .pe__field {
-        margin-bottom: 18px;
-    }
-
-    .pe__label {
-        display: block;
-        font-size: 0.78rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: var(--clr-text-muted);
-        margin-bottom: 8px;
-    }
-
-    .pe__select {
-        width: 100%;
-        padding: 10px 12px;
-        background: var(--clr-surface2);
-        border: 1px solid var(--clr-border);
-        border-radius: var(--r-md);
-        color: var(--clr-text-primary);
-        font-size: 0.875rem;
-        cursor: pointer;
-        outline: none;
-        transition: border-color var(--t-fast);
-    }
-
-    .pe__select:focus { border-color: var(--clr-accent); }
-
-    .pe__textarea {
-        width: 100%;
-        padding: 12px 14px;
-        background: var(--clr-surface2);
-        border: 1px solid var(--clr-border);
-        border-radius: var(--r-md);
-        color: var(--clr-text-primary);
-        font-size: 0.9rem;
-        font-family: inherit;
-        line-height: 1.7;
-        resize: vertical;
-        min-height: 180px;
-        outline: none;
-        transition: border-color var(--t-fast), box-shadow var(--t-fast);
-    }
-
-    .pe__textarea:focus {
-        border-color: var(--clr-accent);
-        box-shadow: 0 0 0 3px var(--clr-accent-glow);
-    }
-
-    .pe__textarea:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .pe__char-count {
-        font-size: 0.7rem;
-        color: var(--clr-text-muted);
-        margin-top: 5px;
-        text-align: right;
-    }
-
-    .pe__checkbox-row {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 20px;
-        cursor: pointer;
-    }
-
-    .pe__checkbox {
-        width: 16px;
-        height: 16px;
-        accent-color: var(--clr-accent);
-        cursor: pointer;
-    }
-
-    .pe__checkbox-label {
-        font-size: 0.875rem;
-        color: var(--clr-text-secondary);
-    }
-
-    .pe__actions {
-        display: flex;
-        gap: 10px;
-    }
-
-    .pe__btn {
-        flex: 1;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 11px 20px;
-        border-radius: var(--r-md);
-        font-size: 0.9rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all var(--t-fast);
-        font-family: inherit;
-        border: none;
-    }
-
-    .pe__btn--primary {
-        background: var(--grad-primary);
-        color: white;
-    }
-
-    .pe__btn--primary:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px var(--clr-accent-glow);
-    }
-
-    .pe__btn--ghost {
-        background: transparent;
-        border: 1px solid var(--clr-border);
-        color: var(--clr-text-secondary);
-        flex: 0;
-        padding: 11px 16px;
-    }
-
-    .pe__btn--ghost:hover:not(:disabled) {
-        background: var(--clr-surface2);
-        color: var(--clr-text-primary);
-    }
-
-    .pe__btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    .pe__spinner {
-        width: 14px;
-        height: 14px;
-        border: 2px solid rgba(255,255,255,0.3);
-        border-top-color: white;
-        border-radius: 50%;
-        animation: spin 0.7s linear infinite;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Output */
-    .pe__output-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 16px;
-    }
-
-    .pe__output-actions {
-        display: flex;
-        gap: 8px;
-    }
-
-    .pe__copy-btn {
-        padding: 6px 14px;
-        background: rgba(16, 185, 129, 0.15);
-        border: 1px solid rgba(16, 185, 129, 0.35);
-        border-radius: var(--r-full);
-        color: #6ee7b7;
-        font-size: 0.78rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all var(--t-fast);
-        font-family: inherit;
-    }
-
-    .pe__copy-btn:hover:not(:disabled) {
-        background: rgba(16, 185, 129, 0.25);
-        transform: translateY(-1px);
-    }
-
-    .pe__copy-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
-    .pe__copy-btn--secondary {
-        background: var(--clr-surface2);
-        border-color: var(--clr-border);
-        color: var(--clr-text-secondary);
-    }
-
-    .pe__copy-btn--secondary:hover:not(:disabled) {
-        background: var(--clr-surface);
-        border-color: var(--clr-accent);
-        color: var(--clr-text-primary);
-    }
-
-    .pe__output-content {
-        background: var(--clr-surface2);
-        border: 1px solid var(--clr-border);
-        border-left: 3px solid var(--clr-accent);
-        border-radius: var(--r-md);
-        padding: 16px;
-        margin-bottom: 20px;
-    }
-
-    .pe__enhanced-text {
-        color: var(--clr-text-primary);
-        font-size: 0.9rem;
-        line-height: 1.8;
-        white-space: pre-wrap;
-        word-wrap: break-word;
-    }
-
-    /* Metrics */
-    .pe__metrics {
-        padding-top: 18px;
-        border-top: 1px solid var(--clr-border);
-        margin-bottom: 16px;
-    }
-
-    .pe__section-title {
-        font-size: 0.78rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: var(--clr-text-muted);
-        margin-bottom: 14px;
-    }
-
-    .pe__metrics-grid {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .pe__metric { display: flex; flex-direction: column; gap: 5px; }
-
-    .pe__metric-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .pe__metric-label {
-        font-size: 0.8rem;
-        color: var(--clr-text-secondary);
-    }
-
-    .pe__metric-val {
-        font-size: 0.85rem;
-        font-weight: 700;
-    }
-    
-    .pe__grade {
-        font-weight: 800;
-        opacity: 0.8;
-        font-size: 0.9rem;
-    }
-
-    .pe__bar {
-        height: 5px;
-        background: var(--clr-surface2);
-        border-radius: var(--r-full);
-        overflow: hidden;
-    }
-
-    .pe__bar-fill {
-        height: 100%;
-        border-radius: var(--r-full);
-        transition: width 600ms cubic-bezier(0.4,0,0.2,1);
-        opacity: 0.85;
-    }
-
-    /* Explanations */
-    .pe__explanations {
-        padding-top: 16px;
-        border-top: 1px solid var(--clr-border);
-    }
-
-    .pe__exp-list {
-        list-style: none;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    .pe__exp-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        font-size: 0.85rem;
-        color: var(--clr-text-secondary);
-        line-height: 1.5;
-    }
-
-    .pe__exp-check {
-        color: var(--clr-success);
-        font-weight: 700;
-        margin-top: 1px;
-        flex-shrink: 0;
-    }
-
-    /* Placeholder */
-    .pe__output-placeholder {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-        min-height: 300px;
-        gap: 14px;
-        border: 1px dashed var(--clr-border);
-        border-radius: var(--r-lg);
-        background: var(--clr-surface);
-    }
-
-    .pe__placeholder-icon { font-size: 3rem; opacity: 0.2; }
-
-    .pe__placeholder-text {
-        font-size: 0.9rem;
-        color: var(--clr-text-muted);
-        text-align: center;
-    }
-
-    .pe__fw-loading { margin-bottom: 0; }
-
     @keyframes slideUp {
         from { opacity: 0; transform: translateY(10px); }
         to   { opacity: 1; transform: translateY(0); }
