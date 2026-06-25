@@ -23,6 +23,7 @@ export default defineConfig({
   plugins: [svelte(), removeElectronCrossorigin()],
   base: './',
   root: 'src/renderer',
+  publicDir: '../../static',
   build: {
     outDir: '../../dist/renderer',
     emptyOutDir: true,

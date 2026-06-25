@@ -325,7 +325,7 @@
         transform: scale(1.1);
     }
 
-    .bookmark img { width: 22px; height: 22px; }
+    .bookmark img { width: 26px; height: 26px; background: #ffffff; border-radius: 6px; padding: 3px; box-sizing: border-box; }
 
     .tabs {
         min-height: 42px;
@@ -362,7 +362,7 @@
         border-color: var(--clr-accent);
     }
 
-    .tab img { width: 14px; height: 14px; flex-shrink: 0; }
+    .tab img { width: 18px; height: 18px; flex-shrink: 0; background: #ffffff; border-radius: 4px; padding: 2px; box-sizing: border-box; }
 
     .tab span {
         flex: 1;
@@ -554,7 +554,7 @@
         width: 48px;
         height: 48px;
         border-radius: var(--r-md);
-        background: var(--clr-bg);
+        background: #ffffff;
         display: flex;
         align-items: center;
         justify-content: center;

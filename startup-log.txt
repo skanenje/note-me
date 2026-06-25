@@ -1,14 +1,14 @@
-=== Note-Me startup log — 2026-06-25T12:01:45.924Z ===
-[2026-06-25T12:01:46.044Z] [WINDOW] Creating BrowserWindow
-[2026-06-25T12:01:46.153Z] [WINDOW] Development mode — loading http://localhost:5173
-[2026-06-25T12:01:47.752Z] [RENDERER-CONSOLE] [Level 0] [vite] connecting... (http://localhost:5173/@vite/client:733)
-[2026-06-25T12:01:47.781Z] [RENDERER-CONSOLE] [Level 0] [vite] connected. (http://localhost:5173/@vite/client:827)
-[2026-06-25T12:01:47.864Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte script tag is executing! (http://localhost:5173/App.svelte:611)
-[2026-06-25T12:01:47.867Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte script tag is executing! (http://localhost:5173/components/LessonList.svelte:895)
-[2026-06-25T12:01:47.877Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte DOM element mounted! Loading lessons... (http://localhost:5173/components/LessonList.svelte:914)
-[2026-06-25T12:01:47.879Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte DOM element mounted! Loading documents... (http://localhost:5173/App.svelte:625)
-[2026-06-25T12:01:47.994Z] [WINDOW] did-finish-load — renderer ready
-[2026-06-25T12:01:47.999Z] [RENDERER-CONSOLE] [Level 2] %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+=== Note-Me startup log — 2026-06-25T12:13:38.409Z ===
+[2026-06-25T12:13:38.512Z] [WINDOW] Creating BrowserWindow
+[2026-06-25T12:13:38.596Z] [WINDOW] Development mode — loading http://localhost:5173
+[2026-06-25T12:13:40.097Z] [RENDERER-CONSOLE] [Level 0] [vite] connecting... (http://localhost:5173/@vite/client:733)
+[2026-06-25T12:13:40.119Z] [RENDERER-CONSOLE] [Level 0] [vite] connected. (http://localhost:5173/@vite/client:827)
+[2026-06-25T12:13:40.194Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte script tag is executing! (http://localhost:5173/App.svelte:611)
+[2026-06-25T12:13:40.196Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte script tag is executing! (http://localhost:5173/components/LessonList.svelte:895)
+[2026-06-25T12:13:40.203Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte DOM element mounted! Loading lessons... (http://localhost:5173/components/LessonList.svelte:914)
+[2026-06-25T12:13:40.204Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte DOM element mounted! Loading documents... (http://localhost:5173/App.svelte:625)
+[2026-06-25T12:13:40.295Z] [WINDOW] did-finish-load — renderer ready
+[2026-06-25T12:13:40.300Z] [RENDERER-CONSOLE] [Level 2] %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
   Policy set or a policy with "unsafe-eval" enabled. This exposes users of
   this app to unnecessary security risks.
 
@@ -16,60 +16,5 @@ For more information and help, consult
 https://electronjs.org/docs/tutorial/security.
 This warning will not show up
 once the app is packaged. (node:electron/js2c/sandbox_bundle:2)
-[2026-06-25T12:02:43.926Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /components/AIToolsView.svelte (http://localhost:5173/@vite/client:810)
-[2026-06-25T12:02:43.927Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /styles/global.css (http://localhost:5173/@vite/client:810)
-[2026-06-25T12:03:16.041Z] [RENDERER-CONSOLE] [Level 0] [vite] connecting... (http://localhost:5173/@vite/client:733)
-[2026-06-25T12:03:16.063Z] [RENDERER-CONSOLE] [Level 0] [vite] connected. (http://localhost:5173/@vite/client:827)
-[2026-06-25T12:03:16.167Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte script tag is executing! (http://localhost:5173/App.svelte?t=1782388963578:611)
-[2026-06-25T12:03:16.169Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte script tag is executing! (http://localhost:5173/components/LessonList.svelte:895)
-[2026-06-25T12:03:16.173Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte DOM element mounted! Loading lessons... (http://localhost:5173/components/LessonList.svelte:914)
-[2026-06-25T12:03:16.174Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte DOM element mounted! Loading documents... (http://localhost:5173/App.svelte?t=1782388963578:625)
-[2026-06-25T12:03:16.215Z] [WINDOW] did-finish-load — renderer ready
-[2026-06-25T12:03:16.232Z] [RENDERER-CONSOLE] [Level 2] %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
-  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
-  this app to unnecessary security risks.
-
-For more information and help, consult
-https://electronjs.org/docs/tutorial/security.
-This warning will not show up
-once the app is packaged. (node:electron/js2c/sandbox_bundle:2)
-[2026-06-25T12:04:11.596Z] [RENDERER-CONSOLE] [Level 1] [AITOOLS] Script tag executing! (http://localhost:5173/components/AIToolsView.svelte?t=1782389051144:1301)
-[2026-06-25T12:04:11.599Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /components/AIToolsView.svelte (http://localhost:5173/@vite/client:810)
-[2026-06-25T12:04:11.600Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /styles/global.css (http://localhost:5173/@vite/client:810)
-[2026-06-25T12:04:19.590Z] [RENDERER-CONSOLE] [Level 1] [AITOOLS] Script tag executing! (http://localhost:5173/components/AIToolsView.svelte?t=1782389058999:1301)
-[2026-06-25T12:04:19.594Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /components/AIToolsView.svelte (http://localhost:5173/@vite/client:810)
-[2026-06-25T12:04:19.594Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /styles/global.css (http://localhost:5173/@vite/client:810)
-[2026-06-25T12:05:39.283Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /components/AIToolsView.svelte (http://localhost:5173/@vite/client:810)
-[2026-06-25T12:05:39.284Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /components/AIToolsView.svelte?svelte&type=style&lang.css (http://localhost:5173/@vite/client:810)
-[2026-06-25T12:05:39.284Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /styles/global.css (http://localhost:5173/@vite/client:810)
-[2026-06-25T12:06:11.277Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /components/AIToolsView.svelte (http://localhost:5173/@vite/client:810)
-[2026-06-25T12:06:11.278Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /components/AIToolsView.svelte?svelte&type=style&lang.css (http://localhost:5173/@vite/client:810)
-[2026-06-25T12:06:11.279Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /styles/global.css (http://localhost:5173/@vite/client:810)
-[2026-06-25T12:06:30.885Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /styles/global.css (http://localhost:5173/@vite/client:810)
-[2026-06-25T12:07:02.655Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /components/AIToolsView.svelte (http://localhost:5173/@vite/client:810)
-[2026-06-25T12:07:02.657Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /components/AIToolsView.svelte?svelte&type=style&lang.css (http://localhost:5173/@vite/client:810)
-[2026-06-25T12:07:02.657Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /styles/global.css (http://localhost:5173/@vite/client:810)
-[2026-06-25T12:08:01.337Z] [RENDERER-CONSOLE] [Level 0] [vite] connecting... (http://localhost:5173/@vite/client:733)
-[2026-06-25T12:08:01.360Z] [RENDERER-CONSOLE] [Level 0] [vite] connected. (http://localhost:5173/@vite/client:827)
-[2026-06-25T12:08:01.460Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte script tag is executing! (http://localhost:5173/App.svelte?t=1782389222299:611)
-[2026-06-25T12:08:01.462Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte script tag is executing! (http://localhost:5173/components/LessonList.svelte:895)
-[2026-06-25T12:08:01.470Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte DOM element mounted! Loading lessons... (http://localhost:5173/components/LessonList.svelte:914)
-[2026-06-25T12:08:01.471Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte DOM element mounted! Loading documents... (http://localhost:5173/App.svelte?t=1782389222299:625)
-[2026-06-25T12:08:01.514Z] [WINDOW] did-finish-load — renderer ready
-[2026-06-25T12:08:01.523Z] [RENDERER-CONSOLE] [Level 2] %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
-  Policy set or a policy with "unsafe-eval" enabled. This exposes users of
-  this app to unnecessary security risks.
-
-For more information and help, consult
-https://electronjs.org/docs/tutorial/security.
-This warning will not show up
-once the app is packaged. (node:electron/js2c/sandbox_bundle:2)
-[2026-06-25T12:08:26.399Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /components/AIToolsView.svelte (http://localhost:5173/@vite/client:810)
-[2026-06-25T12:08:26.400Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /styles/global.css (http://localhost:5173/@vite/client:810)
-[2026-06-25T12:08:39.424Z] [RENDERER-CONSOLE] [Level 1] [AITOOLS] createNewTab: openrouter (http://localhost:5173/stores/aitools.js:64)
-[2026-06-25T12:08:39.436Z] [RENDERER-CONSOLE] [Level 1] [AITOOLS] createNewTab session: 0df80179-a20b-4d8f-8a16-9b9456a74bfc (http://localhost:5173/stores/aitools.js:72)
-[2026-06-25T12:08:56.805Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /components/AIToolsView.svelte (http://localhost:5173/@vite/client:810)
-[2026-06-25T12:08:56.805Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /components/AIToolsView.svelte?svelte&type=style&lang.css (http://localhost:5173/@vite/client:810)
-[2026-06-25T12:08:56.805Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /styles/global.css (http://localhost:5173/@vite/client:810)
-[2026-06-25T12:09:02.760Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte script tag is executing! (http://localhost:5173/components/LessonList.svelte:895)
-[2026-06-25T12:09:02.761Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] LessonList.svelte DOM element mounted! Loading lessons... (http://localhost:5173/components/LessonList.svelte:914)
+[2026-06-25T12:15:33.316Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /components/AIToolsView.svelte?svelte&type=style&lang.css (http://localhost:5173/@vite/client:810)
+[2026-06-25T12:15:33.317Z] [RENDERER-CONSOLE] [Level 0] [vite] hot updated: /styles/global.css (http://localhost:5173/@vite/client:810)
