@@ -10,7 +10,9 @@
   import PromptEnhancer from "./components/PromptEnhancer.svelte";
   import CommandPalette from "./components/CommandPalette.svelte";
   import Toast from "./components/Toast.svelte";
+  import SettingsView from "./components/SettingsView.svelte";
   import { loadDocuments } from "./stores/documents.js";
+  import { settings } from "./stores/settings.js";
 
   let currentView = "lessons"; // 'lessons', 'documents', 'aitools', 'prompt-enhancer'
   let selectedLessonId = null;
@@ -26,6 +28,7 @@
 
   function appMounted(node) {
     console.log('[SVELTE] App.svelte DOM element mounted! Loading documents...');
+    settings.init();
     loadDocuments();
   }
 
@@ -106,6 +109,10 @@
       {:else if currentView === "prompt-enhancer"}
         <div class="page-enter h-full">
           <PromptEnhancer />
+        </div>
+      {:else if currentView === "settings"}
+        <div class="page-enter h-full">
+          <SettingsView />
         </div>
       {/if}
     </div>

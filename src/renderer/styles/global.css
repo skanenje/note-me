@@ -54,6 +54,28 @@
   --glass-blur:   blur(16px);
 }
 
+/* Light Theme Overrides */
+:root[data-theme="light"] {
+  --clr-bg:          #f8fafc;
+  --clr-surface:     #ffffff;
+  --clr-surface2:    #f1f5f9;
+  --clr-border:      #e2e8f0;
+  --clr-border-soft: #cbd5e1;
+
+  --clr-accent:      #2563eb;
+  --clr-accent-glow: rgba(37, 99, 235, 0.15);
+  --clr-accent2:     #3b82f6;
+
+  --clr-text-primary:   #0f172a;
+  --clr-text-secondary: #475569;
+  --clr-text-muted:     #94a3b8;
+
+  --grad-primary:   linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  --grad-surface:   linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  --glass-bg:       rgba(255, 255, 255, 0.8);
+  --glass-border:   rgba(226, 232, 240, 0.8);
+}
+
 /* ─────────────────────────────────────────────
    BASE RESET
 ───────────────────────────────────────────── */

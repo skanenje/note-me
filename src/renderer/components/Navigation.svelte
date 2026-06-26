@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { openTabs } from '../stores/aitools.js';
   import { documents, loadDocuments, selectDocument } from '../stores/documents.js';
+  import { settings } from '../stores/settings.js';
 
   export let currentView = "lessons";
   export let onNavigate;
@@ -78,7 +79,15 @@
   </nav>
 
   <div class="flex flex-col gap-xs mt-auto pt-md border-t border-outline-variant">
-    <button class="flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-high rounded-lg px-md py-sm transition-colors duration-150 w-full text-left">
+    <button 
+      class="flex items-center gap-sm rounded-lg px-md py-sm transition-colors duration-150 w-full text-left"
+      class:bg-secondary-container={currentView === 'settings'}
+      class:text-on-secondary-container={currentView === 'settings'}
+      class:font-semibold={currentView === 'settings'}
+      class:text-on-surface-variant={currentView !== 'settings'}
+      class:hover:bg-surface-container-high={currentView !== 'settings'}
+      on:click={() => onNavigate('settings')}
+    >
       <span class="material-symbols-outlined">settings</span>
       <span>Settings</span>
     </button>
@@ -91,8 +100,8 @@
         <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMxX8cb4Aiv0AhnP7G33yvJipdkaSq5x9157jZkDSNehVd0BnbXmuIMXyx6pTkZk6m2TNExpAP8zF28eHZ9vh6Uw-CmFpc1U-Dhi2-4dE9Z8pEXB1Fv-Um2no6_dgIg4zUSM8jLZOxzCj_ZEfgSSVLNruzkUQszk3QmzBmspfMbXowd4ISSv0pjo0faFmYRTqFtKY3C4Mb-3HVNFc65TVkcnX4qfUrSTCfb0fjwdous3BB0A6Qwgu4yJ2hvYPeEN2TsYYyIppXBDC3" alt="User Profile"/>
       </div>
       <div class="flex flex-col">
-        <span class="text-xs font-semibold">User Profile</span>
-        <span class="text-[10px] text-on-surface-variant">Pro Plan</span>
+        <span class="text-xs font-semibold">{$settings.userName}</span>
+        <span class="text-[10px] text-on-surface-variant">{$settings.userPlan}</span>
       </div>
     </div>
   </div>
