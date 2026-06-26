@@ -250,6 +250,7 @@
           on:focus={() => dispatch('focus', { blockId: block.id })}
           spellcheck="true"
           role="textbox"
+          tabindex="0"
           aria-multiline="true"
         ></div>
       </div>
@@ -268,6 +269,7 @@
           on:focus={() => dispatch('focus', { blockId: block.id })}
           spellcheck="true"
           role="textbox"
+          tabindex="0"
           aria-multiline="true"
         ></div>
       </div>
@@ -286,6 +288,7 @@
           on:focus={() => dispatch('focus', { blockId: block.id })}
           spellcheck="true"
           role="textbox"
+          tabindex="0"
           aria-multiline="true"
         ></div>
       </div>
@@ -304,6 +307,7 @@
           on:focus={() => dispatch('focus', { blockId: block.id })}
           spellcheck="true"
           role="textbox"
+          tabindex="0"
           aria-multiline="true"
         ></div>
       </div>
@@ -321,6 +325,7 @@
         on:focus={() => dispatch('focus', { blockId: block.id })}
         spellcheck={block.type !== 'code'}
         role="textbox"
+        tabindex="0"
         aria-multiline="true"
       ></div>
     {/if}

@@ -15,14 +15,31 @@
   async function loadAll() {
     loading = true;
     try {
-      const [treeRes, favRes, trashRes] = await Promise.all([
+      // Run all three in parallel; handle each independently
+      const [treeRes, favRes, trashRes] = await Promise.allSettled([
         window.api.getDocumentTree(),
         window.api.getFavorites(),
         window.api.getTrash(),
       ]);
-      if (treeRes.success) { tree = treeRes.tree; allDocs = flattenTree(treeRes.tree); }
-      if (favRes.success) favorites = favRes.documents;
-      if (trashRes.success) trash = trashRes.documents;
+
+      if (treeRes.status === 'fulfilled' && treeRes.value?.success) {
+        tree = treeRes.value.tree || [];
+        allDocs = flattenTree(tree);
+      } else {
+        // Fallback: use old getDocuments API which we know works
+        console.warn('[Sidebar] getDocumentTree failed, falling back to getDocuments:', treeRes.reason || treeRes.value?.error);
+        const fallback = await window.api.getDocuments();
+        if (fallback.success) {
+          // Treat all as root-level nodes with no children
+          allDocs = fallback.documents.map(d => ({ ...d, children: [] }));
+          tree = allDocs;
+        }
+      }
+
+      if (favRes.status === 'fulfilled' && favRes.value?.success) favorites = favRes.value.documents || [];
+      if (trashRes.status === 'fulfilled' && trashRes.value?.success) trash = trashRes.value.documents || [];
+    } catch (err) {
+      console.error('[Sidebar] loadAll error:', err);
     } finally {
       loading = false;
     }
@@ -51,7 +68,6 @@
     if (res.success) {
       await loadAll();
       await openDoc(res.document.id);
-      if (parentId) expandedIds = new Set([...expandedIds, parentId]);
       toast.success('Page created');
     } else {
       toast.error('Failed to create page: ' + res.error);
@@ -84,17 +100,9 @@
     await loadAll();
   }
 
-  function toggleExpand(e, nodeId) {
-    e.stopPropagation();
-    if (expandedIds.has(nodeId)) {
-      expandedIds.delete(nodeId);
-    } else {
-      expandedIds.add(nodeId);
-    }
-    expandedIds = new Set(expandedIds);
-  }
 
   onMount(loadAll);
+
 </script>
 
 <aside class="sidebar">

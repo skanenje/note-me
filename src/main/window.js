@@ -141,7 +141,7 @@ async function createWindow() {
   if (process.env.NODE_ENV === 'development') {
     log('[WINDOW] Development mode — loading http://localhost:5173');
     mainWindow.loadURL('http://localhost:5173');
-    mainWindow.webContents.openDevTools();
+    // DevTools: open manually with Ctrl+Shift+I if needed
   } else {
     const distPath = path.join(__dirname, '../../dist/renderer');
     await startRendererServer(distPath);

@@ -54,6 +54,7 @@
         class:slash-menu__item--selected={i === selected}
         on:click={() => pick(item.type)}
         on:mouseover={() => selected = i}
+        on:focus={() => selected = i}
       >
         <span class="slash-menu__icon">{item.icon}</span>
         <span class="slash-menu__text">

@@ -78,7 +78,13 @@
       </div>
     </header>
 
-    <div class="flex-1 overflow-y-auto bg-surface-container-lowest" class:fading={transitioning}>
+    <!-- Documents layout: Sidebar is ALWAYS mounted so pages load immediately on startup -->
+    <div class="documents-layout" class:view-hidden={currentView !== 'documents'}>
+      <Sidebar />
+      <Editor />
+    </div>
+
+    <div class="flex-1 overflow-y-auto bg-surface-container-lowest" class:fading={transitioning} class:view-hidden={currentView === 'documents'}>
       {#if currentView === "lessons"}
         <div class="flex h-full page-enter">
           <LessonList onSelectLesson={handleSelectLesson} {selectedLessonId} />
@@ -92,11 +98,6 @@
               </div>
             {/if}
           </div>
-        </div>
-      {:else if currentView === "documents"}
-        <div class="documents-layout page-enter h-full">
-          <Sidebar />
-          <Editor />
         </div>
       {:else if currentView === "aitools"}
         <div class="page-enter h-full">
@@ -122,11 +123,19 @@
 <style>
   .fading {
     opacity: 0;
+    transition: opacity 0.08s;
   }
 
   .documents-layout {
     display: flex;
     height: 100%;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* Hides an element visually but keeps it mounted in the DOM */
+  .view-hidden {
+    display: none !important;
   }
 
   .back-btn {
