@@ -22,8 +22,8 @@ export async function loadDocuments() {
   }
 }
 
-export async function createDocument(title) {
-  const result = await window.api.createDocument(title);
+export async function createDocument(title, parentId = null) {
+  const result = await window.api.createDocument({ title, parentId });
   if (result.success) {
     await loadDocuments();
     return result.document;
@@ -44,7 +44,10 @@ export async function updateDocumentTitle(documentId, title) {
   const result = await window.api.updateDocumentTitle({ documentId, title });
   if (result.success) {
     await loadDocuments();
-    await selectDocument(documentId);
+    // Silently update local state
+    currentDocument.update((doc) =>
+      doc?.id === documentId ? { ...doc, title } : doc
+    );
   } else {
     throw new Error(result.error || 'Failed to update title');
   }

@@ -1,210 +1,278 @@
 <script>
-  import { currentDocument, updateDocumentTitle, refreshCurrentDocument } from "../stores/documents.js";
-  import { toast } from "../stores/toast.js";
-  import Block from "./Block.svelte";
+  import { tick } from 'svelte';
+  import { currentDocument, updateDocumentTitle } from '../stores/documents.js';
+  import { toast } from '../stores/toast.js';
+  import Block from './Block.svelte';
+  import FloatingToolbar from './FloatingToolbar.svelte';
 
-  let blockType = "paragraph";
-  let blockContent = "";
-  let titleElement;
-  let addingBlock = false;
+  let titleEl;
+  let editorEl;
+  let focusedBlockId = null;
+  let toolbarSelection = null;
+  let selectionTimer;
+  let saving = false;
 
-  const BLOCK_TYPES = [
-    { value: 'paragraph', label: '¶  Paragraph' },
-    { value: 'heading',   label: 'H  Heading' },
-    { value: 'list',      label: '≡  List' },
-    { value: 'todo',      label: '☑  To-Do' },
-    { value: 'code',      label: '</> Code' },
-  ];
-
-  async function handleSaveTitle() {
-    if (!$currentDocument) return;
-    const title = titleElement.innerText.trim();
-    if (!title) {
-      titleElement.innerText = $currentDocument.title;
-      toast.error("Title cannot be empty");
-      return;
+  // ── Document meta ──────────────────────────────────────────────────────────
+  async function handleTitleKeydown(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      // Move focus to first block or create one
+      const blocks = $currentDocument?.blocks || [];
+      if (blocks.length === 0) await createBlockAtEnd('paragraph');
+      else focusedBlockId = blocks[0].id;
     }
+  }
+
+  async function handleTitleBlur() {
+    if (!$currentDocument || !titleEl) return;
+    const title = titleEl.innerText.trim() || 'Untitled';
     if (title !== $currentDocument.title) {
-      try {
-        await updateDocumentTitle($currentDocument.id, title);
-        toast.success("Title saved");
-      } catch (err) {
-        toast.error("Failed to save title: " + err.message);
-        titleElement.innerText = $currentDocument.title;
-      }
+      try { await updateDocumentTitle($currentDocument.id, title); }
+      catch { toast.error('Failed to save title'); }
     }
   }
 
-  async function handleCreateBlock() {
-    if (!$currentDocument || !blockContent.trim()) return;
-    addingBlock = true;
+  async function changeIcon(newIcon) {
+    if (!$currentDocument) return;
+    await window.api.updateDocumentMeta({ documentId: $currentDocument.id, icon: newIcon });
+    $currentDocument = { ...$currentDocument, icon: newIcon };
+  }
+
+  // Emoji picker state (quick inline)
+  let showEmojiPicker = false;
+  const QUICK_EMOJIS = ['📄','📝','📋','📌','🗒️','✅','🔥','⭐','💡','🚀','📊','🎯','🔑','🌟','💎','🎨','🛠️','📂','🏆','❤️'];
+
+  // ── Floating text-selection toolbar ────────────────────────────────────────
+  function handleSelectionChange() {
+    clearTimeout(selectionTimer);
+    selectionTimer = setTimeout(() => {
+      const sel = window.getSelection();
+      if (sel && !sel.isCollapsed && sel.rangeCount > 0) {
+        const range = sel.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+        if (rect.width > 0) {
+          toolbarSelection = {
+            x: rect.left + rect.width / 2 - 140,
+            y: rect.top,
+          };
+        } else {
+          toolbarSelection = null;
+        }
+      } else {
+        toolbarSelection = null;
+      }
+    }, 150);
+  }
+
+  // ── Block CRUD ─────────────────────────────────────────────────────────────
+  async function reloadDoc() {
+    if (!$currentDocument) return;
+    const result = await window.api.getDocumentWithBlocks($currentDocument.id);
+    if (result.success) $currentDocument = result.document;
+  }
+
+  async function createBlockAtEnd(type = 'paragraph') {
+    if (!$currentDocument) return;
+    const res = await window.api.createBlock({ documentId: $currentDocument.id, type, content: '' });
+    if (res.success) {
+      await reloadDoc();
+      await tick();
+      focusedBlockId = res.block.id;
+    }
+  }
+
+  async function handleCreateAfter({ detail }) {
+    if (!$currentDocument) return;
+    saving = true;
     try {
-      const result = await window.api.createBlock({
+      const res = await window.api.createBlock({
         documentId: $currentDocument.id,
-        type: blockType,
-        content: blockContent.trim(),
+        type: detail.type || 'paragraph',
+        content: '',
+        afterBlockId: detail.blockId,
       });
-      if (result.success) {
-        blockContent = "";
-        await refreshCurrentDocument();
-        toast.success("Block added");
-      } else {
-        toast.error("Failed to add block: " + result.error);
+      if (res.success) {
+        await reloadDoc();
+        await tick();
+        focusedBlockId = res.block.id;
       }
-    } catch (err) {
-      toast.error("Error: " + err.message);
-    } finally {
-      addingBlock = false;
+    } finally { saving = false; }
+  }
+
+  async function handleDelete({ detail }) {
+    if (!$currentDocument) return;
+    const blocks = $currentDocument.blocks;
+    const idx = blocks.findIndex(b => b.id === detail.blockId);
+    const prevId = idx > 0 ? blocks[idx - 1].id : null;
+    const res = await window.api.deleteBlock(detail.blockId);
+    if (res.success) {
+      await reloadDoc();
+      await tick();
+      if (prevId) focusedBlockId = prevId;
     }
   }
 
-  async function handleDeleteBlock(blockId) {
-    try {
-      const result = await window.api.deleteBlock(blockId);
-      if (result.success) {
-        await refreshCurrentDocument();
-        toast.success("Block deleted");
-      } else {
-        toast.error("Failed to delete block: " + result.error);
-      }
-    } catch (err) {
-      toast.error("Error: " + err.message);
+  async function handleUpdate({ detail }) {
+    await window.api.updateBlock({ blockId: detail.blockId, content: detail.content, metadata: detail.metadata });
+    // Silently update local state without full reload (avoid cursor jumps)
+    if ($currentDocument) {
+      $currentDocument = {
+        ...$currentDocument,
+        blocks: $currentDocument.blocks.map(b =>
+          b.id === detail.blockId ? { ...b, content: detail.content || b.content, metadata: detail.metadata || b.metadata } : b
+        )
+      };
     }
   }
 
-  async function handleUpdateBlock(blockId, content) {
-    try {
-      const result = await window.api.updateBlock({ blockId, content });
-      if (result.success) {
-        await refreshCurrentDocument();
-        toast.success("Block saved");
-      } else {
-        toast.error("Failed to save block: " + result.error);
-      }
-    } catch (err) {
-      toast.error("Error: " + err.message);
+  async function handleChangeType({ detail }) {
+    const res = await window.api.updateBlockType({ blockId: detail.blockId, type: detail.type });
+    if (res.success) {
+      await reloadDoc();
+      await tick();
+      focusedBlockId = detail.blockId;
     }
   }
 
-  // Calculate live word count and reading time
-  $: wordCount = $currentDocument?.blocks.reduce((acc, block) => acc + block.content.split(/\s+/).filter(Boolean).length, 0) || 0;
+  async function handleMove({ detail }) {
+    const res = await window.api.moveBlock({ blockId: detail.fromId, newPosition: detail.toPosition });
+    if (res.success) await reloadDoc();
+  }
+
+  async function handleIndent({ detail }) {
+    await window.api.updateBlockIndent({ blockId: detail.blockId, indent: detail.indent });
+    if ($currentDocument) {
+      $currentDocument = {
+        ...$currentDocument,
+        blocks: $currentDocument.blocks.map(b =>
+          b.id === detail.blockId ? { ...b, indent: detail.indent } : b
+        )
+      };
+    }
+  }
+
+  async function handleDuplicate({ detail }) {
+    if (!$currentDocument) return;
+    const block = $currentDocument.blocks.find(b => b.id === detail.blockId);
+    if (!block) return;
+    const res = await window.api.createBlock({
+      documentId: $currentDocument.id,
+      type: block.type,
+      content: block.content,
+      afterBlockId: block.id,
+      metadata: block.metadata,
+    });
+    if (res.success) await reloadDoc();
+  }
+
+  // ── Word count & stats ─────────────────────────────────────────────────────
+  $: wordCount = $currentDocument?.blocks?.reduce((acc, b) => {
+    const text = b.content?.replace(/<[^>]+>/g, '') || '';
+    return acc + text.split(/\s+/).filter(Boolean).length;
+  }, 0) || 0;
+
   $: readingTime = Math.max(1, Math.ceil(wordCount / 200));
 
-  function handleSlashCommand(e) {
-    if (blockContent === "/p") { blockType = "paragraph"; blockContent = ""; e.preventDefault(); }
-    if (blockContent === "/h") { blockType = "heading"; blockContent = ""; e.preventDefault(); }
-    if (blockContent === "/l") { blockType = "list"; blockContent = ""; e.preventDefault(); }
-    if (blockContent === "/t") { blockType = "todo"; blockContent = ""; e.preventDefault(); }
-    if (blockContent === "/c") { blockType = "code"; blockContent = ""; e.preventDefault(); }
-  }
-
-  function exportMarkdown() {
-    if (!$currentDocument) return;
-    let md = `# ${$currentDocument.title}\n\n`;
-    $currentDocument.blocks.forEach(b => {
-      if (b.type === 'heading') md += `### ${b.content}\n\n`;
-      else if (b.type === 'list') md += `${b.content.split('\n').map(i => '- ' + i.replace(/^[-*•]\s*/, '')).join('\n')}\n\n`;
-      else if (b.type === 'todo') md += `${b.content.split('\n').map(i => {
-        const isChecked = i.match(/^\[[xX]\]\s/);
-        const hasPrefix = i.match(/^\[[ xX]\]\s/);
-        const text = hasPrefix ? i.substring(hasPrefix[0].length) : i;
-        return `- [${isChecked ? 'x' : ' '}] ${text}`;
-      }).join('\n')}\n\n`;
-      else if (b.type === 'code') md += `\`\`\`\n${b.content}\n\`\`\`\n\n`;
-      else md += `${b.content}\n\n`;
-    });
-
-    const blob = new Blob([md], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${$currentDocument.title.replace(/\\s+/g, '_').toLowerCase()}.md`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("Exported to Markdown");
-  }
+  // Reset focused block when document changes
+  $: if ($currentDocument) { focusedBlockId = null; }
 </script>
 
-<div class="editor">
+<svelte:window on:selectionchange={handleSelectionChange} on:mousedown={() => { if (!toolbarSelection) toolbarSelection = null; }} />
+
+<FloatingToolbar selection={toolbarSelection} />
+
+<div class="editor" bind:this={editorEl}>
   {#if !$currentDocument}
+    <!-- Empty state -->
     <div class="editor__empty">
-      <div class="editor__empty-icon">📝</div>
+      <div class="editor__empty-icon">🗒️</div>
       <h2 class="editor__empty-title">No page selected</h2>
-      <p class="editor__empty-sub">Pick a page from the sidebar or create a new one</p>
+      <p class="editor__empty-sub">Pick a page from the sidebar or create a new one to get started</p>
     </div>
+
   {:else}
-    <div class="editor__content">
-      <!-- Title -->
-      <div class="editor__title-wrap">
-        <h1
-          bind:this={titleElement}
-          contenteditable="true"
-          on:blur={handleSaveTitle}
-          on:keydown={(e) => {
-            if (e.key === "Enter") { e.preventDefault(); titleElement.blur(); }
-          }}
-          class="editor__title"
-          data-placeholder="Untitled"
-        >{$currentDocument.title}</h1>
-          <div class="editor__meta-actions">
-            <span>Last edited {new Date($currentDocument.updated_at).toLocaleString()}</span>
-            <span class="editor__meta-divider">•</span>
-            <span>{wordCount} words</span>
-            <span class="editor__meta-divider">•</span>
-            <span>{readingTime} min read</span>
-            <button class="editor__export-btn" on:click={exportMarkdown} title="Export as Markdown">⬇️ Export</button>
-          </div>
+    <div class="editor__page">
+      <!-- Cover image (if set) -->
+      {#if $currentDocument.cover}
+        <div class="editor__cover" style="background: {$currentDocument.cover}">
+          <button class="editor__cover-remove" on:click={() => window.api.updateDocumentMeta({ documentId: $currentDocument.id, cover: null })}>
+            Remove cover
+          </button>
+        </div>
+      {:else}
+        <div class="editor__cover-add-zone">
+          <button class="editor__cover-add-btn" on:click={() => {
+            const gradients = ['linear-gradient(135deg,#667eea,#764ba2)', 'linear-gradient(135deg,#f093fb,#f5576c)', 'linear-gradient(135deg,#4facfe,#00f2fe)', 'linear-gradient(135deg,#43e97b,#38f9d7)', 'linear-gradient(135deg,#fa709a,#fee140)'];
+            const g = gradients[Math.floor(Math.random() * gradients.length)];
+            window.api.updateDocumentMeta({ documentId: $currentDocument.id, cover: g });
+            $currentDocument = { ...$currentDocument, cover: g };
+          }}>
+            + Add Cover
+          </button>
+        </div>
+      {/if}
+
+      <div class="editor__content">
+        <!-- Page icon -->
+        <div class="editor__icon-wrap">
+          <button
+            class="editor__icon"
+            title="Change icon"
+            on:click={() => showEmojiPicker = !showEmojiPicker}
+          >{$currentDocument.icon || '📄'}</button>
+
+          {#if showEmojiPicker}
+            <div class="emoji-picker">
+              {#each QUICK_EMOJIS as emoji}
+                <button class="emoji-picker__item" on:click={() => { changeIcon(emoji); showEmojiPicker = false; }}>
+                  {emoji}
+                </button>
+              {/each}
+            </div>
+          {/if}
         </div>
 
-      <!-- Blocks -->
-      <div class="editor__blocks">
-        {#if $currentDocument.blocks.length === 0}
-          <div class="editor__no-blocks">
-            <p>Start adding blocks below ↓</p>
-          </div>
-        {:else}
+        <!-- Title -->
+        <h1
+          bind:this={titleEl}
+          contenteditable="true"
+          class="editor__title"
+          data-placeholder="Untitled"
+          on:keydown={handleTitleKeydown}
+          on:blur={handleTitleBlur}
+          spellcheck="true"
+        >{$currentDocument.title}</h1>
+
+        <!-- Meta row -->
+        <div class="editor__meta">
+          <span>{wordCount} words · {readingTime} min read</span>
+          <span>Edited {new Date($currentDocument.updated_at).toLocaleString()}</span>
+        </div>
+
+        <!-- Blocks area -->
+        <div class="editor__blocks" role="list">
           {#each $currentDocument.blocks as block (block.id)}
             <Block
               {block}
-              onDelete={handleDeleteBlock}
-              onUpdate={handleUpdateBlock}
+              isFocused={focusedBlockId === block.id}
+              on:update={handleUpdate}
+              on:delete={handleDelete}
+              on:createAfter={handleCreateAfter}
+              on:changeType={handleChangeType}
+              on:move={handleMove}
+              on:indent={handleIndent}
+              on:duplicate={handleDuplicate}
+              on:focus={(e) => focusedBlockId = e.detail.blockId}
             />
           {/each}
-        {/if}
-      </div>
 
-      <!-- Add Block -->
-      <div class="add-block">
-        <div class="add-block__header">
-          <span class="add-block__label">Add Block</span>
-          <select bind:value={blockType} class="add-block__type-select">
-            {#each BLOCK_TYPES as bt}
-              <option value={bt.value}>{bt.label}</option>
-            {/each}
-          </select>
-        </div>
-        <textarea
-          bind:value={blockContent}
-          rows="4"
-          placeholder={blockType === 'code' ? '// Write your code here...' : 'Type your content here...'}
-          class="add-block__textarea"
-          class:add-block__textarea--code={blockType === 'code'}
-          on:input={handleSlashCommand}
-          on:keydown={(e) => {
-            if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-              e.preventDefault();
-              handleCreateBlock();
-            }
-          }}
-        ></textarea>
-        <div class="add-block__footer">
-          <span class="add-block__hint">Ctrl+Enter to add · Type /h, /p, /l, /t, /c to quick-switch block type</span>
+          <!-- Click-to-add area -->
           <button
-            class="add-block__btn"
-            on:click={handleCreateBlock}
-            disabled={addingBlock || !blockContent.trim()}
+            class="editor__add-block"
+            on:click={() => createBlockAtEnd('paragraph')}
           >
-            {addingBlock ? 'Adding…' : '+ Add Block'}
+            <span class="editor__add-block-icon">+</span>
+            <span>Click to add a block, or type <kbd>/</kbd> in any empty block</span>
           </button>
         </div>
       </div>
@@ -217,8 +285,10 @@
     height: 100%;
     overflow-y: auto;
     background: var(--clr-bg);
+    scroll-behavior: smooth;
   }
 
+  /* Empty state */
   .editor__empty {
     display: flex;
     flex-direction: column;
@@ -229,208 +299,193 @@
     text-align: center;
     padding: 40px;
   }
+  .editor__empty-icon { font-size: 4rem; opacity: 0.12; }
+  .editor__empty-title { font-size: 1.3rem; font-weight: 600; color: var(--clr-text-secondary); }
+  .editor__empty-sub { font-size: 0.9rem; color: var(--clr-text-muted); max-width: 320px; line-height: 1.6; }
 
-  .editor__empty-icon {
-    font-size: 4rem;
-    opacity: 0.15;
+  /* Page layout */
+  .editor__page { min-height: 100%; }
+
+  /* Cover */
+  .editor__cover {
+    position: relative;
+    height: 180px;
+    width: 100%;
+    border-radius: 0;
+  }
+  .editor__cover-remove {
+    position: absolute;
+    bottom: 10px;
+    right: 16px;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    border-radius: var(--r-sm);
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .editor__cover:hover .editor__cover-remove { opacity: 1; }
+
+  .editor__cover-add-zone {
+    height: 32px;
+    display: flex;
+    align-items: center;
+    padding: 0 64px;
+  }
+  .editor__cover-add-btn {
+    font-size: 0.75rem;
+    color: var(--clr-text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s;
+    padding: 4px 8px;
+    border-radius: var(--r-sm);
+  }
+  .editor__cover-add-zone:hover .editor__cover-add-btn { opacity: 1; }
+  .editor__cover-add-btn:hover { background: var(--clr-surface); color: var(--clr-text-secondary); }
+
+  /* Content column */
+  .editor__content {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 64px 120px;
+  }
+
+  /* Icon */
+  .editor__icon-wrap { position: relative; margin-bottom: 16px; }
+  .editor__icon {
+    font-size: 3.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--r-md);
+    padding: 4px 8px;
+    margin: -4px -8px;
+    transition: background 0.15s;
     line-height: 1;
   }
+  .editor__icon:hover { background: var(--clr-surface); }
 
-  .editor__empty-title {
+  /* Emoji picker */
+  .emoji-picker {
+    position: absolute;
+    top: 56px;
+    left: 0;
+    z-index: 200;
+    background: var(--clr-surface);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--r-lg);
+    padding: 10px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    animation: popIn 0.15s cubic-bezier(0.16,1,0.3,1);
+  }
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.9) translateY(-8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .emoji-picker__item {
+    width: 36px;
+    height: 36px;
     font-size: 1.3rem;
-    font-weight: 600;
-    color: var(--clr-text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: var(--r-sm);
+    transition: background 0.1s;
   }
+  .emoji-picker__item:hover { background: var(--clr-surface2); }
 
-  .editor__empty-sub {
-    font-size: 0.9rem;
-    color: var(--clr-text-muted);
-  }
-
-  .editor__content {
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 40px 32px 80px;
-  }
-
-  .editor__title-wrap {
-    margin-bottom: 32px;
-  }
-
+  /* Title */
   .editor__title {
-    font-size: 2.2rem;
+    font-size: 2.6rem;
     font-weight: 800;
     color: var(--clr-text-primary);
     line-height: 1.2;
     outline: none;
     cursor: text;
-    border-radius: var(--r-sm);
-    padding: 4px 6px;
-    margin: 0 -6px;
-    transition: background var(--t-fast);
-    min-height: 52px;
+    width: 100%;
+    word-break: break-word;
+    margin-bottom: 6px;
+    caret-color: var(--clr-accent);
   }
-
-  .editor__title:focus {
-    background: var(--clr-surface);
-  }
-
   .editor__title:empty::before {
     content: attr(data-placeholder);
     color: var(--clr-text-muted);
+    opacity: 0.4;
     pointer-events: none;
   }
 
+  /* Meta */
   .editor__meta {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     font-size: 0.75rem;
     color: var(--clr-text-muted);
-    padding: 6px 6px 0;
-    letter-spacing: 0.01em;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--clr-border);
+    margin-bottom: 20px;
   }
 
-  .editor__meta-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .editor__meta-divider {
-    opacity: 0.3;
-  }
-
-  .editor__export-btn {
-    background: var(--clr-surface2);
-    border: 1px solid var(--clr-border);
-    color: var(--clr-text-secondary);
-    border-radius: var(--r-sm);
-    padding: 2px 8px;
-    font-size: 0.75rem;
-    cursor: pointer;
-    transition: all var(--t-fast);
-    margin-left: 8px;
-  }
-
-  .editor__export-btn:hover {
-    background: var(--clr-surface);
-    color: var(--clr-text-primary);
-    border-color: var(--clr-accent);
-  }
-
+  /* Blocks */
   .editor__blocks {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    margin-bottom: 32px;
+    gap: 2px;
+    min-height: 200px;
   }
 
-  .editor__no-blocks {
-    padding: 32px;
-    text-align: center;
-    color: var(--clr-text-muted);
-    font-size: 0.9rem;
-    border: 1px dashed var(--clr-border);
-    border-radius: var(--r-lg);
-  }
-
-  /* Add Block panel */
-  .add-block {
-    background: var(--clr-surface);
-    border: 1px solid var(--clr-border);
-    border-radius: var(--r-lg);
-    padding: 20px;
-    transition: border-color var(--t-fast);
-  }
-
-  .add-block:focus-within {
-    border-color: var(--clr-accent);
-    box-shadow: 0 0 0 3px var(--clr-accent-glow);
-  }
-
-  .add-block__header {
+  /* Add block hint */
+  .editor__add-block {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 14px;
-  }
-
-  .add-block__label {
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 8px 4px;
     color: var(--clr-text-muted);
+    font-size: 0.85rem;
+    background: none;
+    border: none;
+    cursor: text;
+    border-radius: var(--r-md);
+    width: 100%;
+    text-align: left;
+    opacity: 0;
+    transition: opacity 0.2s;
   }
+  .editor__blocks:hover .editor__add-block { opacity: 0.5; }
+  .editor__add-block:hover { opacity: 1 !important; background: var(--clr-surface); }
 
-  .add-block__type-select {
-    padding: 5px 10px;
-    font-size: 0.8rem;
-    background: var(--clr-surface2);
+  .editor__add-block-icon {
+    width: 22px;
+    height: 22px;
     border: 1px solid var(--clr-border);
     border-radius: var(--r-sm);
-    color: var(--clr-text-secondary);
-  }
-
-  .add-block__textarea {
-    width: 100%;
-    padding: 12px 14px;
-    background: var(--clr-surface2);
-    border: 1px solid var(--clr-border);
-    border-radius: var(--r-md);
-    color: var(--clr-text-primary);
-    font-size: 0.9rem;
-    font-family: inherit;
-    line-height: 1.6;
-    resize: vertical;
-    min-height: 90px;
-    outline: none;
-    transition: border-color var(--t-fast);
-  }
-
-  .add-block__textarea:focus {
-    border-color: var(--clr-accent);
-  }
-
-  .add-block__textarea--code {
-    font-family: 'Fira Code', 'Cascadia Code', monospace;
-    font-size: 0.85rem;
-    color: #7dd3fc;
-  }
-
-  .add-block__footer {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-top: 12px;
-  }
-
-  .add-block__hint {
-    font-size: 0.72rem;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
     color: var(--clr-text-muted);
   }
 
-  .add-block__btn {
-    padding: 8px 20px;
-    background: var(--grad-primary);
-    color: white;
-    border: none;
-    border-radius: var(--r-md);
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all var(--t-fast);
-    font-family: inherit;
-  }
-
-  .add-block__btn:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 16px var(--clr-accent-glow);
-  }
-
-  .add-block__btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
+  kbd {
+    font-family: monospace;
+    font-size: 0.8em;
+    padding: 1px 5px;
+    border: 1px solid var(--clr-border);
+    border-radius: 3px;
+    background: var(--clr-surface);
+    color: var(--clr-text-secondary);
   }
 </style>
