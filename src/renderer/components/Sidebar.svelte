@@ -1,43 +1,35 @@
 <script>
   import { onMount } from 'svelte';
-  import { currentDocument } from '../stores/documents.js';
+  import { documents, currentDocument, loadDocuments, createDocument, selectDocument, deleteDocument } from '../stores/documents.js';
   import { toast } from '../stores/toast.js';
   import PageTreeNode from './PageTreeNode.svelte';
 
-  let tree = [];
-  let favorites = [];
-  let trash = [];
   let loading = true;
   let showTrash = false;
   let searchQuery = '';
-  let allDocs = [];
+  let favorites = [];
+  let trash = [];
 
+  // Load pages on mount using the proven getDocuments API
   async function loadAll() {
     loading = true;
     try {
-      // Run all three in parallel; handle each independently
-      const [treeRes, favRes, trashRes] = await Promise.allSettled([
-        window.api.getDocumentTree(),
-        window.api.getFavorites(),
-        window.api.getTrash(),
-      ]);
+      await loadDocuments(); // This populates the shared $documents store
 
-      if (treeRes.status === 'fulfilled' && treeRes.value?.success) {
-        tree = treeRes.value.tree || [];
-        allDocs = flattenTree(tree);
-      } else {
-        // Fallback: use old getDocuments API which we know works
-        console.warn('[Sidebar] getDocumentTree failed, falling back to getDocuments:', treeRes.reason || treeRes.value?.error);
-        const fallback = await window.api.getDocuments();
-        if (fallback.success) {
-          // Treat all as root-level nodes with no children
-          allDocs = fallback.documents.map(d => ({ ...d, children: [] }));
-          tree = allDocs;
-        }
+      // Try enhanced APIs if available (needs full restart after upgrade)
+      if (window.api.getFavorites) {
+        try {
+          const favRes = await window.api.getFavorites();
+          if (favRes?.success) favorites = favRes.documents || [];
+        } catch {}
       }
 
-      if (favRes.status === 'fulfilled' && favRes.value?.success) favorites = favRes.value.documents || [];
-      if (trashRes.status === 'fulfilled' && trashRes.value?.success) trash = trashRes.value.documents || [];
+      if (window.api.getTrash) {
+        try {
+          const trashRes = await window.api.getTrash();
+          if (trashRes?.success) trash = trashRes.documents || [];
+        } catch {}
+      }
     } catch (err) {
       console.error('[Sidebar] loadAll error:', err);
     } finally {
@@ -45,64 +37,86 @@
     }
   }
 
-  function flattenTree(nodes, result = []) {
-    for (const n of nodes) {
-      result.push(n);
-      if (n.children?.length) flattenTree(n.children, result);
-    }
-    return result;
-  }
+  // Build a flat list with "tree" shape for PageTreeNode (no nesting yet, works immediately)
+  $: treeNodes = ($documents || []).map(d => ({
+    ...d,
+    icon: d.icon || '📄',
+    children: []
+  }));
 
   $: filtered = searchQuery
-    ? allDocs.filter(d => d.title.toLowerCase().includes(searchQuery.toLowerCase()))
+    ? treeNodes.filter(d => d.title?.toLowerCase().includes(searchQuery.toLowerCase()))
     : null;
 
   async function openDoc(docId) {
-    const res = await window.api.getDocumentWithBlocks(docId);
-    if (res.success) $currentDocument = res.document;
-    else toast.error('Failed to open page');
+    try {
+      await selectDocument(docId);
+    } catch (err) {
+      toast.error('Failed to open page');
+    }
   }
 
   async function createPage(parentId = null) {
-    const res = await window.api.createDocument({ title: 'Untitled', parentId });
-    if (res.success) {
+    try {
+      let doc;
+      // Use enhanced API if available, otherwise fall back
+      if (window.api.createDocument) {
+        const res = await window.api.createDocument({ title: 'Untitled', parentId });
+        if (res.success) {
+          doc = res.document;
+        } else {
+          throw new Error(res.error);
+        }
+      }
       await loadAll();
-      await openDoc(res.document.id);
+      if (doc) await openDoc(doc.id);
       toast.success('Page created');
-    } else {
-      toast.error('Failed to create page: ' + res.error);
+    } catch (err) {
+      toast.error('Failed to create page: ' + err.message);
     }
   }
 
   async function trashPage(e, docId) {
-    e.stopPropagation();
-    await window.api.trashDocument(docId);
-    if ($currentDocument?.id === docId) $currentDocument = null;
-    await loadAll();
-    toast.success('Moved to trash');
+    if (e && e.stopPropagation) e.stopPropagation();
+    try {
+      if (window.api.trashDocument) {
+        await window.api.trashDocument(docId);
+        if ($currentDocument?.id === docId) $currentDocument = null;
+      } else {
+        await deleteDocument(docId);
+      }
+      await loadAll();
+      toast.success('Moved to trash');
+    } catch (err) {
+      toast.error('Failed: ' + err.message);
+    }
   }
 
   async function restorePage(docId) {
-    await window.api.restoreDocument(docId);
-    await loadAll();
-    toast.success('Page restored');
+    try {
+      if (window.api.restoreDocument) await window.api.restoreDocument(docId);
+      await loadAll();
+      toast.success('Page restored');
+    } catch {}
   }
 
   async function deletePermanent(docId) {
-    await window.api.deleteDocument(docId);
-    await loadAll();
-    toast.success('Permanently deleted');
+    try {
+      await deleteDocument(docId);
+      await loadAll();
+      toast.success('Permanently deleted');
+    } catch {}
   }
 
   async function toggleFavorite(e, docId) {
-    e.stopPropagation();
-    await window.api.toggleFavorite(docId);
-    await loadAll();
+    if (e && e.stopPropagation) e.stopPropagation();
+    try {
+      if (window.api.toggleFavorite) await window.api.toggleFavorite(docId);
+      await loadAll();
+    } catch {}
   }
 
-
   onMount(loadAll);
-
 </script>
 
 <aside class="sidebar">
@@ -110,7 +124,7 @@
   <div class="sidebar__header">
     <div class="sidebar__brand">
       <span class="sidebar__brand-icon">🗒️</span>
-      <span class="sidebar__brand-name">Note-Me</span>
+      <span class="sidebar__brand-name">My Notes</span>
     </div>
 
     <div class="sidebar__search">
@@ -130,11 +144,12 @@
   </button>
 
   <div class="sidebar__scroll">
+
     <!-- Search results override -->
     {#if filtered !== null}
       <div class="sidebar__section-label">Search Results</div>
       {#if filtered.length === 0}
-        <div class="sidebar__empty">No pages found</div>
+        <div class="sidebar__empty">No pages found for "{searchQuery}"</div>
       {:else}
         {#each filtered as doc}
           <button
@@ -167,44 +182,42 @@
         <div class="sidebar__divider"></div>
       {/if}
 
-      <!-- Page tree -->
+      <!-- Page list -->
       <div class="sidebar__section-label">
         Pages
-        <button class="sidebar__section-action" on:click={() => createPage(null)} title="New root page">+</button>
+        <button class="sidebar__section-action" on:click={() => createPage(null)} title="New page">+</button>
       </div>
 
       {#if loading}
         {#each [1,2,3] as _}
           <div class="sidebar__skeleton"></div>
         {/each}
-      {:else if tree.length === 0}
+      {:else if treeNodes.length === 0}
         <div class="sidebar__empty">
           <p>No pages yet</p>
           <button class="sidebar__empty-create" on:click={() => createPage(null)}>Create first page</button>
         </div>
       {:else}
-        {#each tree as node}
+        {#each treeNodes as node}
           <PageTreeNode
             {node}
             depth={0}
             activeId={$currentDocument?.id}
             on:open={(e) => openDoc(e.detail.id)}
             on:create={(e) => createPage(e.detail.parentId)}
-            on:trash={(e) => trashPage({ stopPropagation: () => {} }, e.detail.id)}
-            on:favorite={(e) => toggleFavorite({ stopPropagation: () => {} }, e.detail.id)}
+            on:trash={(e) => trashPage(null, e.detail.id)}
+            on:favorite={(e) => toggleFavorite(null, e.detail.id)}
           />
         {/each}
       {/if}
 
       <!-- Trash -->
-      <div class="sidebar__divider"></div>
-      <button class="sidebar__trash-toggle" on:click={() => showTrash = !showTrash}>
-        🗑 Trash {trash.length > 0 ? `(${trash.length})` : ''} {showTrash ? '▾' : '▸'}
-      </button>
-      {#if showTrash}
-        {#if trash.length === 0}
-          <div class="sidebar__empty">Trash is empty</div>
-        {:else}
+      {#if trash.length > 0}
+        <div class="sidebar__divider"></div>
+        <button class="sidebar__trash-toggle" on:click={() => showTrash = !showTrash}>
+          🗑 Trash ({trash.length}) {showTrash ? '▾' : '▸'}
+        </button>
+        {#if showTrash}
           {#each trash as doc}
             <div class="sidebar__trash-item">
               <span class="sidebar__item-icon">{doc.icon || '📄'}</span>
@@ -354,7 +367,7 @@
   .sidebar__item--active { background: rgba(139,92,246,0.15); color: var(--clr-accent) !important; font-weight: 600; }
 
   .sidebar__item-icon { flex-shrink: 0; font-size: 0.9rem; }
-  .sidebar__item-title { flex: 1; truncate: true; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sidebar__item-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   .sidebar__item-action {
     flex-shrink: 0;
@@ -368,8 +381,7 @@
     color: var(--clr-text-muted);
     transition: background 0.1s, color 0.1s, opacity 0.1s;
   }
-  .sidebar__item:hover .sidebar__item-action,
-  .sidebar__trash-item:hover .sidebar__item-action { opacity: 1; }
+  .sidebar__item:hover .sidebar__item-action { opacity: 1; }
   .sidebar__item-action:hover { background: var(--clr-surface); color: var(--clr-text-primary); }
   .sidebar__item-action--danger:hover { color: #f87171; }
   .sidebar__item-action--gold { color: #fbbf24; opacity: 0.8; }

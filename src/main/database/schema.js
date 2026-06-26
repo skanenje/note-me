@@ -56,17 +56,26 @@ module.exports = function initSchema(db) {
 
   // ── Notion-style migrations (additive, safe for existing data) ──────────────
   const columns = db.prepare("PRAGMA table_info(documents)").all().map(c => c.name);
+
   if (!columns.includes('icon'))        db.exec("ALTER TABLE documents ADD COLUMN icon TEXT DEFAULT '📄'");
   if (!columns.includes('cover'))       db.exec("ALTER TABLE documents ADD COLUMN cover TEXT DEFAULT NULL");
   if (!columns.includes('parent_id'))   db.exec("ALTER TABLE documents ADD COLUMN parent_id TEXT DEFAULT NULL");
   if (!columns.includes('is_favorite')) db.exec("ALTER TABLE documents ADD COLUMN is_favorite INTEGER DEFAULT 0");
   if (!columns.includes('is_trashed'))  db.exec("ALTER TABLE documents ADD COLUMN is_trashed INTEGER DEFAULT 0");
 
+  // CRITICAL: SQLite ALTER TABLE only sets DEFAULT for new inserts.
+  // Existing rows get NULL — backfill them to 0 so WHERE clauses work correctly.
+  db.exec("UPDATE documents SET icon = '📄' WHERE icon IS NULL");
+  db.exec("UPDATE documents SET is_favorite = 0 WHERE is_favorite IS NULL");
+  db.exec("UPDATE documents SET is_trashed = 0 WHERE is_trashed IS NULL");
+  db.exec("UPDATE documents SET deleted = 0 WHERE deleted IS NULL");
+
   const blockColumns = db.prepare("PRAGMA table_info(blocks)").all().map(c => c.name);
   if (!blockColumns.includes('metadata')) db.exec("ALTER TABLE blocks ADD COLUMN metadata TEXT DEFAULT NULL");
   if (!blockColumns.includes('indent'))   db.exec("ALTER TABLE blocks ADD COLUMN indent INTEGER DEFAULT 0");
+  db.exec("UPDATE blocks SET indent = 0 WHERE indent IS NULL");
 
-  // Index for parent_id tree navigation
+  // Index for parent_id tree navigation (safe to recreate)
   db.exec(`
     CREATE INDEX IF NOT EXISTS idx_documents_parent
     ON documents(parent_id)

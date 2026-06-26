@@ -77,22 +77,21 @@ class DatabaseManager {
   }
   
   getDocument(id) {
-    const stmt = this.db.prepare(`SELECT * FROM documents WHERE id = ? AND deleted = 0`);
+    const stmt = this.db.prepare(`SELECT * FROM documents WHERE id = ? AND COALESCE(deleted,0) = 0`);
     return stmt.get(id);
   }
   
   getAllDocuments() {
-    const stmt = this.db.prepare(`
-      SELECT * FROM documents WHERE deleted = 0 AND is_trashed = 0 ORDER BY updated_at DESC
-    `);
-    return stmt.all();
+    return this.db.prepare(`
+      SELECT * FROM documents WHERE COALESCE(deleted,0) = 0 AND COALESCE(is_trashed,0) = 0 ORDER BY updated_at DESC
+    `).all();
   }
 
   getDocumentTree() {
     const all = this.db.prepare(`
-      SELECT id, title, icon, parent_id, is_favorite, updated_at
+      SELECT id, title, COALESCE(icon,'📄') as icon, parent_id, COALESCE(is_favorite,0) as is_favorite, updated_at
       FROM documents
-      WHERE deleted = 0 AND is_trashed = 0
+      WHERE COALESCE(deleted,0) = 0 AND COALESCE(is_trashed,0) = 0
       ORDER BY updated_at DESC
     `).all();
 
@@ -111,13 +110,13 @@ class DatabaseManager {
 
   getFavoriteDocuments() {
     return this.db.prepare(`
-      SELECT * FROM documents WHERE deleted = 0 AND is_trashed = 0 AND is_favorite = 1 ORDER BY updated_at DESC
+      SELECT * FROM documents WHERE COALESCE(deleted,0) = 0 AND COALESCE(is_trashed,0) = 0 AND COALESCE(is_favorite,0) = 1 ORDER BY updated_at DESC
     `).all();
   }
 
   getTrashedDocuments() {
     return this.db.prepare(`
-      SELECT * FROM documents WHERE deleted = 0 AND is_trashed = 1 ORDER BY updated_at DESC
+      SELECT * FROM documents WHERE COALESCE(deleted,0) = 0 AND COALESCE(is_trashed,0) = 1 ORDER BY updated_at DESC
     `).all();
   }
 
