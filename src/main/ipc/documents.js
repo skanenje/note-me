@@ -1,9 +1,9 @@
 const { ipcMain } = require('electron');
 
 module.exports = function registerDocumentHandlers(dbManager) {
-  ipcMain.handle('create-document', async (_, title) => {
+  ipcMain.handle('create-document', async (_, { title, parentId } = {}) => {
     try {
-      const doc = dbManager.createDocument(title);
+      const doc = dbManager.createDocument(title || 'Untitled', parentId || null);
       return { success: true, document: doc };
     } catch (error) {
       console.error('Error creating document:', error);
@@ -16,7 +16,33 @@ module.exports = function registerDocumentHandlers(dbManager) {
       const docs = dbManager.getAllDocuments();
       return { success: true, documents: docs };
     } catch (error) {
-      console.error('Error fetching documents:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('get-document-tree', async () => {
+    try {
+      const tree = dbManager.getDocumentTree();
+      return { success: true, tree };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('get-favorites', async () => {
+    try {
+      const docs = dbManager.getFavoriteDocuments();
+      return { success: true, documents: docs };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('get-trash', async () => {
+    try {
+      const docs = dbManager.getTrashedDocuments();
+      return { success: true, documents: docs };
+    } catch (error) {
       return { success: false, error: error.message };
     }
   });
@@ -26,7 +52,6 @@ module.exports = function registerDocumentHandlers(dbManager) {
       const doc = dbManager.getDocumentWithBlocks(documentId);
       return { success: true, document: doc };
     } catch (error) {
-      console.error('Error fetching document with blocks:', error);
       return { success: false, error: error.message };
     }
   });
@@ -36,7 +61,42 @@ module.exports = function registerDocumentHandlers(dbManager) {
       const doc = dbManager.updateDocumentTitle(documentId, title);
       return { success: true, document: doc };
     } catch (error) {
-      console.error('Error updating document title:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('update-document-meta', async (_, { documentId, icon, cover }) => {
+    try {
+      const doc = dbManager.updateDocumentMeta(documentId, { icon, cover });
+      return { success: true, document: doc };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('toggle-favorite', async (_, documentId) => {
+    try {
+      const isFavorite = dbManager.toggleFavorite(documentId);
+      return { success: true, isFavorite };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('trash-document', async (_, documentId) => {
+    try {
+      dbManager.trashDocument(documentId);
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('restore-document', async (_, documentId) => {
+    try {
+      const doc = dbManager.restoreDocument(documentId);
+      return { success: true, document: doc };
+    } catch (error) {
       return { success: false, error: error.message };
     }
   });
@@ -46,7 +106,6 @@ module.exports = function registerDocumentHandlers(dbManager) {
       const result = dbManager.deleteDocument(documentId);
       return { success: result };
     } catch (error) {
-      console.error('Error deleting document:', error);
       return { success: false, error: error.message };
     }
   });

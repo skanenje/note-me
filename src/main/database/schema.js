@@ -53,6 +53,25 @@ module.exports = function initSchema(db) {
     ON mutations(synced, created_at)
     WHERE synced = 0
   `);
+
+  // ── Notion-style migrations (additive, safe for existing data) ──────────────
+  const columns = db.prepare("PRAGMA table_info(documents)").all().map(c => c.name);
+  if (!columns.includes('icon'))        db.exec("ALTER TABLE documents ADD COLUMN icon TEXT DEFAULT '📄'");
+  if (!columns.includes('cover'))       db.exec("ALTER TABLE documents ADD COLUMN cover TEXT DEFAULT NULL");
+  if (!columns.includes('parent_id'))   db.exec("ALTER TABLE documents ADD COLUMN parent_id TEXT DEFAULT NULL");
+  if (!columns.includes('is_favorite')) db.exec("ALTER TABLE documents ADD COLUMN is_favorite INTEGER DEFAULT 0");
+  if (!columns.includes('is_trashed'))  db.exec("ALTER TABLE documents ADD COLUMN is_trashed INTEGER DEFAULT 0");
+
+  const blockColumns = db.prepare("PRAGMA table_info(blocks)").all().map(c => c.name);
+  if (!blockColumns.includes('metadata')) db.exec("ALTER TABLE blocks ADD COLUMN metadata TEXT DEFAULT NULL");
+  if (!blockColumns.includes('indent'))   db.exec("ALTER TABLE blocks ADD COLUMN indent INTEGER DEFAULT 0");
+
+  // Index for parent_id tree navigation
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_documents_parent
+    ON documents(parent_id)
+    WHERE deleted = 0 AND is_trashed = 0
+  `);
   
   // Initialize LMS schema
   initLMSSchema(db);
@@ -61,3 +80,4 @@ module.exports = function initSchema(db) {
   const seedData = require('./seed');
   seedData(db);
 };
+
