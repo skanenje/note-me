@@ -126,7 +126,17 @@
     }
   }
 
-  onMount(loadAll);
+  onMount(async () => {
+    // Tick ensures contextBridge is fully ready before the first IPC call
+    await new Promise(r => setTimeout(r, 0));
+    await loadAll();
+
+    // If documents are still empty after the first load (e.g. slow backend start),
+    // retry once after a short delay
+    if (!$documents || $documents.length === 0) {
+      setTimeout(loadAll, 600);
+    }
+  });
 
 </script>
 

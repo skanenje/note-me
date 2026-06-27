@@ -34,10 +34,16 @@
     }
   }
 
-  function appMounted(node) {
-    console.log('[SVELTE] App.svelte DOM element mounted! Loading documents...');
+  onMount(async () => {
+    console.log('[SVELTE] App.svelte onMount - loading documents...');
     settings.init();
-    loadDocuments();
+    // Small tick ensures window.api (contextBridge) is fully exposed before first IPC call
+    await new Promise(r => setTimeout(r, 0));
+    await loadDocuments();
+  });
+
+  function appMounted(node) {
+    // No-op action kept for compatibility; actual init happens in onMount above
   }
 
   async function handleNavigate(view) {

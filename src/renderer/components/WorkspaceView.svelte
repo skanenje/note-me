@@ -1,6 +1,6 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
-  import { documents, createDocument, selectDocument } from '../stores/documents.js';
+  import { documents, loadDocuments, createDocument, selectDocument } from '../stores/documents.js';
   import { settings } from '../stores/settings.js';
   import { openTabs } from '../stores/aitools.js';
   import { toast } from '../stores/toast.js';
@@ -173,7 +173,13 @@
   $: activeTracks = lessons.filter(l => l.progressPct > 0 && l.progressPct < 100);
   $: doneTracks   = lessons.filter(l => l.progressPct === 100);
 
-  onMount(loadLessons);
+  onMount(async () => {
+    // Ensure contextBridge is ready before first IPC call
+    await new Promise(r => setTimeout(r, 0));
+    // WorkspaceView is the default landing page — load documents proactively
+    await loadDocuments();
+    loadLessons();
+  });
   onDestroy(() => clearInterval(pomInterval));
 </script>
 
