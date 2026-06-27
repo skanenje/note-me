@@ -11,11 +11,14 @@
   import CommandPalette from "./components/CommandPalette.svelte";
   import Toast from "./components/Toast.svelte";
   import SettingsView from "./components/SettingsView.svelte";
+  import WorkspaceView from "./components/WorkspaceView.svelte";
+  import DashboardView from "./components/DashboardView.svelte";
+  import SharedView from "./components/SharedView.svelte";
   import { loadDocuments } from "./stores/documents.js";
   import { settings } from "./stores/settings.js";
   import { toast } from "./stores/toast.js";
 
-  let currentView = "lessons"; // 'lessons', 'documents', 'aitools', 'prompt-enhancer'
+  let currentView = "workspace"; // 'workspace', 'dashboard', 'shared', 'lessons', 'documents', 'aitools', 'prompt-enhancer', 'settings'
   let selectedLessonId = null;
   let transitioning = false;
   let showCommandPalette = false;
@@ -54,8 +57,9 @@
     selectedLessonId = null;
   }
 
+  const TOP_TAB_VIEWS = { Workspace: 'workspace', Dashboard: 'dashboard', Shared: 'shared' };
   function handleTopTabClick(tab) {
-    toast.info(`"${tab}" view coming soon`);
+    handleNavigate(TOP_TAB_VIEWS[tab] || tab);
   }
 </script>
 
@@ -69,10 +73,18 @@
     <header class="flex justify-between items-center h-16 px-xl bg-surface border-b border-outline-variant sticky top-0 z-10 shrink-0">
       <div class="flex items-center gap-lg">
         <div class="flex items-center gap-md">
-          <!-- Top tabs — coming soon -->
-          <button class="text-primary font-bold border-b-2 border-primary pb-1" on:click={() => handleTopTabClick('Workspace')}>Workspace</button>
-          <button class="text-on-surface-variant hover:text-on-surface transition-colors" on:click={() => handleTopTabClick('Dashboard')}>Dashboard</button>
-          <button class="text-on-surface-variant hover:text-on-surface transition-colors" on:click={() => handleTopTabClick('Shared')}>Shared</button>
+          <!-- Top tabs -->
+          {#each [['Workspace','workspace'],['Dashboard','dashboard'],['Shared','shared']] as [label, view]}
+            <button
+              class="pb-1 transition-colors font-semibold text-sm"
+              class:text-primary={currentView === view}
+              class:border-b-2={currentView === view}
+              class:border-primary={currentView === view}
+              class:text-on-surface-variant={currentView !== view}
+              class:hover:text-on-surface={currentView !== view}
+              on:click={() => handleTopTabClick(label)}
+            >{label}</button>
+          {/each}
         </div>
       </div>
       <div class="flex items-center gap-md">
@@ -129,7 +141,19 @@
     </div>
 
     <div class="flex-1 overflow-y-auto bg-surface-container-lowest" class:fading={transitioning} class:view-hidden={currentView === 'documents'}>
-      {#if currentView === "lessons"}
+      {#if currentView === "workspace"}
+        <div class="page-enter h-full">
+          <WorkspaceView onNavigate={handleNavigate} onSelectLesson={handleSelectLesson} />
+        </div>
+      {:else if currentView === "dashboard"}
+        <div class="page-enter h-full">
+          <DashboardView />
+        </div>
+      {:else if currentView === "shared"}
+        <div class="page-enter h-full">
+          <SharedView />
+        </div>
+      {:else if currentView === "lessons"}
         <div class="flex h-full page-enter">
           <LessonList onSelectLesson={handleSelectLesson} {selectedLessonId} />
           <div class="flex-1 flex flex-col h-full bg-background overflow-hidden relative">
