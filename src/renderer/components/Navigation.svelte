@@ -1,8 +1,9 @@
 <script>
   import { onMount } from 'svelte';
   import { openTabs } from '../stores/aitools.js';
-  import { documents, loadDocuments, selectDocument } from '../stores/documents.js';
+  import { documents, loadDocuments, selectDocument, createDocument } from '../stores/documents.js';
   import { settings } from '../stores/settings.js';
+  import { toast } from '../stores/toast.js';
 
   export let currentView = "lessons";
   export let onNavigate;
@@ -18,9 +19,34 @@
     loadDocuments();
   });
 
-  function handleCreateNote() {
-    onNavigate('documents');
-    // Assuming Editor/Sidebar will handle 'New Note' flow, or we trigger it globally
+  /** New Note: navigate to documents view then immediately create & open a blank page */
+  async function handleCreateNote() {
+    await onNavigate('documents');
+    try {
+      const doc = await createDocument('Untitled');
+      await selectDocument(doc.id);
+    } catch (err) {
+      toast.error('Could not create page: ' + err.message);
+    }
+  }
+
+  /** Support: open documentation URL in the system browser */
+  async function handleSupport() {
+    try {
+      await window.api.openExternal('https://github.com');
+    } catch {
+      toast.info('Support link unavailable offline');
+    }
+  }
+
+  /** Derive initials from the user's display name for the avatar */
+  function getInitials(name) {
+    return (name || 'U')
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(w => w[0].toUpperCase())
+      .join('');
   }
 </script>
 
@@ -91,18 +117,29 @@
       <span class="material-symbols-outlined">settings</span>
       <span>Settings</span>
     </button>
-    <button class="flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-high rounded-lg px-md py-sm transition-colors duration-150 w-full text-left">
+    <button
+      class="flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-high rounded-lg px-md py-sm transition-colors duration-150 w-full text-left"
+      on:click={handleSupport}
+      title="Open documentation in browser"
+    >
       <span class="material-symbols-outlined">help_outline</span>
       <span>Support</span>
     </button>
-    <div class="flex items-center gap-sm px-md py-sm mt-sm">
-      <div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden">
-        <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMxX8cb4Aiv0AhnP7G33yvJipdkaSq5x9157jZkDSNehVd0BnbXmuIMXyx6pTkZk6m2TNExpAP8zF28eHZ9vh6Uw-CmFpc1U-Dhi2-4dE9Z8pEXB1Fv-Um2no6_dgIg4zUSM8jLZOxzCj_ZEfgSSVLNruzkUQszk3QmzBmspfMbXowd4ISSv0pjo0faFmYRTqFtKY3C4Mb-3HVNFc65TVkcnX4qfUrSTCfb0fjwdous3BB0A6Qwgu4yJ2hvYPeEN2TsYYyIppXBDC3" alt="User Profile"/>
+
+    <!-- User profile row — clicking navigates to Settings -->
+    <button
+      class="flex items-center gap-sm px-md py-sm mt-sm rounded-lg hover:bg-surface-container-high transition-colors w-full text-left"
+      on:click={() => onNavigate('settings')}
+      title="Open Settings"
+    >
+      <!-- Initials-based local avatar -->
+      <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0 select-none">
+        <span class="text-on-primary text-xs font-bold">{getInitials($settings.userName)}</span>
       </div>
       <div class="flex flex-col">
         <span class="text-xs font-semibold">{$settings.userName}</span>
         <span class="text-[10px] text-on-surface-variant">{$settings.userPlan}</span>
       </div>
-    </div>
+    </button>
   </div>
 </aside>

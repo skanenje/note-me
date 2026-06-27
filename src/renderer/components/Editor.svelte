@@ -2,6 +2,7 @@
   import { tick } from 'svelte';
   import { currentDocument, updateDocumentTitle } from '../stores/documents.js';
   import { toast } from '../stores/toast.js';
+  import { settings } from '../stores/settings.js';
   import Block from './Block.svelte';
   import FloatingToolbar from './FloatingToolbar.svelte';
 
@@ -165,6 +166,22 @@
     if (res.success) await reloadDoc();
   }
 
+  // ── Export ──────────────────────────────────────────────────────────────────
+  let exporting = false;
+  async function handleExport() {
+    if (!$currentDocument) return;
+    exporting = true;
+    try {
+      const res = await window.api.exportDocument($currentDocument.id);
+      if (res.success) toast.success('Exported to ' + res.filePath.split('/').pop());
+      else if (!res.canceled) toast.error('Export failed: ' + (res.error || 'Unknown error'));
+    } catch (err) {
+      toast.error('Export failed: ' + err.message);
+    } finally {
+      exporting = false;
+    }
+  }
+
   // ── Word count & stats ─────────────────────────────────────────────────────
   $: wordCount = $currentDocument?.blocks?.reduce((acc, b) => {
     const text = b.content?.replace(/<[^>]+>/g, '') || '';
@@ -195,7 +212,10 @@
       <!-- Cover image (if set) -->
       {#if $currentDocument.cover}
         <div class="editor__cover" style="background: {$currentDocument.cover}">
-          <button class="editor__cover-remove" on:click={() => window.api.updateDocumentMeta({ documentId: $currentDocument.id, cover: null })}>
+          <button class="editor__cover-remove" on:click={async () => {
+            await window.api.updateDocumentMeta({ documentId: $currentDocument.id, cover: null });
+            $currentDocument = { ...$currentDocument, cover: null };
+          }}>
             Remove cover
           </button>
         </div>
@@ -246,7 +266,17 @@
         <!-- Meta row -->
         <div class="editor__meta">
           <span>{wordCount} words · {readingTime} min read</span>
-          <span>Edited {new Date($currentDocument.updated_at).toLocaleString()}</span>
+          <div class="editor__meta-actions">
+            <span>Edited {new Date($currentDocument.updated_at).toLocaleString()}</span>
+            <button class="editor__export-btn" on:click={handleExport} disabled={exporting} title="Export as Markdown">
+              {#if exporting}
+                <span class="editor__export-spin"></span>
+              {:else}
+                <span class="material-symbols-outlined" style="font-size:14px">download</span>
+              {/if}
+              Export .md
+            </button>
+          </div>
         </div>
 
         <!-- Blocks area -->
@@ -430,12 +460,49 @@
   .editor__meta {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     font-size: 0.75rem;
     color: var(--clr-text-muted);
     padding-bottom: 28px;
     border-bottom: 1px solid var(--clr-border);
     margin-bottom: 20px;
   }
+
+  .editor__meta-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .editor__export-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    background: var(--clr-surface);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--r-full);
+    color: var(--clr-text-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+    opacity: 0;
+  }
+  .editor__meta:hover .editor__export-btn { opacity: 1; }
+  .editor__export-btn:hover { border-color: var(--clr-accent); color: var(--clr-accent); background: var(--clr-surface2); }
+  .editor__export-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .editor__export-spin {
+    width: 10px;
+    height: 10px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-top-color: var(--clr-accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
   /* Blocks */
   .editor__blocks {

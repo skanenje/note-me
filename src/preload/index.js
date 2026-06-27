@@ -36,6 +36,10 @@ contextBridge.exposeInMainWorld('api', {
   getPromptHistory: (limit) => ipcRenderer.invoke('prompt-enhancer:get-history', limit),
   deletePromptHistory: (id) => ipcRenderer.invoke('prompt-enhancer:delete-history', id),
 
+  // Shell / system
+  openExternal: (url) => ipcRenderer.invoke('shell:open-external', url),
+  exportDocument: (documentId) => ipcRenderer.invoke('shell:export-document', { documentId }),
+
   // AI Tools
   getTools: () => ipcRenderer.invoke('tools:get-all'),
   getSessions: () => ipcRenderer.invoke('tools:get-sessions'),

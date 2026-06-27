@@ -13,16 +13,21 @@
   import SettingsView from "./components/SettingsView.svelte";
   import { loadDocuments } from "./stores/documents.js";
   import { settings } from "./stores/settings.js";
+  import { toast } from "./stores/toast.js";
 
   let currentView = "lessons"; // 'lessons', 'documents', 'aitools', 'prompt-enhancer'
   let selectedLessonId = null;
   let transitioning = false;
   let showCommandPalette = false;
+  let showNotifications = false;
 
   function handleGlobalKeydown(e) {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
       e.preventDefault();
       showCommandPalette = !showCommandPalette;
+    }
+    if (e.key === 'Escape') {
+      showNotifications = false;
     }
   }
 
@@ -48,6 +53,10 @@
   function handleBackToLessons() {
     selectedLessonId = null;
   }
+
+  function handleTopTabClick(tab) {
+    toast.info(`"${tab}" view coming soon`);
+  }
 </script>
 
 <svelte:window on:keydown={handleGlobalKeydown} />
@@ -60,21 +69,53 @@
     <header class="flex justify-between items-center h-16 px-xl bg-surface border-b border-outline-variant sticky top-0 z-10 shrink-0">
       <div class="flex items-center gap-lg">
         <div class="flex items-center gap-md">
-          <a class="text-on-surface-variant hover:text-on-surface transition-colors" href="#">Dashboard</a>
-          <a class="text-primary font-bold border-b-2 border-primary pb-1" href="#">Workspace</a>
-          <a class="text-on-surface-variant hover:text-on-surface transition-colors" href="#">Shared</a>
+          <!-- Top tabs — coming soon -->
+          <button class="text-primary font-bold border-b-2 border-primary pb-1" on:click={() => handleTopTabClick('Workspace')}>Workspace</button>
+          <button class="text-on-surface-variant hover:text-on-surface transition-colors" on:click={() => handleTopTabClick('Dashboard')}>Dashboard</button>
+          <button class="text-on-surface-variant hover:text-on-surface transition-colors" on:click={() => handleTopTabClick('Shared')}>Shared</button>
         </div>
       </div>
       <div class="flex items-center gap-md">
+        <!-- Search: clicking opens CommandPalette -->
         <div class="relative group">
-          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none group-focus-within:text-primary transition-colors">search</span>
-          <input class="bg-surface-container-low border border-outline-variant rounded-lg pl-10 pr-md py-2 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-64 transition-all" placeholder="Search Workspace..." type="text"/>
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-sm">search</span>
+          <input
+            class="bg-surface-container-low border border-outline-variant rounded-lg pl-10 pr-md py-2 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-64 transition-all cursor-pointer"
+            placeholder="Search Workspace… (Ctrl+K)"
+            type="text"
+            readonly
+            on:click={() => showCommandPalette = true}
+            on:focus={() => showCommandPalette = true}
+          />
         </div>
-        <div class="flex items-center gap-sm">
-          <button class="p-2 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors">
+        <div class="flex items-center gap-sm relative">
+          <!-- Notifications -->
+          <button
+            class="p-2 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"
+            on:click={() => showNotifications = !showNotifications}
+            title="Notifications"
+          >
             <span class="material-symbols-outlined">notifications</span>
           </button>
-          <button class="p-2 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors">
+          {#if showNotifications}
+            <!-- svelte-ignore a11y-no-static-element-interactions -->
+            <div class="absolute right-0 top-10 w-72 bg-surface border border-outline-variant rounded-xl shadow-2xl z-50 overflow-hidden" on:click|stopPropagation>
+              <div class="px-4 py-3 border-b border-outline-variant flex items-center justify-between">
+                <span class="text-sm font-semibold">Notifications</span>
+                <button class="text-on-surface-variant hover:text-on-surface text-xs" on:click={() => showNotifications = false}>✕</button>
+              </div>
+              <div class="p-6 text-center text-on-surface-variant opacity-60">
+                <span class="material-symbols-outlined text-3xl mb-2">notifications_none</span>
+                <p class="text-sm">No new notifications</p>
+              </div>
+            </div>
+          {/if}
+          <!-- Account: navigate to settings -->
+          <button
+            class="p-2 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors"
+            on:click={() => handleNavigate('settings')}
+            title="Open Settings"
+          >
             <span class="material-symbols-outlined">account_circle</span>
           </button>
         </div>
@@ -145,31 +186,12 @@
     display: none !important;
   }
 
-  .back-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin: 24px 24px 0;
-    padding: 8px 16px;
-    background: var(--clr-surface);
-    border: 1px solid var(--clr-border);
-    border-radius: var(--r-full);
-    color: var(--clr-text-secondary);
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--t-fast);
-    width: fit-content;
+  .page-enter {
+    animation: pageEnter 0.15s ease;
   }
 
-  .back-btn:hover {
-    background: var(--clr-surface2);
-    color: var(--clr-text-primary);
-    border-color: var(--clr-accent);
-    transform: translateX(-2px);
-  }
-
-  .back-icon {
-    font-size: 1rem;
+  @keyframes pageEnter {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 </style>

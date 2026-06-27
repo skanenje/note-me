@@ -11,6 +11,7 @@ const registerLessonHandlers = require('./ipc/lessons');
 const registerPromptEnhancerHandlers = require('./ipc/prompt-enhancer');
 const registerAIToolsHandlers = require('./ipc/aitools');
 const { registerTabHandlers } = require('./tabs');
+const registerShellHandlers = require('./ipc/shell');
 
 let dbManager;
 let mainWindow;
@@ -25,6 +26,7 @@ app.whenReady().then(async () => {
   registerLessonHandlers(dbManager);
   registerPromptEnhancerHandlers(dbManager);
   registerAIToolsHandlers(dbManager);
+  registerShellHandlers(dbManager);
 
   // Create the main window — no backend poll delay needed
   mainWindow = await createWindow();

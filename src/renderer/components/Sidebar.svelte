@@ -116,7 +116,18 @@
     } catch {}
   }
 
+  async function renamePage(docId, newTitle) {
+    try {
+      await window.api.updateDocumentTitle({ documentId: docId, title: newTitle });
+      await loadAll();
+      toast.success('Renamed');
+    } catch (err) {
+      toast.error('Rename failed: ' + err.message);
+    }
+  }
+
   onMount(loadAll);
+
 </script>
 
 <aside class="sidebar">
@@ -207,6 +218,7 @@
             on:create={(e) => createPage(e.detail.parentId)}
             on:trash={(e) => trashPage(null, e.detail.id)}
             on:favorite={(e) => toggleFavorite(null, e.detail.id)}
+            on:rename={(e) => renamePage(e.detail.id, e.detail.title)}
           />
         {/each}
       {/if}

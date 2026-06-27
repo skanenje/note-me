@@ -1,10 +1,14 @@
 <script>
   import { settings } from '../stores/settings.js';
+  import { toast } from '../stores/toast.js';
 
   let localName = $settings.userName;
   
   function saveProfile() {
-    settings.updateSetting('userName', localName);
+    const trimmed = localName.trim() || 'User';
+    settings.updateSetting('userName', trimmed);
+    localName = trimmed;
+    toast.success('Profile saved');
   }
 </script>
 
@@ -23,7 +27,8 @@
         <p class="text-sm text-on-surface-variant">Customize how Note-Me looks on your device.</p>
       </div>
 
-      <div class="flex items-center gap-6 pt-4">
+      <div class="flex items-center gap-6 pt-4 flex-wrap">
+        <!-- Light -->
         <button 
           class="theme-btn" 
           class:active={$settings.theme === 'light'}
@@ -36,6 +41,7 @@
           <span class="mt-3 font-medium">Light</span>
         </button>
 
+        <!-- Dark -->
         <button 
           class="theme-btn" 
           class:active={$settings.theme === 'dark'}
@@ -47,6 +53,74 @@
           </div>
           <span class="mt-3 font-medium">Dark</span>
         </button>
+
+        <!-- System -->
+        <button 
+          class="theme-btn" 
+          class:active={$settings.theme === 'system'}
+          on:click={() => settings.updateSetting('theme', 'system')}
+        >
+          <div class="theme-preview system-preview">
+            <div class="theme-preview-nav"></div>
+            <div class="theme-preview-main"></div>
+          </div>
+          <span class="mt-3 font-medium">System</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Editor Preferences -->
+    <section class="space-y-4 border border-outline-variant rounded-xl p-6 bg-surface">
+      <div>
+        <h2 class="text-xl font-semibold mb-1">Editor</h2>
+        <p class="text-sm text-on-surface-variant">Customize your writing experience.</p>
+      </div>
+
+      <div class="pt-2 space-y-6">
+        <!-- Font size -->
+        <div>
+          <label class="block text-sm font-medium mb-3 opacity-80">Font Size</label>
+          <div class="flex gap-3">
+            {#each [['sm','Small'], ['md','Medium'], ['lg','Large']] as [val, label]}
+              <button
+                class="pref-chip"
+                class:pref-chip--active={$settings.fontSize === val}
+                on:click={() => settings.updateSetting('fontSize', val)}
+              >{label}</button>
+            {/each}
+          </div>
+        </div>
+
+        <!-- Editor width -->
+        <div>
+          <label class="block text-sm font-medium mb-3 opacity-80">Content Width</label>
+          <div class="flex gap-3">
+            {#each [['narrow','Narrow'], ['medium','Medium'], ['full','Full Width']] as [val, label]}
+              <button
+                class="pref-chip"
+                class:pref-chip--active={$settings.editorWidth === val}
+                on:click={() => settings.updateSetting('editorWidth', val)}
+              >{label}</button>
+            {/each}
+          </div>
+        </div>
+
+        <!-- Spellcheck -->
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium">Spell Check</p>
+            <p class="text-xs text-on-surface-variant mt-0.5">Underline spelling mistakes while you type</p>
+          </div>
+          <button
+            class="toggle-btn"
+            class:toggle-btn--on={$settings.spellcheck}
+            role="switch"
+            aria-checked={$settings.spellcheck}
+            on:click={() => settings.updateSetting('spellcheck', !$settings.spellcheck)}
+          >
+            <span class="toggle-btn__thumb"></span>
+          </button>
+        </div>
       </div>
     </section>
 
@@ -76,6 +150,13 @@
             <span class="bg-primary-container text-on-primary-container px-3 py-1 rounded-full text-sm font-semibold">{$settings.userPlan}</span>
           </div>
         </div>
+
+        <button
+          class="mt-2 bg-primary text-on-primary px-4 py-2 rounded-lg text-sm font-bold transition-all hover:opacity-90"
+          on:click={saveProfile}
+        >
+          Save Changes
+        </button>
       </div>
     </section>
 
@@ -86,7 +167,7 @@
       </div>
       <div class="text-sm space-y-2">
         <p>Version: 1.0.0-beta</p>
-        <p>An advanced agentic IDE with integrated Notion-style block editor and AI tool session management.</p>
+        <p>An advanced Electron-based workspace with integrated Notion-style block editor and AI tool session management.</p>
       </div>
     </section>
   </div>
@@ -127,21 +208,72 @@
     color: var(--clr-accent);
   }
 
-  .light-preview {
-    background: #f8fafc;
-  }
+  .light-preview { background: #f8fafc; }
   .light-preview .theme-preview-nav {
     width: 30%;
     background: #f1f5f9;
     border-right: 1px solid #e2e8f0;
   }
   
-  .dark-preview {
-    background: #0b1326;
-  }
+  .dark-preview { background: #0b1326; }
   .dark-preview .theme-preview-nav {
     width: 30%;
     background: #111827;
     border-right: 1px solid #374151;
   }
+
+  .system-preview {
+    background: linear-gradient(90deg, #f8fafc 50%, #0b1326 50%);
+  }
+  .system-preview .theme-preview-nav {
+    width: 30%;
+    background: linear-gradient(180deg, #f1f5f9 50%, #111827 50%);
+    border-right: 1px solid #6b7280;
+  }
+
+  /* Pref chips */
+  .pref-chip {
+    padding: 6px 16px;
+    border-radius: var(--r-full);
+    border: 1px solid var(--clr-border);
+    background: var(--clr-surface-container-low, var(--clr-surface));
+    color: var(--clr-text-secondary);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .pref-chip:hover { border-color: var(--clr-accent); color: var(--clr-text-primary); }
+  .pref-chip--active {
+    background: var(--clr-accent);
+    border-color: var(--clr-accent);
+    color: white;
+  }
+
+  /* Toggle switch */
+  .toggle-btn {
+    width: 48px;
+    height: 26px;
+    border-radius: 13px;
+    border: none;
+    background: var(--clr-surface2);
+    cursor: pointer;
+    position: relative;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .toggle-btn--on { background: var(--clr-accent); }
+  .toggle-btn__thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    transition: transform 0.2s cubic-bezier(0.4,0,0.2,1);
+  }
+  .toggle-btn--on .toggle-btn__thumb { transform: translateX(22px); }
 </style>
