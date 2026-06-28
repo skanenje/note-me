@@ -18,6 +18,16 @@
     loadProgress();
   });
 
+  // Also reload reactively if lessonId prop changes while component stays mounted
+  $: if (lessonId) {
+    lesson = null;
+    loading = true;
+    progress = {};
+    completedCount = 0;
+    loadLesson();
+    loadProgress();
+  }
+
   async function loadLesson() {
     loading = true;
     error = null;

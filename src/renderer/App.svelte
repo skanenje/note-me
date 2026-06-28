@@ -46,16 +46,20 @@
     // No-op action kept for compatibility; actual init happens in onMount above
   }
 
-  async function handleNavigate(view) {
-    if (view === currentView) return;
+  async function handleNavigate(view, keepLesson = false) {
+    if (view === currentView && !keepLesson) return;
     transitioning = true;
     await new Promise(r => setTimeout(r, 80));
     currentView = view;
-    selectedLessonId = null;
+    if (!keepLesson) selectedLessonId = null;
     transitioning = false;
   }
 
-  function handleSelectLesson(lessonId) {
+  async function handleSelectLesson(lessonId) {
+    // Make sure we're on the lessons view first, preserving the lesson ID
+    if (currentView !== 'lessons') {
+      await handleNavigate('lessons', true);
+    }
     selectedLessonId = lessonId;
   }
 
