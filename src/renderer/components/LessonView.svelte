@@ -12,11 +12,11 @@
   let progress = {};
   let completedCount = 0;
 
-  function viewMounted(node) {
-    console.log('[SVELTE] LessonView.svelte DOM element mounted! Loading lesson and progress...');
+  onMount(async () => {
+    await new Promise(r => setTimeout(r, 0));
     loadLesson();
     loadProgress();
-  }
+  });
 
   async function loadLesson() {
     loading = true;
@@ -72,7 +72,7 @@
   $: progressPct = totalBlocks > 0 ? Math.round((completedCount / totalBlocks) * 100) : 0;
 </script>
 
-<div class="lesson-view" use:viewMounted>
+<div class="lesson-view">
   {#if loading}
     <div class="lesson-view__loading">
       <div class="lesson-skeleton skeleton" style="height:48px; width:60%; margin-bottom:12px;"></div>

@@ -8,9 +8,10 @@
   let loading = true;
   let error = null;
 
-  function listMounted(node) {
+  onMount(async () => {
+    await new Promise(r => setTimeout(r, 0));
     loadLessons();
-  }
+  });
 
   async function loadLessons() {
     loading = true;
@@ -59,7 +60,7 @@
   }
 </script>
 
-<div class="w-80 h-full border-r border-outline-variant bg-surface-container-lowest flex flex-col" use:listMounted>
+<div class="w-80 h-full border-r border-outline-variant bg-surface-container-lowest flex flex-col">
   <div class="p-md border-b border-outline-variant">
     <h3 class="font-h2 text-primary flex items-center gap-xs">
       <span class="material-symbols-outlined text-[20px]">school</span>
