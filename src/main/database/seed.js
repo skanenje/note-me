@@ -456,5 +456,43 @@ module.exports = function seedCurriculum(db) {
     });
     console.log('✅ Seeded: Neural Networks & Deep Learning');
   }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  //  TRACK 6  ·  Multi-Language Code Playground (Python, SQL, Bash, JS)
+  // ─────────────────────────────────────────────────────────────────────────
+  const checkML = db.prepare("SELECT COUNT(*) as count FROM lessons WHERE title = 'Multi-Language Code Playground'").get();
+  if (checkML.count === 0) {
+    const mlId = uuidv4();
+    db.prepare(`INSERT INTO lessons (id, title, description, order_index, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
+      .run(mlId, 'Multi-Language Code Playground',
+        'Run live code in JavaScript, Python, SQL, and Bash — all inside the app. No setup required. Edit and experiment freely.',
+        9, now, now);
+
+    const mlBlocks = [
+      ['text', null,
+        '# Multi-Language Code Playground\n\nEvery code block in this app is fully executable. Hit **▶ Run** to see live output right here.\n\nYou can also click **✏️ Edit** to modify any example and try your own variations.\n\n## Supported Languages\n| Language | Use case |\n|---|---|\n| 🟨 **JavaScript** | Logic, algorithms, data structures |\n| 🐍 **Python** | Data science, statistics, ML prototypes |\n| 🗄️ **SQL** | Querying structured data, joins, aggregations |\n| 🐚 **Bash** | System automation, file ops, scripting |'],
+
+      ['code', 'javascript',
+        '// JavaScript — Closures and higher-order functions\nfunction makeCounter(start = 0, step = 1) {\n  let count = start;\n  return {\n    next:  () => (count += step),\n    reset: () => { count = start; },\n    value: () => count,\n  };\n}\n\nconst counter = makeCounter(0, 5);\nconsole.log(counter.next()); // 5\nconsole.log(counter.next()); // 10\nconsole.log(counter.next()); // 15\ncounter.reset();\nconsole.log(counter.value()); // 0\n\n// Array pipeline\nconst result = [1,2,3,4,5,6,7,8,9,10]\n  .filter(n => n % 2 === 0)\n  .map(n => n ** 2)\n  .reduce((a, b) => a + b, 0);\n\nconsole.log("Sum of squares of even numbers 1-10:", result);'],
+
+      ['code', 'python',
+        '# Python — Statistics from scratch\nimport math\n\ndata = [12, 45, 7, 23, 89, 34, 56, 11, 78, 42]\n\nmean = sum(data) / len(data)\nvariance = sum((x - mean)**2 for x in data) / len(data)\nstd_dev = math.sqrt(variance)\nsorted_data = sorted(data)\nn = len(sorted_data)\nmedian = sorted_data[n // 2] if n % 2 else (sorted_data[n//2-1] + sorted_data[n//2]) / 2\n\nprint(f"Dataset: {data}")\nprint(f"Mean:    {mean:.2f}")\nprint(f"Median:  {median:.2f}")\nprint(f"Std Dev: {std_dev:.2f}")\nprint(f"Min:     {min(data)}  Max: {max(data)}")\n\n# Simple linear regression\nxs = list(range(1, 11))\nys = [2.1*x + 1.5 + ((-1)**i * i*0.3) for i, x in enumerate(xs)]\n\nn = len(xs)\nxbar = sum(xs)/n\nybar = sum(ys)/n\nw = sum((x-xbar)*(y-ybar) for x,y in zip(xs,ys)) / sum((x-xbar)**2 for x in xs)\nb = ybar - w * xbar\nprint(f"\\nLinear fit: y = {w:.3f}x + {b:.3f}")\nprint(f"Predict x=12: {w*12+b:.2f}")'],
+
+      ['code', 'sql',
+        '-- SQL — Build and query a mini student database\nCREATE TABLE students (\n  id      INTEGER PRIMARY KEY,\n  name    TEXT NOT NULL,\n  score   REAL,\n  track   TEXT\n);\n\nINSERT INTO students VALUES\n  (1, "Alice",   92.5, "Neural Networks"),\n  (2, "Bob",     74.0, "Prompt Engineering"),\n  (3, "Carol",   88.0, "Neural Networks"),\n  (4, "David",   61.5, "Regression Models"),\n  (5, "Eva",     95.0, "Prompt Engineering"),\n  (6, "Frank",   55.0, "Regression Models"),\n  (7, "Grace",   83.5, "Neural Networks");\n\n-- Average score per track, sorted descending\nSELECT\n  track,\n  COUNT(*)          AS students,\n  ROUND(AVG(score), 1) AS avg_score,\n  MAX(score)        AS top_score\nFROM students\nGROUP BY track\nORDER BY avg_score DESC;'],
+
+      ['code', 'bash',
+        '# Bash — system info snapshot\necho "=== System Info ==="\necho "Date:    $(date)"\necho "Host:    $(hostname)"\necho "Uptime:  $(uptime -p 2>/dev/null || uptime)"\necho ""\necho "=== Python Version ==="\npython3 --version 2>&1\necho ""\necho "=== Disk Usage (top 5 dirs in /tmp) ==="\ndu -sh /tmp/* 2>/dev/null | sort -rh | head -5 || echo "(none)"\necho ""\necho "=== Word frequency in this script ==="\necho "echo date host uptime python version disk echo echo" \\\n  | tr " " "\\n" | sort | uniq -c | sort -rn | head -5'],
+
+      ['text', null,
+        '## Tips for the Playground\n\n### Edit Mode\nClick **✏️ Edit** on any code block to modify it. Your changes are local — the original is preserved and you can **↺ Reset** at any time.\n\n### Keyboard Shortcuts\n- `Ctrl+Enter` → Run the code\n- `Tab` → Insert 2 spaces\n\n### Python\nAll standard library modules are available (`math`, `statistics`, `json`, `re`, `datetime`, etc.). Third-party packages like `numpy` require a system install.\n\n### SQL\nEach run gets a **fresh in-memory database** — previous `CREATE TABLE` statements do not persist between runs. Write everything in one block (like the example above).\n\n### Bash\nRuns inside WSL/Ubuntu. Standard tools like `awk`, `grep`, `sed`, `curl`, and `python3` are all available.'],
+    ];
+
+    mlBlocks.forEach(([type, language, content], i) => {
+      db.prepare(`INSERT INTO learning_blocks (id, lesson_id, type, content, language, order_index, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
+        .run(uuidv4(), mlId, type, content, language, i + 1, now, now);
+    });
+    console.log('✅ Seeded: Multi-Language Code Playground');
+  }
 };
 

@@ -131,6 +131,7 @@
                 blockId={block.id}
                 code={block.content}
                 language={block.language}
+                on:run={() => markComplete(block.id)}
               />
             {:else if block.type === 'quiz'}
               <QuizBlock

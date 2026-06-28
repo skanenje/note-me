@@ -86,7 +86,7 @@
     { icon: '✍️', title: 'Write to Remember', body: 'Summarizing in your own words is far more effective than re-reading. Use the editor after each lesson.' },
     { icon: '🎯', title: 'Time Blocking', body: 'Dedicate fixed slots to learning. Consistency beats intensity — 30 minutes daily beats 5 hours on weekends.' },
     { icon: '🔗', title: 'Link Ideas', body: 'Connect new concepts to things you already know. The more connections, the stronger the memory.' },
-    { icon: '🌳', title: 'Feynman Technique', body: 'Explain a concept as if teaching a child. If you struggle, you've found a gap — go fill it.' },
+    { icon: '🌳', title: 'Feynman Technique', body: 'Explain a concept as if teaching a child. If you struggle, you\'ve found a gap — go fill it.' },
     { icon: '🎵', title: 'Focus with Music', body: 'Instrumental music (binaural beats, lo-fi) can reduce distraction during deep work sessions.' },
   ];
 
