@@ -193,12 +193,19 @@
 
   onMount(async () => {
     console.log('[SVELTE] WorkspaceView onMount executed');
-    // Ensure contextBridge is ready before first IPC call
-    await new Promise(r => setTimeout(r, 0));
-    // WorkspaceView is the default landing page — load documents proactively
-    await loadDocuments();
-    loadLessons();
   });
+
+  // Bypass onMount for data loading since it is mysteriously not firing
+  setTimeout(async () => {
+    console.log('[WorkspaceView] setTimeout bypass triggered');
+    try {
+      await loadDocuments();
+    } catch(e) {
+      logBoth('[WorkspaceView] loadDocuments threw: ' + e.message, true);
+    }
+    loadLessons();
+  }, 100);
+
   onDestroy(() => clearInterval(pomInterval));
 </script>
 

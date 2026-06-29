@@ -54,9 +54,15 @@
     await loadDocuments();
   });
 
+  setTimeout(() => {
+    console.log('[SVELTE-DEBUG] App.svelte script tag setTimeout fired!');
+    if (window.api && window.api.log) window.api.log('[SVELTE-DEBUG] App.svelte script tag setTimeout fired via API!');
+  }, 500);
+
   function appMounted(node) {
     // No-op action kept for compatibility; actual init happens in onMount above
   }
+
 
   async function handleNavigate(view, keepLesson = false) {
     if (view === currentView && !keepLesson) return;
