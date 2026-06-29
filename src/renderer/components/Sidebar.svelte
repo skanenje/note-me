@@ -126,7 +126,8 @@
     }
   }
 
-  onMount(async () => {
+  // Bypass onMount
+  setTimeout(async () => {
     // Tick ensures contextBridge is fully ready before the first IPC call
     await new Promise(r => setTimeout(r, 0));
     await loadAll();
@@ -136,7 +137,7 @@
     if (!$documents || $documents.length === 0) {
       setTimeout(loadAll, 600);
     }
-  });
+  }, 100);
 
 </script>
 

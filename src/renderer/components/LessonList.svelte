@@ -8,10 +8,11 @@
   let loading = true;
   let error = null;
 
-  onMount(async () => {
+  // Bypass onMount
+  setTimeout(async () => {
     await new Promise(r => setTimeout(r, 0));
     loadLessons();
-  });
+  }, 100);
 
   async function loadLessons() {
     loading = true;

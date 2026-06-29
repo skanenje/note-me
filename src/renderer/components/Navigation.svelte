@@ -15,9 +15,10 @@
     { id: 'prompt-enhancer', label: 'Prompt Enhancer',  icon: 'auto_fix_high' },
   ];
 
-  onMount(() => {
+  // Bypass onMount
+  setTimeout(() => {
     loadDocuments();
-  });
+  }, 100);
 
   /** New Note: navigate to documents view then immediately create & open a blank page */
   async function handleCreateNote() {

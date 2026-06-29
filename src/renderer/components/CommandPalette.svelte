@@ -15,14 +15,15 @@
   let allLessons = [];
 
   // Fetch lessons on mount to cache them for search
-  onMount(async () => {
+  // Bypass onMount
+  setTimeout(async () => {
     try {
       const res = await window.api.getLessons();
       if (res.success) allLessons = res.lessons;
     } catch (err) {
       console.error("CommandPalette: failed to load lessons", err);
     }
-  });
+  }, 100);
 
   $: if (show && searchInput) {
     query = "";
