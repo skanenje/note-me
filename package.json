@@ -1,0 +1,34 @@
+{
+  "name": "note-me",
+  "version": "1.0.0",
+  "description": "a writing app similar to notion",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "src/main/index.js",
+  "scripts": {
+    "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && NODE_ENV=development electron . --disable-gpu\"",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "NODE_ENV=production electron .",
+    "package": "electron-builder"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^3.1.2",
+    "autoprefixer": "^10.4.23",
+    "concurrently": "^9.2.1",
+    "electron": "^39.8.10",
+    "electron-builder": "^26.4.0",
+    "postcss": "^8.5.6",
+    "svelte": "^4.2.20",
+    "tailwindcss": "^3.4.19",
+    "vite": "^7.3.1"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.6.0",
+    "node-fetch": "^2.7.0",
+    "prismjs": "^1.30.0",
+    "uuid": "^13.0.0",
+    "wait-on": "^9.0.3"
+  }
+}
