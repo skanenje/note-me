@@ -1,14 +1,18 @@
-=== Note-Me startup log — 2026-06-29T10:30:51.661Z ===
-[2026-06-29T10:30:51.950Z] [WINDOW] Creating BrowserWindow
-[2026-06-29T10:30:52.083Z] [WINDOW] Development mode — loading http://localhost:5173
-[2026-06-29T10:30:53.483Z] [RENDERER-CONSOLE] [Level 0] [vite] connecting... (http://localhost:5173/@vite/client:733)
-[2026-06-29T10:30:53.499Z] [RENDERER-CONSOLE] [Level 0] [vite] connected. (http://localhost:5173/@vite/client:827)
-[2026-06-29T10:30:53.540Z] [RENDERER] CONSOLE.LOG: [SVELTE] App.svelte script tag is executing!
-[2026-06-29T10:30:53.540Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte script tag is executing! (http://localhost:5173/main.js:16)
-[2026-06-29T10:30:53.543Z] [RENDERER] CONSOLE.LOG: [SVELTE] WorkspaceView.svelte script tag is executing!
-[2026-06-29T10:30:53.543Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] WorkspaceView.svelte script tag is executing! (http://localhost:5173/main.js:16)
-[2026-06-29T10:30:53.666Z] [WINDOW] did-finish-load — renderer ready
-[2026-06-29T10:30:53.671Z] [RENDERER-CONSOLE] [Level 2] %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+=== Note-Me startup log — 2026-06-29T11:24:46.753Z ===
+[2026-06-29T11:24:47.042Z] [WINDOW] Creating BrowserWindow
+[2026-06-29T11:24:47.180Z] [WINDOW] Development mode — loading http://localhost:5173
+[2026-06-29T11:24:48.655Z] [RENDERER-CONSOLE] [Level 0] [vite] connecting... (http://localhost:5173/@vite/client:733)
+[2026-06-29T11:24:48.685Z] [RENDERER-CONSOLE] [Level 0] [vite] connected. (http://localhost:5173/@vite/client:827)
+[2026-06-29T11:24:48.807Z] [RENDERER] CONSOLE.LOG: [MAIN] Instantiating App...
+[2026-06-29T11:24:48.808Z] [RENDERER-CONSOLE] [Level 1] [MAIN] Instantiating App... (http://localhost:5173/main.js:16)
+[2026-06-29T11:24:48.808Z] [RENDERER] CONSOLE.LOG: [SVELTE] App.svelte script tag is executing!
+[2026-06-29T11:24:48.809Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte script tag is executing! (http://localhost:5173/main.js:16)
+[2026-06-29T11:24:48.814Z] [RENDERER] CONSOLE.LOG: [SVELTE] WorkspaceView.svelte script tag is executing!
+[2026-06-29T11:24:48.814Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] WorkspaceView.svelte script tag is executing! (http://localhost:5173/main.js:16)
+[2026-06-29T11:24:48.847Z] [RENDERER] CONSOLE.LOG: [MAIN] App successfully instantiated and mounted!
+[2026-06-29T11:24:48.847Z] [RENDERER-CONSOLE] [Level 1] [MAIN] App successfully instantiated and mounted! (http://localhost:5173/main.js:16)
+[2026-06-29T11:24:48.965Z] [WINDOW] did-finish-load — renderer ready
+[2026-06-29T11:24:48.972Z] [RENDERER-CONSOLE] [Level 2] %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
   Policy set or a policy with "unsafe-eval" enabled. This exposes users of
   this app to unnecessary security risks.
 
@@ -16,3 +20,7 @@ For more information and help, consult
 https://electronjs.org/docs/tutorial/security.
 This warning will not show up
 once the app is packaged. (node:electron/js2c/sandbox_bundle:2)
+[2026-06-29T11:25:01.237Z] [RENDERER] CONSOLE.LOG: [STORE] loadDocuments called
+[2026-06-29T11:25:01.238Z] [RENDERER-CONSOLE] [Level 1] [STORE] loadDocuments called (http://localhost:5173/main.js:16)
+[2026-06-29T11:25:01.239Z] [RENDERER] CONSOLE.LOG: [STORE] loadDocuments result received: 1 docs
+[2026-06-29T11:25:01.240Z] [RENDERER-CONSOLE] [Level 1] [STORE] loadDocuments result received: 1 docs (http://localhost:5173/main.js:16)
