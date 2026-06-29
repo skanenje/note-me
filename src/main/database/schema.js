@@ -62,6 +62,7 @@ module.exports = function initSchema(db) {
   if (!columns.includes('parent_id'))   db.exec("ALTER TABLE documents ADD COLUMN parent_id TEXT DEFAULT NULL");
   if (!columns.includes('is_favorite')) db.exec("ALTER TABLE documents ADD COLUMN is_favorite INTEGER DEFAULT 0");
   if (!columns.includes('is_trashed'))  db.exec("ALTER TABLE documents ADD COLUMN is_trashed INTEGER DEFAULT 0");
+  if (!columns.includes('deleted'))     db.exec("ALTER TABLE documents ADD COLUMN deleted INTEGER DEFAULT 0");
 
   // CRITICAL: SQLite ALTER TABLE only sets DEFAULT for new inserts.
   // Existing rows get NULL — backfill them to 0 so WHERE clauses work correctly.

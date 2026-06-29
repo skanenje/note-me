@@ -5,6 +5,8 @@ const { v4: uuidv4 } = require('uuid');
 const initSchema = require('./schema');
 const initAIToolsSchema = require('./aitools-schema');
 const initPromptSchema = require('./prompt-schema');
+const initLMSSchema = require('./lms-schema');
+const seedCurriculum = require('./seed');
 const lmsMethods = require('./lms-methods');
 const aitoolsMethods = require('./aitools-methods');
 const promptMethods = require('./prompt-methods');
@@ -22,11 +24,15 @@ class DatabaseManager {
     initSchema(this.db);
     initAIToolsSchema(this.db);
     initPromptSchema(this.db);
+    initLMSSchema(this.db);
     
     // Bind methods to this instance
     Object.assign(this, lmsMethods);
     Object.assign(this, aitoolsMethods);
     Object.assign(this, promptMethods);
+    
+    // Seed default lesson content (idempotent — checks before inserting)
+    seedCurriculum(this.db);
     
     console.log('Schema initialized');
   }

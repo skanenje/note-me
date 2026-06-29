@@ -17,9 +17,13 @@
     loading = true;
     error = null;
     try {
+      console.log('Fetching lessons...');
       const result = await window.api.getLessons();
+      console.log('getLessons result:', result);
+      
       if (result.success) {
         const loadedLessons = result.lessons;
+        console.log('loadedLessons length:', loadedLessons?.length);
         const lessonsWithProg = [];
         
         for (const lesson of loadedLessons) {
@@ -48,11 +52,14 @@
             });
           }
         }
+        console.log('lessonsWithProg:', lessonsWithProg);
         lessons = lessonsWithProg;
       } else {
+        console.error('Failed to load lessons:', result.error);
         error = result.error || 'Failed to load lessons';
       }
     } catch (err) {
+      console.error('Exception in loadLessons:', err);
       error = err.message;
     } finally {
       loading = false;
