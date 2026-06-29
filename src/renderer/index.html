@@ -13,6 +13,15 @@
           vertical-align: middle;
       }
   </style>
+  <script>
+    window.onerror = function(msg, url, line, col, error) {
+      const errText = 'GLOBAL ERROR: ' + msg + ' at ' + line + ':' + col + '\n' + (error && error.stack ? error.stack : '');
+      if (window.api && window.api.log) window.api.log(errText);
+    };
+    window.addEventListener('unhandledrejection', function(event) {
+      if (window.api && window.api.log) window.api.log('GLOBAL PROMISE REJECTION: ' + event.reason);
+    });
+  </script>
 </head>
 <body class="bg-background text-on-surface font-body-md text-body-md overflow-hidden antialiased">
   <div id="app" class="h-screen w-screen flex"></div>

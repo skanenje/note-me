@@ -35,8 +35,13 @@ window.addEventListener('unhandledrejection', function(event) {
   }
 });
 
-const app = new App({
-  target: document.getElementById('app')
-});
-
+console.log('[MAIN] Instantiating App...');
+try {
+  const app = new App({
+    target: document.getElementById('app')
+  });
+  console.log('[MAIN] App successfully instantiated and mounted!');
+} catch (e) {
+  console.error('[MAIN] ERROR instantiating App:', e.message, e.stack);
+}
 export default app;
