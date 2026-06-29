@@ -14,21 +14,25 @@ module.exports = function initSchema(db) {
   `);
   
   // Blocks table
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS blocks (
-      id TEXT PRIMARY KEY,
-      document_id TEXT NOT NULL,
-      type TEXT NOT NULL,
-      content TEXT NOT NULL,
-      position INTEGER NOT NULL,
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL,
-      deleted INTEGER DEFAULT 0,
-      FOREIGN KEY (document_id) REFERENCES documents(id)
-    )
-  `);
-  
-  // Mutations table (append-only log)
+    db.prepare(`
+      CREATE TABLE IF NOT EXISTS blocks (
+        id TEXT PRIMARY KEY,
+        document_id TEXT NOT NULL,
+        type TEXT NOT NULL,
+        content TEXT,
+        position INTEGER,
+        deleted INTEGER DEFAULT 0,
+        created_at INTEGER,
+        updated_at INTEGER,
+        FOREIGN KEY(document_id) REFERENCES documents(id) ON DELETE CASCADE
+      )
+    `).run();
+
+    // Migrations to add columns to existing tables
+    try { db.exec('ALTER TABLE documents ADD COLUMN deleted INTEGER DEFAULT 0;'); } catch (e) { /* ignore if exists */ }
+    try { db.exec('ALTER TABLE blocks ADD COLUMN deleted INTEGER DEFAULT 0;'); } catch (e) { /* ignore if exists */ }
+
+    // Mutations - for sync(append-only log)
   db.exec(`
     CREATE TABLE IF NOT EXISTS mutations (
       id TEXT PRIMARY KEY,

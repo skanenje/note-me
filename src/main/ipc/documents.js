@@ -1,4 +1,5 @@
 const { ipcMain } = require('electron');
+const { log } = require('../window');
 
 module.exports = function registerDocumentHandlers(dbManager) {
   ipcMain.handle('create-document', async (_, { title, parentId } = {}) => {
@@ -16,6 +17,7 @@ module.exports = function registerDocumentHandlers(dbManager) {
       const docs = dbManager.getAllDocuments();
       return { success: true, documents: docs };
     } catch (error) {
+      log('[IPC] get-documents ERROR: ' + error.message);
       return { success: false, error: error.message };
     }
   });

@@ -21,6 +21,7 @@ module.exports = function initLMSSchema(db) {
       content TEXT NOT NULL,
       language TEXT,
       order_index INTEGER NOT NULL,
+      deleted INTEGER DEFAULT 0,
       created_at INTEGER NOT NULL,
       updated_at INTEGER NOT NULL,
       FOREIGN KEY (lesson_id) REFERENCES lessons(id)
@@ -66,4 +67,8 @@ module.exports = function initLMSSchema(db) {
     CREATE INDEX IF NOT EXISTS idx_code_runs_block
     ON code_runs(block_id, created_at DESC)
   `);
+
+  // Migrations for existing databases
+  try { db.exec('ALTER TABLE lessons ADD COLUMN deleted INTEGER DEFAULT 0;'); } catch (e) {}
+  try { db.exec('ALTER TABLE learning_blocks ADD COLUMN deleted INTEGER DEFAULT 0;'); } catch (e) {}
 };

@@ -1,11 +1,14 @@
-=== Note-Me startup log — 2026-06-29T06:14:28.501Z ===
-[2026-06-29T06:14:28.609Z] [WINDOW] Creating BrowserWindow
-[2026-06-29T06:14:28.673Z] [WINDOW] Development mode — loading http://localhost:5173
-[2026-06-29T06:14:28.787Z] [RENDERER-CONSOLE] [Level 0] [vite] connecting... (http://localhost:5173/@vite/client:733)
-[2026-06-29T06:14:28.806Z] [RENDERER-CONSOLE] [Level 0] [vite] connected. (http://localhost:5173/@vite/client:827)
-[2026-06-29T06:14:28.916Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte script tag is executing! (http://localhost:5173/App.svelte:1136)
-[2026-06-29T06:14:29.045Z] [WINDOW] did-finish-load — renderer ready
-[2026-06-29T06:14:29.050Z] [RENDERER-CONSOLE] [Level 2] %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+=== Note-Me startup log — 2026-06-29T10:30:51.661Z ===
+[2026-06-29T10:30:51.950Z] [WINDOW] Creating BrowserWindow
+[2026-06-29T10:30:52.083Z] [WINDOW] Development mode — loading http://localhost:5173
+[2026-06-29T10:30:53.483Z] [RENDERER-CONSOLE] [Level 0] [vite] connecting... (http://localhost:5173/@vite/client:733)
+[2026-06-29T10:30:53.499Z] [RENDERER-CONSOLE] [Level 0] [vite] connected. (http://localhost:5173/@vite/client:827)
+[2026-06-29T10:30:53.540Z] [RENDERER] CONSOLE.LOG: [SVELTE] App.svelte script tag is executing!
+[2026-06-29T10:30:53.540Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte script tag is executing! (http://localhost:5173/main.js:16)
+[2026-06-29T10:30:53.543Z] [RENDERER] CONSOLE.LOG: [SVELTE] WorkspaceView.svelte script tag is executing!
+[2026-06-29T10:30:53.543Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] WorkspaceView.svelte script tag is executing! (http://localhost:5173/main.js:16)
+[2026-06-29T10:30:53.666Z] [WINDOW] did-finish-load — renderer ready
+[2026-06-29T10:30:53.671Z] [RENDERER-CONSOLE] [Level 2] %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
   Policy set or a policy with "unsafe-eval" enabled. This exposes users of
   this app to unnecessary security risks.
 

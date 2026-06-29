@@ -35,6 +35,18 @@
   }
 
   onMount(async () => {
+    window.onerror = function(msg, url, line, col, error) {
+      if (window.api && window.api.log) {
+        window.api.log('FATAL RENDERER ERROR: ' + msg + ' at ' + line + ':' + col);
+        if (error && error.stack) window.api.log(error.stack);
+      }
+    };
+    window.addEventListener('unhandledrejection', function(event) {
+      if (window.api && window.api.log) {
+        window.api.log('UNHANDLED PROMISE REJECTION: ' + event.reason);
+      }
+    });
+
     console.log('[SVELTE] App.svelte onMount - loading documents...');
     settings.init();
     // Small tick ensures window.api (contextBridge) is fully exposed before first IPC call

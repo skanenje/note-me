@@ -1,4 +1,5 @@
 <script>
+  console.log('[SVELTE] WorkspaceView.svelte script tag is executing!');
   import { onMount, onDestroy } from 'svelte';
   import { documents, loadDocuments, createDocument, selectDocument } from '../stores/documents.js';
   import { settings } from '../stores/settings.js';
@@ -43,20 +44,31 @@
   // ── Lessons ───────────────────────────────────────────────────────────────
   let lessons = [];
   let loadingLessons = true;
+  let lessonsError = null;
+
+  function logBoth(msg, isError = false) {
+    if (isError) console.error(msg);
+    else console.log(msg);
+    if (window.api && window.api.log) window.api.log(msg);
+  }
 
   async function loadLessons() {
+    console.log('[WorkspaceView] loadLessons() called');
     loadingLessons = true;
+    logBoth('[WorkspaceView] loadLessons started');
     try {
       const res = await window.api.getLessons();
-      if (res.success) {
+      logBoth('[WorkspaceView] getLessons returned: ' + (res ? JSON.stringify(res).substring(0, 200) : 'null/undefined'));
+      if (res && res.success) {
+        logBoth('[WorkspaceView] Processing ' + (res.lessons ? res.lessons.length : 0) + ' lessons');
         const withProg = await Promise.all(res.lessons.map(async lesson => {
           try {
             const [detRes, progRes] = await Promise.all([
               window.api.getLessonWithBlocks(lesson.id),
               window.api.getLessonProgress(lesson.id),
             ]);
-            const totalBlocks = detRes.success ? detRes.lesson.blocks.length : 0;
-            const completedCount = progRes.success
+            const totalBlocks = (detRes && detRes.success && detRes.lesson && detRes.lesson.blocks) ? detRes.lesson.blocks.length : 0;
+            const completedCount = (progRes && progRes.success && progRes.progress)
               ? progRes.progress.filter(p => p.status === 'completed').length
               : 0;
             return {
@@ -68,8 +80,14 @@
           } catch { return { ...lesson, totalBlocks: 0, completedCount: 0, progressPct: 0 }; }
         }));
         lessons = withProg;
+        logBoth('[WorkspaceView] Successfully set lessons array, length: ' + lessons.length);
+      } else {
+        logBoth('[WorkspaceView] getLessons res.success is false or undefined. res: ' + JSON.stringify(res));
       }
-    } catch (e) { console.error('[WorkspaceView] loadLessons:', e); }
+    } catch (e) { 
+      logBoth('[WorkspaceView] loadLessons EXCEPTION: ' + e.message + '\n' + e.stack, true);
+      lessonsError = e.message || String(e);
+    }
     finally { loadingLessons = false; }
   }
 
@@ -174,6 +192,7 @@
   $: doneTracks   = lessons.filter(l => l.progressPct === 100);
 
   onMount(async () => {
+    console.log('[SVELTE] WorkspaceView onMount executed');
     // Ensure contextBridge is ready before first IPC call
     await new Promise(r => setTimeout(r, 0));
     // WorkspaceView is the default landing page — load documents proactively
@@ -334,6 +353,10 @@
         {#each [1,2,3] as _}
           <div class="ws__track-skeleton"></div>
         {/each}
+      {:else if lessonsError}
+        <div class="ws__empty">
+          <span>⚠️</span><p>Error: {lessonsError}</p>
+        </div>
       {:else if lessons.length === 0}
         <div class="ws__empty">
           <span>🎓</span><p>No learning tracks available.</p>

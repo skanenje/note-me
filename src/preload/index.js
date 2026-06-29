@@ -39,6 +39,7 @@ contextBridge.exposeInMainWorld('api', {
   // Shell / system
   openExternal: (url) => ipcRenderer.invoke('shell:open-external', url),
   exportDocument: (documentId) => ipcRenderer.invoke('shell:export-document', { documentId }),
+  log: (msg) => ipcRenderer.send('renderer-log', msg),
 
   // AI Tools
   getTools: () => ipcRenderer.invoke('tools:get-all'),

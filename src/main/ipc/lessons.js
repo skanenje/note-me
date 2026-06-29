@@ -1,4 +1,5 @@
 const { ipcMain } = require('electron');
+const { log } = require('../window');
 const vm        = require('vm');
 const { spawn } = require('child_process');
 const Database  = require('better-sqlite3');
@@ -154,14 +155,16 @@ module.exports = function registerLessonHandlers(dbManager) {
     try {
       return { success: true, lessons: dbManager.getAllLessons() };
     } catch (e) {
+      log('[IPC] lessons:get-all ERROR: ' + e.message);
       return { success: false, error: e.message };
     }
   });
 
-  ipcMain.handle('lessons:get-with-blocks', async (_, lessonId) => {
+  ipcMain.handle('lessons:get-with-blocks', async (e, lessonId) => {
     try {
       return { success: true, lesson: dbManager.getLessonWithBlocks(lessonId) };
     } catch (e) {
+      log('[IPC] lessons:get-with-blocks ERROR: ' + e.message);
       return { success: false, error: e.message };
     }
   });

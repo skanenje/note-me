@@ -8,8 +8,10 @@ export const documentsError = writable(null);
 export async function loadDocuments() {
   documentsLoading.set(true);
   documentsError.set(null);
+  console.log('[STORE] loadDocuments called');
   try {
     const result = await window.api.getDocuments();
+    console.log('[STORE] loadDocuments result received:', result.success ? result.documents?.length + ' docs' : 'error');
     if (result.success) {
       documents.set(result.documents);
     } else {
