@@ -1,24 +1,18 @@
-=== Note-Me startup log — 2026-06-29T12:06:53.118Z ===
-[2026-06-29T12:06:53.491Z] [WINDOW] Creating BrowserWindow
-[2026-06-29T12:06:53.637Z] [WINDOW] Development mode — loading http://localhost:5173
-[2026-06-29T12:06:56.193Z] [RENDERER-CONSOLE] [Level 0] [vite] connecting... (http://localhost:5173/@vite/client:733)
-[2026-06-29T12:06:56.229Z] [RENDERER-CONSOLE] [Level 0] [vite] connected. (http://localhost:5173/@vite/client:827)
-[2026-06-29T12:06:56.386Z] [RENDERER] CONSOLE.LOG: [MAIN] Instantiating App...
-[2026-06-29T12:06:56.387Z] [RENDERER-CONSOLE] [Level 1] [MAIN] Instantiating App... (http://localhost:5173/main.js:16)
-[2026-06-29T12:06:56.388Z] [RENDERER] CONSOLE.LOG: [SVELTE] App.svelte script tag is executing!
-[2026-06-29T12:06:56.388Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte script tag is executing! (http://localhost:5173/main.js:16)
-[2026-06-29T12:06:56.404Z] [RENDERER] CONSOLE.LOG: [SVELTE] WorkspaceView.svelte script tag is executing!
-[2026-06-29T12:06:56.404Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] WorkspaceView.svelte script tag is executing! (http://localhost:5173/main.js:16)
-[2026-06-29T12:06:56.453Z] [RENDERER] CONSOLE.LOG: [MAIN] App successfully instantiated and mounted!
-[2026-06-29T12:06:56.454Z] [RENDERER-CONSOLE] [Level 1] [MAIN] App successfully instantiated and mounted! (http://localhost:5173/main.js:16)
-[2026-06-29T12:06:56.586Z] [WINDOW] did-finish-load — renderer ready
-[2026-06-29T12:06:56.592Z] [RENDERER] CONSOLE.LOG: [STORE] loadDocuments called
-[2026-06-29T12:06:56.593Z] [RENDERER-CONSOLE] [Level 1] [STORE] loadDocuments called (http://localhost:5173/main.js:16)
-[2026-06-29T12:06:56.595Z] [RENDERER] CONSOLE.LOG: [WorkspaceView] setTimeout bypass triggered
-[2026-06-29T12:06:56.595Z] [RENDERER-CONSOLE] [Level 1] [WorkspaceView] setTimeout bypass triggered (http://localhost:5173/main.js:16)
-[2026-06-29T12:06:56.595Z] [RENDERER] CONSOLE.LOG: [STORE] loadDocuments called
-[2026-06-29T12:06:56.595Z] [RENDERER-CONSOLE] [Level 1] [STORE] loadDocuments called (http://localhost:5173/main.js:16)
-[2026-06-29T12:06:56.597Z] [RENDERER-CONSOLE] [Level 2] %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+=== Note-Me startup log — 2026-06-29T12:29:23.733Z ===
+[2026-06-29T12:29:23.995Z] [WINDOW] Creating BrowserWindow
+[2026-06-29T12:29:24.111Z] [WINDOW] Development mode — loading http://localhost:5173
+[2026-06-29T12:29:25.497Z] [RENDERER-CONSOLE] [Level 0] [vite] connecting... (http://localhost:5173/@vite/client:733)
+[2026-06-29T12:29:25.525Z] [RENDERER-CONSOLE] [Level 0] [vite] connected. (http://localhost:5173/@vite/client:827)
+[2026-06-29T12:29:25.552Z] [RENDERER] CONSOLE.LOG: [MAIN] Instantiating App...
+[2026-06-29T12:29:25.552Z] [RENDERER-CONSOLE] [Level 1] [MAIN] Instantiating App... (http://localhost:5173/main.js:16)
+[2026-06-29T12:29:25.553Z] [RENDERER] CONSOLE.LOG: [SVELTE] App.svelte script tag is executing!
+[2026-06-29T12:29:25.553Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] App.svelte script tag is executing! (http://localhost:5173/main.js:16)
+[2026-06-29T12:29:25.557Z] [RENDERER] CONSOLE.LOG: [SVELTE] WorkspaceView.svelte script tag is executing!
+[2026-06-29T12:29:25.557Z] [RENDERER-CONSOLE] [Level 1] [SVELTE] WorkspaceView.svelte script tag is executing! (http://localhost:5173/main.js:16)
+[2026-06-29T12:29:25.580Z] [RENDERER] CONSOLE.LOG: [MAIN] App successfully instantiated and mounted!
+[2026-06-29T12:29:25.580Z] [RENDERER-CONSOLE] [Level 1] [MAIN] App successfully instantiated and mounted! (http://localhost:5173/main.js:16)
+[2026-06-29T12:29:25.683Z] [WINDOW] did-finish-load — renderer ready
+[2026-06-29T12:29:25.688Z] [RENDERER-CONSOLE] [Level 2] %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
   Policy set or a policy with "unsafe-eval" enabled. This exposes users of
   this app to unnecessary security risks.
 
@@ -26,44 +20,42 @@ For more information and help, consult
 https://electronjs.org/docs/tutorial/security.
 This warning will not show up
 once the app is packaged. (node:electron/js2c/sandbox_bundle:2)
-[2026-06-29T12:06:56.597Z] [RENDERER] CONSOLE.LOG: [STORE] loadDocuments called
-[2026-06-29T12:06:56.598Z] [RENDERER-CONSOLE] [Level 1] [STORE] loadDocuments called (http://localhost:5173/main.js:16)
-[2026-06-29T12:06:56.598Z] [RENDERER] CONSOLE.LOG: [STORE] loadDocuments result received: 1 docs
-[2026-06-29T12:06:56.599Z] [RENDERER-CONSOLE] [Level 1] [STORE] loadDocuments result received: 1 docs (http://localhost:5173/main.js:16)
-[2026-06-29T12:06:56.603Z] [RENDERER] CONSOLE.LOG: [STORE] loadDocuments result received: 1 docs
-[2026-06-29T12:06:56.603Z] [RENDERER-CONSOLE] [Level 1] [STORE] loadDocuments result received: 1 docs (http://localhost:5173/main.js:16)
-[2026-06-29T12:06:56.604Z] [RENDERER] CONSOLE.LOG: [WorkspaceView] loadLessons() called
-[2026-06-29T12:06:56.605Z] [RENDERER-CONSOLE] [Level 1] [WorkspaceView] loadLessons() called (http://localhost:5173/main.js:16)
-[2026-06-29T12:06:56.605Z] [RENDERER] CONSOLE.LOG: [WorkspaceView] loadLessons started
-[2026-06-29T12:06:56.606Z] [RENDERER-CONSOLE] [Level 1] [WorkspaceView] loadLessons started (http://localhost:5173/main.js:16)
-[2026-06-29T12:06:56.606Z] [RENDERER] [WorkspaceView] loadLessons started
-[2026-06-29T12:06:56.610Z] [RENDERER] CONSOLE.LOG: [STORE] loadDocuments result received: 1 docs
-[2026-06-29T12:06:56.611Z] [RENDERER-CONSOLE] [Level 1] [STORE] loadDocuments result received: 1 docs (http://localhost:5173/main.js:16)
-[2026-06-29T12:06:56.612Z] [RENDERER] CONSOLE.LOG: [WorkspaceView] getLessons returned: {"success":true,"lessons":[{"id":"c30a96f4-e535-4f2f-b17f-a56cdb0cee58","title":"Prompt Engineering 101","description":"Learn how to communicate effectively with AI systems. Master the art of crafting
-[2026-06-29T12:06:56.612Z] [RENDERER-CONSOLE] [Level 1] [WorkspaceView] getLessons returned: {"success":true,"lessons":[{"id":"c30a96f4-e535-4f2f-b17f-a56cdb0cee58","title":"Prompt Engineering 101","description":"Learn how to communicate effectively with AI systems. Master the art of crafting (http://localhost:5173/main.js:16)
-[2026-06-29T12:06:56.612Z] [RENDERER] [WorkspaceView] getLessons returned: {"success":true,"lessons":[{"id":"c30a96f4-e535-4f2f-b17f-a56cdb0cee58","title":"Prompt Engineering 101","description":"Learn how to communicate effectively with AI systems. Master the art of crafting
-[2026-06-29T12:06:56.613Z] [RENDERER] CONSOLE.LOG: [WorkspaceView] Processing 9 lessons
-[2026-06-29T12:06:56.613Z] [RENDERER-CONSOLE] [Level 1] [WorkspaceView] Processing 9 lessons (http://localhost:5173/main.js:16)
-[2026-06-29T12:06:56.613Z] [RENDERER] [WorkspaceView] Processing 9 lessons
-[2026-06-29T12:06:56.623Z] [RENDERER] CONSOLE.LOG: [WorkspaceView] Successfully set lessons array, length: 9
-[2026-06-29T12:06:56.623Z] [RENDERER-CONSOLE] [Level 1] [WorkspaceView] Successfully set lessons array, length: 9 (http://localhost:5173/main.js:16)
-[2026-06-29T12:06:56.627Z] [RENDERER] [WorkspaceView] Successfully set lessons array, length: 9
-[2026-06-29T12:06:56.888Z] [RENDERER] CONSOLE.LOG: [SVELTE-DEBUG] App.svelte script tag setTimeout fired!
-[2026-06-29T12:06:56.889Z] [RENDERER-CONSOLE] [Level 1] [SVELTE-DEBUG] App.svelte script tag setTimeout fired! (http://localhost:5173/main.js:16)
-[2026-06-29T12:06:56.889Z] [RENDERER] [SVELTE-DEBUG] App.svelte script tag setTimeout fired via API!
-[2026-06-29T12:06:59.878Z] [RENDERER] CONSOLE.LOG: Fetching lessons...
-[2026-06-29T12:06:59.879Z] [RENDERER-CONSOLE] [Level 1] Fetching lessons... (http://localhost:5173/main.js:16)
-[2026-06-29T12:06:59.880Z] [RENDERER] CONSOLE.LOG: getLessons result: [object Object]
-[2026-06-29T12:06:59.880Z] [RENDERER-CONSOLE] [Level 1] getLessons result: [object Object] (http://localhost:5173/main.js:16)
-[2026-06-29T12:06:59.881Z] [RENDERER] CONSOLE.LOG: loadedLessons length: 9
-[2026-06-29T12:06:59.881Z] [RENDERER-CONSOLE] [Level 1] loadedLessons length: 9 (http://localhost:5173/main.js:16)
-[2026-06-29T12:06:59.899Z] [RENDERER] CONSOLE.LOG: lessonsWithProg: [object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]
-[2026-06-29T12:06:59.899Z] [RENDERER-CONSOLE] [Level 1] lessonsWithProg: [object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object] (http://localhost:5173/main.js:16)
-[2026-06-29T12:07:36.265Z] [RENDERER] CONSOLE.LOG: Fetching lessons...
-[2026-06-29T12:07:36.265Z] [RENDERER-CONSOLE] [Level 1] Fetching lessons... (http://localhost:5173/main.js:16)
-[2026-06-29T12:07:36.267Z] [RENDERER] CONSOLE.LOG: getLessons result: [object Object]
-[2026-06-29T12:07:36.267Z] [RENDERER-CONSOLE] [Level 1] getLessons result: [object Object] (http://localhost:5173/main.js:16)
-[2026-06-29T12:07:36.267Z] [RENDERER] CONSOLE.LOG: loadedLessons length: 9
-[2026-06-29T12:07:36.267Z] [RENDERER-CONSOLE] [Level 1] loadedLessons length: 9 (http://localhost:5173/main.js:16)
-[2026-06-29T12:07:36.286Z] [RENDERER] CONSOLE.LOG: lessonsWithProg: [object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]
-[2026-06-29T12:07:36.286Z] [RENDERER-CONSOLE] [Level 1] lessonsWithProg: [object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object] (http://localhost:5173/main.js:16)
+[2026-06-29T12:29:25.689Z] [RENDERER] CONSOLE.LOG: [STORE] loadDocuments called
+[2026-06-29T12:29:25.689Z] [RENDERER-CONSOLE] [Level 1] [STORE] loadDocuments called (http://localhost:5173/main.js:16)
+[2026-06-29T12:29:25.690Z] [RENDERER] CONSOLE.LOG: [WorkspaceView] setTimeout bypass triggered
+[2026-06-29T12:29:25.690Z] [RENDERER-CONSOLE] [Level 1] [WorkspaceView] setTimeout bypass triggered (http://localhost:5173/main.js:16)
+[2026-06-29T12:29:25.690Z] [RENDERER] CONSOLE.LOG: [STORE] loadDocuments called
+[2026-06-29T12:29:25.691Z] [RENDERER-CONSOLE] [Level 1] [STORE] loadDocuments called (http://localhost:5173/main.js:16)
+[2026-06-29T12:29:25.693Z] [RENDERER] CONSOLE.LOG: [STORE] loadDocuments called
+[2026-06-29T12:29:25.693Z] [RENDERER-CONSOLE] [Level 1] [STORE] loadDocuments called (http://localhost:5173/main.js:16)
+[2026-06-29T12:29:25.694Z] [RENDERER] CONSOLE.LOG: [STORE] loadDocuments result received: 1 docs
+[2026-06-29T12:29:25.694Z] [RENDERER-CONSOLE] [Level 1] [STORE] loadDocuments result received: 1 docs (http://localhost:5173/main.js:16)
+[2026-06-29T12:29:25.698Z] [RENDERER] CONSOLE.LOG: [STORE] loadDocuments result received: 1 docs
+[2026-06-29T12:29:25.698Z] [RENDERER-CONSOLE] [Level 1] [STORE] loadDocuments result received: 1 docs (http://localhost:5173/main.js:16)
+[2026-06-29T12:29:25.699Z] [RENDERER] CONSOLE.LOG: [WorkspaceView] loadLessons() called
+[2026-06-29T12:29:25.699Z] [RENDERER-CONSOLE] [Level 1] [WorkspaceView] loadLessons() called (http://localhost:5173/main.js:16)
+[2026-06-29T12:29:25.699Z] [RENDERER] CONSOLE.LOG: [WorkspaceView] loadLessons started
+[2026-06-29T12:29:25.700Z] [RENDERER-CONSOLE] [Level 1] [WorkspaceView] loadLessons started (http://localhost:5173/main.js:16)
+[2026-06-29T12:29:25.700Z] [RENDERER] [WorkspaceView] loadLessons started
+[2026-06-29T12:29:25.701Z] [RENDERER] CONSOLE.LOG: [STORE] loadDocuments result received: 1 docs
+[2026-06-29T12:29:25.701Z] [RENDERER-CONSOLE] [Level 1] [STORE] loadDocuments result received: 1 docs (http://localhost:5173/main.js:16)
+[2026-06-29T12:29:25.702Z] [RENDERER] CONSOLE.LOG: [WorkspaceView] getLessons returned: {"success":true,"lessons":[{"id":"c30a96f4-e535-4f2f-b17f-a56cdb0cee58","title":"Prompt Engineering 101","description":"Learn how to communicate effectively with AI systems. Master the art of crafting
+[2026-06-29T12:29:25.703Z] [RENDERER-CONSOLE] [Level 1] [WorkspaceView] getLessons returned: {"success":true,"lessons":[{"id":"c30a96f4-e535-4f2f-b17f-a56cdb0cee58","title":"Prompt Engineering 101","description":"Learn how to communicate effectively with AI systems. Master the art of crafting (http://localhost:5173/main.js:16)
+[2026-06-29T12:29:25.703Z] [RENDERER] [WorkspaceView] getLessons returned: {"success":true,"lessons":[{"id":"c30a96f4-e535-4f2f-b17f-a56cdb0cee58","title":"Prompt Engineering 101","description":"Learn how to communicate effectively with AI systems. Master the art of crafting
+[2026-06-29T12:29:25.703Z] [RENDERER] CONSOLE.LOG: [WorkspaceView] Processing 9 lessons
+[2026-06-29T12:29:25.703Z] [RENDERER-CONSOLE] [Level 1] [WorkspaceView] Processing 9 lessons (http://localhost:5173/main.js:16)
+[2026-06-29T12:29:25.703Z] [RENDERER] [WorkspaceView] Processing 9 lessons
+[2026-06-29T12:29:25.712Z] [RENDERER] CONSOLE.LOG: [WorkspaceView] Successfully set lessons array, length: 9
+[2026-06-29T12:29:25.713Z] [RENDERER-CONSOLE] [Level 1] [WorkspaceView] Successfully set lessons array, length: 9 (http://localhost:5173/main.js:16)
+[2026-06-29T12:29:25.713Z] [RENDERER] [WorkspaceView] Successfully set lessons array, length: 9
+[2026-06-29T12:29:26.069Z] [RENDERER] CONSOLE.LOG: [SVELTE-DEBUG] App.svelte script tag setTimeout fired!
+[2026-06-29T12:29:26.071Z] [RENDERER-CONSOLE] [Level 1] [SVELTE-DEBUG] App.svelte script tag setTimeout fired! (http://localhost:5173/main.js:16)
+[2026-06-29T12:29:26.072Z] [RENDERER] [SVELTE-DEBUG] App.svelte script tag setTimeout fired via API!
+[2026-06-29T12:29:28.547Z] [RENDERER] CONSOLE.LOG: Fetching lessons...
+[2026-06-29T12:29:28.547Z] [RENDERER-CONSOLE] [Level 1] Fetching lessons... (http://localhost:5173/main.js:16)
+[2026-06-29T12:29:28.550Z] [RENDERER] CONSOLE.LOG: getLessons result: [object Object]
+[2026-06-29T12:29:28.550Z] [RENDERER-CONSOLE] [Level 1] getLessons result: [object Object] (http://localhost:5173/main.js:16)
+[2026-06-29T12:29:28.550Z] [RENDERER] CONSOLE.LOG: loadedLessons length: 9
+[2026-06-29T12:29:28.550Z] [RENDERER-CONSOLE] [Level 1] loadedLessons length: 9 (http://localhost:5173/main.js:16)
+[2026-06-29T12:29:28.568Z] [RENDERER] CONSOLE.LOG: lessonsWithProg: [object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]
+[2026-06-29T12:29:28.569Z] [RENDERER-CONSOLE] [Level 1] lessonsWithProg: [object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object] (http://localhost:5173/main.js:16)
