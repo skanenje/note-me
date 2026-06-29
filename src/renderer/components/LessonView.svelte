@@ -12,11 +12,12 @@
   let progress = {};
   let completedCount = 0;
 
-  onMount(async () => {
+  // Bypass onMount
+  setTimeout(async () => {
     await new Promise(r => setTimeout(r, 0));
-    loadLesson();
+    if (lessonId) loadLesson();
     loadProgress();
-  });
+  }, 100);
 
   // Also reload reactively if lessonId prop changes while component stays mounted
   $: if (lessonId) {
