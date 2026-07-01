@@ -1,6 +1,6 @@
 # Note-Me - Integrated Learning & AI Tools Platform
 
-A desktop application combining note-taking, learning management, and AI tools browser functionality. Built with Electron, Svelte, SQLite, and Rust.
+A desktop application combining note-taking, learning management, and AI tools browser functionality. Built with Electron, Svelte, and SQLite.
 
 ## 🎯 Features
 
@@ -40,7 +40,6 @@ A desktop application combining note-taking, learning management, and AI tools b
 - **Main Process** (`src/main/`)
   - `index.js` - Application entry point
   - `window.js` - Window management
-  - `backend.js` - Rust backend lifecycle management
   - `tabs.js` - BrowserView tab management
   - `database/` - SQLite database layer
   - `ipc/` - IPC handlers for documents, blocks, lessons
@@ -50,16 +49,15 @@ A desktop application combining note-taking, learning management, and AI tools b
   - Stores for state management
   - Three main views: Learning, Notes, AI Tools
 
-### Backend (Rust + Axum)
-- REST API server running on `localhost:3001`
-- SQLite database for AI tool sessions
-- Manages tool definitions and session persistence
+### Backend (Node.js + IPC)
+- Direct SQLite integration using `better-sqlite3` via IPC handlers
+- No external server needed; fully bundled within Electron Main Process
+- Manages tool definitions, learning tracks, documents, and session persistence
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js 18+
-- Rust (for building the backend)
 - npm or yarn
 
 ### Installation
@@ -67,9 +65,6 @@ A desktop application combining note-taking, learning management, and AI tools b
 ```bash
 # Install dependencies
 npm install
-
-# Build the Rust backend (first time only)
-npm run build-backend
 ```
 
 ### Development
@@ -79,9 +74,8 @@ npm run build-backend
 npm run dev
 
 # This will:
-# 1. Build the Rust backend (if needed)
-# 2. Start Vite dev server
-# 3. Launch Electron app
+# 1. Start Vite dev server
+# 2. Launch Electron app
 ```
 
 ### Production Build
@@ -89,9 +83,6 @@ npm run dev
 ```bash
 # Build frontend
 npm run build
-
-# Build backend (if not already built)
-npm run build-backend
 
 # Run production app
 npm start
@@ -137,17 +128,11 @@ note-me/
 │   ├── main/           # Electron main process
 │   │   ├── database/   # SQLite layer
 │   │   ├── ipc/        # IPC handlers
-│   │   ├── backend.js  # Rust backend manager
 │   │   └── tabs.js     # BrowserView management
 │   ├── preload/        # Preload scripts
 │   └── renderer/       # Svelte frontend
 │       ├── components/ # UI components
 │       └── stores/     # State management
-├── backend/            # Rust backend server
-│   └── src/
-│       ├── main.rs     # Axum server
-│       ├── db.rs       # Database layer
-│       └── commands.rs # API handlers
 └── static/             # AI tool icons
 
 ```
@@ -166,7 +151,7 @@ Interactive code execution for learning (JavaScript only, no external AI calls).
 ## 🔄 Changes from Original Projects
 
 ### From wax-spes:
-- ✅ Integrated Rust backend for AI tool management
+- ✅ Integrated native Node backend via IPC for AI tool management
 - ✅ BrowserView-based tab system
 - ✅ Session persistence
 - ✅ Tool icons and definitions

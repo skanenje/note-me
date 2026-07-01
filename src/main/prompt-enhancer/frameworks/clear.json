@@ -1,0 +1,13 @@
+{
+  "id": "CLEAR",
+  "name": "CLEAR",
+  "description": "Great for writing content with emotional tone — Context, Length, Emotion, Action, Result.",
+  "fields": {
+    "Context": {"hint": "Situation or background", "required": true},
+    "Length": {"hint": "Short, Medium, Long", "required": false},
+    "Emotion": {"hint": "Tone - inspiring, bold, funny?", "required": true},
+    "Action": {"hint": "What should the reader do?", "required": true},
+    "Result": {"hint": "Desired impact", "required": true}
+  },
+  "template": "Given {Context}, write a {Length} piece that feels {Emotion}, and should {Action} to achieve {Result}."
+}
